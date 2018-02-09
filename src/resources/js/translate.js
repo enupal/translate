@@ -1,11 +1,10 @@
 /**
- * Translate javascript.
+ * Translate plugin for Craft CMS 3.x
  *
- * @author    Bob Olde Hampsink <b.oldehampsink@itmundi.nl>
- * @copyright Copyright (c) 2015, Bob Olde Hampsink
- * @license   MIT
+ * Translation management plugin for Craft CMS
  *
- * @link      http://github.com/boboldehampsink
+ * @link      https://enupal.com
+ * @copyright Copyright (c) 2018 Enupal
  */
 
 (function($) {

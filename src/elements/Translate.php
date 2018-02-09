@@ -8,11 +8,12 @@
  * @copyright Copyright (c) 2018 Enupal
  */
 
-
 namespace enupal\translate\elements;
 
 use Craft;
 use craft\base\Element;
+use craft\elements\db\ElementQueryInterface;
+use enupal\translate\Translate as TranslatePlugin;
 
 class Translate extends Element
 {
@@ -214,42 +215,30 @@ class Translate extends Element
     }
 
     /**
-     * Return the html.
-     *
-     * @param array  $criteria
-     * @param array  $disabledElementIds
-     * @param array  $viewState
-     * @param string $sourceKey
-     * @param string $context
-     * @param bool   $includeContainer
-     * @param bool   $showCheckboxes
-     *
-     * @return string
-
-    public function getIndexHtml($criteria, $disabledElementIds, $viewState, $sourceKey, $context, $includeContainer, $showCheckboxes)
+     * @inheritdoc
+     */
+    public static function indexHtml(ElementQueryInterface $elementQuery, array $disabledElementIds = null, array $viewState, string $sourceKey = null, string $context = null, bool $includeContainer, bool $showCheckboxes): string
     {
         // If the site only has 1 locale enabled, set the translated locale to the primary (and only) locale
-        if (empty($criteria['locale'])) {
-            $criteria['locale'] = craft()->i18n->getPrimarySiteLocale();
+        if (empty($elementQuery->locale)) {
+            $elementQuery->locale = Craft::$app->i18n->getPrimarySiteLocale();
         }
 
         $variables = array(
             'viewMode' => $viewState['mode'],
             'context' => $context,
-            'elementType' => new ElementTypeVariable($this),
             'disabledElementIds' => $disabledElementIds,
-            'attributes' => $this->getTableAttributesForSource($sourceKey),
-            'elements' => craft()->translate->get($criteria),
-            'showCheckboxes' => $showCheckboxes,
+            'attributes' => Craft::$app->getElementIndexes()->getTableAttributes(static::class, $sourceKey),
+            'elements' => TranslatePlugin::$app->translate->get($elementQuery),
+            'showCheckboxes' => $showCheckboxes
         );
 
         // Inject some custom js also
-        craft()->templates->includeJs("$('table.fullwidth thead th').css('width', '50%');");
-        craft()->templates->includeJs("$('.buttons.hidden').removeClass('hidden');");
+        Craft::$app->view->registerJs("$('table.fullwidth thead th').css('width', '50%');");
+        Craft::$app->view->registerJs("$('.buttons.hidden').removeClass('hidden');");
 
         $template = '_elements/'.$viewState['mode'].'view/'.($includeContainer ? 'container' : 'elements');
 
-        return craft()->templates->render($template, $variables);
+        return Craft::$app->view->render($template, $variables);
     }
-     */
 }

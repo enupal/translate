@@ -1,10 +1,21 @@
+{#
+/**
+ * Translate plugin for Craft CMS 3.x
+ *
+ * Translation management plugin for Craft CMS
+ *
+ * @link      https://enupal.com
+ * @copyright Copyright (c) 2018 Enupal
+ */
+#}
+
 {% extends "_layouts/elementindex" %}
 {% set title = "Translate"|t %}
-{% set elementType = 'Translate' %}
+{% set elementType = 'enupal\\translate\\elements\\Translate' %}
 
-{% includeJsResource "translate/js/translate.js" %}
+{% do view.registerAssetBundle("enupal\\translate\\assetbundles\\TranslateAsset") %}
 
-{% block sidebar %}
+{% block actionButton %}
     <div class="buttons">
         <form method="post" enctype="multipart/form-data">
             {{ getCsrfInput() }}

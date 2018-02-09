@@ -1,19 +1,22 @@
 <?php
-
-namespace Craft;
-
 /**
- * Translate Service.
+ * Translate plugin for Craft CMS 3.x
  *
- * Contains translate logics.
+ * Translation management plugin for Craft CMS
  *
- * @author    Bob Olde Hampsink <b.oldehampsink@nerds.company>
- * @copyright Copyright (c) 2016, Bob Olde Hampsink
- * @license   MIT
- *
- * @link      http://github.com/boboldehampsink
+ * @link      https://enupal.com
+ * @copyright Copyright (c) 2018 Enupal
  */
-class TranslateService extends BaseApplicationComponent
+
+namespace enupal\translate\services;
+use craft\base\Component;
+use craft\elements\db\ElementQueryInterface;
+use craft\helpers\ElementHelper;
+use yii\helpers\FileHelper;
+use enupal\translate\elements\Translate as TranslateElement;
+use Craft;
+
+class Translate extends Component
 {
     /**
      * Translate tag finding regular expressions.
@@ -98,18 +101,18 @@ class TranslateService extends BaseApplicationComponent
         if (!IOHelper::writeToFile($file, $php)) {
 
             // If not, complain
-            throw new Exception(Craft::t('Something went wrong while saving your translations'));
+            throw new Exception(Craft::t('enupal-translate','Something went wrong while saving your translations'));
         }
     }
 
     /**
      * Get translations by criteria.
      *
-     * @param ElementCriteriaModel $criteria
+     * @param ElementQueryInterface $criteria
      *
      * @return array
      */
-    public function get(ElementCriteriaModel $criteria)
+    public function get(ElementQueryInterface $criteria)
     {
         // Ensure source is an array
         if (!is_array($criteria->source)) {
@@ -123,7 +126,7 @@ class TranslateService extends BaseApplicationComponent
         foreach ($criteria->source as $path) {
 
             // Check if this is a folder or a file
-            $isFile = IOHelper::fileExists($path);
+            $isFile = file_exists($path);
 
             // If its not a file
             if (!$isFile) {
@@ -132,7 +135,12 @@ class TranslateService extends BaseApplicationComponent
                 $filter = '^((?!vendor|node_modules).)*(\.(php|html|twig|js|json|atom|rss)?)$';
 
                 // Get files
-                $files = IOHelper::getFolderContents($path, true, $filter);
+                $options = [
+                    'recursive' => true,
+                    'filter' => $filter
+                ];
+
+                $files = FileHelper::findFiles($path, $options);
 
                 // Loop through files and find translate occurences
                 foreach ($files as $file) {
@@ -161,20 +169,20 @@ class TranslateService extends BaseApplicationComponent
      *
      * @param string               $path
      * @param string               $file
-     * @param ElementCriteriaModel $criteria
+     * @param ElementQueryInterface $criteria
      *
      * @return array
      */
-    protected function _parseFile($path, $file, ElementCriteriaModel $criteria)
+    protected function _parseFile($path, $file, ElementQueryInterface $criteria)
     {
         // Collect matches in file
         $occurences = array();
 
         // Get file contents
-        $contents = IOHelper::getFileContents($file);
+        $contents = file_get_contents($file);
 
         // Get extension
-        $extension = IOHelper::getExtension($file);
+        $extension = $ext = pathinfo($file, PATHINFO_EXTENSION);
 
         // Get matches per extension
         foreach ($this->_expressions[$extension] as $regex) {
@@ -186,10 +194,10 @@ class TranslateService extends BaseApplicationComponent
                 foreach ($matches[2] as $original) {
 
                     // Translate
-                    $translation = Craft::t($original, array(), null, $criteria->locale);
+                    $translation = Craft::t('enupal-translate', $original, null, $criteria->locale);
 
                     // Show translation in textfield
-                    $field = craft()->templates->render('_includes/forms/text', array(
+                    $field = Craft::$app->view->render('_includes/forms/text', array(
                         'id' => ElementHelper::createSlug($original),
                         'name' => 'translation['.$original.']',
                         'value' => $translation,
@@ -197,7 +205,7 @@ class TranslateService extends BaseApplicationComponent
                     ));
 
                     // Fill element with translation data
-                    $element = TranslateModel::populateModel(array(
+                    $element = new TranslateElement([
                         'id' => ElementHelper::createSlug($original),
                         'original' => $original,
                         'translation' => $translation,
@@ -205,7 +213,7 @@ class TranslateService extends BaseApplicationComponent
                         'file' => $file,
                         'locale' => $criteria->locale,
                         'field' => $field,
-                    ));
+                    ]);
 
                     // If searching, only return matches
                     if ($criteria->search && !stristr($element->original, $criteria->search) && !stristr($element->translation, $criteria->search)) {
