@@ -24,7 +24,6 @@ class Translate extends Component
      * @var array
      */
     protected $_expressions = array(
-
         // Expressions for Craft::t() variants
         'php' => array(
             // Single quotes
@@ -35,6 +34,14 @@ class Translate extends Component
 
         // Expressions for |t() variants
         'html' => array(
+            // Single quotes
+            '/(\{\{\s*|\{\%.*?|:\s*)\'(.*?)\'.*?\|.*?(t|translate)(\(.*?\)|).*?(\}\}|\%\}|,)/',
+            // Double quotes
+            '/(\{\{\s*|\{\%.*?|:\s*)"(.*?)".*?\|.*?(t|translate)(\(.*?\)|).*?(\}\}|\%\}|,)/',
+        ),
+
+        // Expressions for |t() variants
+        'twig' => array(
             // Single quotes
             '/(\{\{\s*|\{\%.*?|:\s*)\'(.*?)\'.*?\|.*?(t|translate)(\(.*?\)|).*?(\}\}|\%\}|,)/',
             // Double quotes
@@ -116,28 +123,29 @@ class Translate extends Component
     {
         // Ensure source is an array
         if (!is_array($criteria->source)) {
-            $criteria->source = array($criteria->source);
+            $criteria->source = [$criteria->source];
         }
 
         // Gather all translatable strings
-        $occurences = array();
+        $occurences = [];
 
         // Loop through paths
         foreach ($criteria->source as $path) {
 
             // Check if this is a folder or a file
-            $isFile = file_exists($path);
+            $isDir = is_dir($path);
 
             // If its not a file
-            if (!$isFile) {
+            if ($isDir) {
 
                 // Set filter - no vendor folders, only template files
-                $filter = '^((?!vendor|node_modules).)*(\.(php|html|twig|js|json|atom|rss)?)$';
+                #$filter = '^((?!vendor|node_modules).)*(\.(php|html|twig|js|json|atom|rss)?)$';
 
                 // Get files
                 $options = [
                     'recursive' => true,
-                    'filter' => $filter
+                    'only' => ['*.php','*.html','*.twig','*.js','*.json','*.atom','*.rss'],
+                    #'except' => 'vendor|node_modules'
                 ];
 
                 $files = FileHelper::findFiles($path, $options);
@@ -151,7 +159,7 @@ class Translate extends Component
                     // Collect in array
                     $occurences = array_merge($occurences, $elements);
                 }
-            } else {
+            } elseif (file_exists($path)) {
 
                 // Parse file
                 $elements = $this->_parseFile($path, $path, $criteria);
@@ -182,7 +190,7 @@ class Translate extends Component
         $contents = file_get_contents($file);
 
         // Get extension
-        $extension = $ext = pathinfo($file, PATHINFO_EXTENSION);
+        $extension = pathinfo($file, PATHINFO_EXTENSION);
 
         // Get matches per extension
         foreach ($this->_expressions[$extension] as $regex) {
@@ -197,7 +205,11 @@ class Translate extends Component
                     $translation = Craft::t('enupal-translate', $original, null, $criteria->locale);
 
                     // Show translation in textfield
-                    $field = Craft::$app->view->render('_includes/forms/text', array(
+                    $view = Craft::$app->getView();
+                    $originalTemplatesPath = Craft::$app->getView()->getTemplatesPath();
+                    $view->setTemplatesPath($originalTemplatesPath);
+
+                    $field = $view->render('_includes/forms/text', array(
                         'id' => ElementHelper::createSlug($original),
                         'name' => 'translation['.$original.']',
                         'value' => $translation,
@@ -211,14 +223,14 @@ class Translate extends Component
                         'translation' => $translation,
                         'source' => $path,
                         'file' => $file,
-                        'locale' => $criteria->locale,
+                        'siteId' => $criteria->siteId,
                         'field' => $field,
                     ]);
 
                     // If searching, only return matches
-                    if ($criteria->search && !stristr($element->original, $criteria->search) && !stristr($element->translation, $criteria->search)) {
-                        continue;
-                    }
+                   # if ($criteria->search && !stristr($element->original, $criteria->search) && !stristr($element->translation, $criteria->search)) {
+                   #     continue;
+                   # }
 
                     // If wanting one status, ditch the rest
                     if ($criteria->status && $criteria->status != $element->getStatus()) {

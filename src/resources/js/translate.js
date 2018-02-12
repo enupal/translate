@@ -10,7 +10,7 @@
 (function($) {
 
     // Get locale menu btn
-    var $localeMenuBtn = $('.localemenubtn:first').menubtn().data('menubtn').menu;
+    var $localeMenuBtn = $('.sitemenubtn:first').menubtn().data('menubtn').menu;
     
     // Get locale form element
     var $localeFormElm = $('input[name="locale"]');

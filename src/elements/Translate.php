@@ -14,6 +14,7 @@ use Craft;
 use craft\base\Element;
 use craft\elements\db\ElementQueryInterface;
 use enupal\translate\Translate as TranslatePlugin;
+use enupal\translate\elements\db\TranslateQuery;
 
 class Translate extends Element
 {
@@ -37,7 +38,7 @@ class Translate extends Element
      */
     public function getName()
     {
-        return Craft::t('enupal-translate','enupal-translate','Translations');
+        return Craft::t('enupal-translate','Translations');
     }
 
     /**
@@ -45,7 +46,7 @@ class Translate extends Element
      */
     public static function isLocalized(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -67,6 +68,11 @@ class Translate extends Element
             self::DONE => Craft::t('enupal-translate','Done'),
             self::PENDING => Craft::t('enupal-translate','Pending'),
         ];
+    }
+
+    public static function find(): ElementQueryInterface
+    {
+        return new TranslateQuery(get_called_class());
     }
 
     /**
@@ -127,10 +133,17 @@ class Translate extends Element
     protected static function defineSources(string $context = null): array
     {
         // Get plugin sources
+
         $sources = [
             [
                 'key'   => '*',
                 'label' => Craft::t('enupal-translate','All Translations'),
+                'criteria' => [
+                    'source' => [
+                        //Craft::$app->path->getPluginsPath(),
+                        Craft::$app->path->getSiteTemplatesPath(),
+                    ],
+                ],
             ]
         ];
         /*
@@ -220,8 +233,9 @@ class Translate extends Element
     public static function indexHtml(ElementQueryInterface $elementQuery, array $disabledElementIds = null, array $viewState, string $sourceKey = null, string $context = null, bool $includeContainer, bool $showCheckboxes): string
     {
         // If the site only has 1 locale enabled, set the translated locale to the primary (and only) locale
-        if (empty($elementQuery->locale)) {
-            $elementQuery->locale = Craft::$app->i18n->getPrimarySiteLocale();
+        if (empty($elementQuery->siteId)) {
+            $primarySite = Craft::$app->getSites()->getPrimarySite();
+            $elementQuery->siteId = $primarySite->id;
         }
 
         $variables = array(
