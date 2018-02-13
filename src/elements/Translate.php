@@ -253,6 +253,6 @@ class Translate extends Element
 
         $template = '_elements/'.$viewState['mode'].'view/'.($includeContainer ? 'container' : 'elements');
 
-        return Craft::$app->view->render($template, $variables);
+        return Craft::$app->view->renderTemplate($template, $variables);
     }
 }

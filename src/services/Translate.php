@@ -27,9 +27,9 @@ class Translate extends Component
         // Expressions for Craft::t() variants
         'php' => array(
             // Single quotes
-            '/Craft::(t|translate)\(.*?\'(.*?)\'.*?\)/',
+            '/Craft::(t|translate)\(.*?\'(.*?)\'.*?\,.*?\'(.*?)\'.*?\)/',
             // Double quotes
-            '/Craft::(t|translate)\(.*?"(.*?)".*?\)/',
+            '/Craft::(t|translate)\(.*?"(.*?)".*?\,.*?"(.*?)".*?\)/',
         ),
 
         // Expressions for |t() variants
@@ -51,9 +51,9 @@ class Translate extends Component
         // Expressions for Craft.t() variants
         'js' => array(
             // Single quotes
-            '/Craft\.(t|translate)\(.*?\'(.*?)\'.*?\)/',
+            '/Craft\.(t|translate)\(.*?\'(.*?)\'.*?\,.*?\'(.*?)\'.*?\)/',
             // Double quotes
-            '/Craft\.(t|translate)\(.*?"(.*?)".*?\)/',
+            '/Craft\.(t|translate)\(.*?\"(.*?)\".*?\,.*?"(.*?)".*?\)/',
         ),
 
     );
@@ -202,19 +202,18 @@ class Translate extends Component
                 foreach ($matches[2] as $original) {
 
                     // Translate
-                    $translation = Craft::t('enupal-translate', $original, null, $criteria->locale);
+                    $site = Craft::$app->getSites()->getSiteById($criteria->siteId);
+                    $translation = Craft::t('enupal-translate', $original, null, $site->language);
 
                     // Show translation in textfield
                     $view = Craft::$app->getView();
-                    $originalTemplatesPath = Craft::$app->getView()->getTemplatesPath();
-                    $view->setTemplatesPath($originalTemplatesPath);
 
-                    $field = $view->render('_includes/forms/text', array(
+                    $field = $view->renderTemplate('_includes/forms/text', [
                         'id' => ElementHelper::createSlug($original),
                         'name' => 'translation['.$original.']',
                         'value' => $translation,
                         'placeholder' => $translation,
-                    ));
+                    ]);
 
                     // Fill element with translation data
                     $element = new TranslateElement([
