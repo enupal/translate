@@ -43,4 +43,12 @@ class TranslateQuery extends ElementQuery
     {
         return $this->source;
     }
+
+    /**
+     * @inheritdoc
+     */
+    protected function beforePrepare(): bool
+    {
+        return false;
+    }
 }

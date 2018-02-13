@@ -42,6 +42,23 @@ class Translate extends Element
     }
 
     /**
+     * Use the name as the string representation.
+     *
+     * @return string
+     */
+    /** @noinspection PhpInconsistentReturnPointsInspection */
+    public function __toString()
+    {
+        try
+        {
+            // @todo - For some reason the Title returns null possible Craft3 bug
+            return $this->original;
+        } catch (\Exception $e) {
+            ErrorHandler::convertExceptionToError($e);
+        }
+    }
+
+    /**
      * @inheritdoc
      */
     public static function isLocalized(): bool
@@ -76,16 +93,14 @@ class Translate extends Element
     }
 
     /**
-     * Define available table column names.
-     *
-     * @return array
+     * @inheritdoc
      */
-    public function defineAvailableTableAttributes()
+    protected static function defineTableAttributes(): array
     {
-        return [
-            'original' => ['label' => Craft::t('enupal-translate','Original')],
-            'field' => ['label' => Craft::t('enupal-translate','Translation')],
-        ];
+        $attributes['original'] = ['label' => Craft::t('enupal-translate','Original')];
+        $attributes['field']     = ['label' => Craft::t('enupal-translate','Field')];
+
+        return $attributes;
     }
 
     /**
@@ -109,6 +124,8 @@ class Translate extends Element
      */
     protected function tableAttributeHtml(string $attribute): string
     {
+        $test = $this->$attribute;
+
         return $this->$attribute;
     }
 
@@ -238,14 +255,16 @@ class Translate extends Element
             $elementQuery->siteId = $primarySite->id;
         }
 
-        $variables = array(
+        $elements = TranslatePlugin::$app->translate->get($elementQuery);
+
+        $variables = [
             'viewMode' => $viewState['mode'],
             'context' => $context,
             'disabledElementIds' => $disabledElementIds,
             'attributes' => Craft::$app->getElementIndexes()->getTableAttributes(static::class, $sourceKey),
-            'elements' => TranslatePlugin::$app->translate->get($elementQuery),
+            'elements' => $elements,
             'showCheckboxes' => $showCheckboxes
-        );
+        ];
 
         // Inject some custom js also
         Craft::$app->view->registerJs("$('table.fullwidth thead th').css('width', '50%');");

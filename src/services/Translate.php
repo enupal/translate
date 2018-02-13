@@ -237,7 +237,7 @@ class Translate extends Component
                     }
 
                     // Collect in array
-                    $occurences[$original] = $element;
+                    $occurences[] = $element;
                 }
             }
         }

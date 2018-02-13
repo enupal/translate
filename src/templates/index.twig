@@ -26,11 +26,13 @@
         <div class="btn submit translations-upload-button" data-icon="upload" style="position: relative; overflow: hidden;" role="button">{{ "Upload file"|t }}</div>
     </div>
 
-    {{ parent() }}
+
 {% endblock %}
 
 {% block content %}
-    <form method="post" accept-charset="utf-8">
+
+    {{ parent() }}
+    {#<form method="post" accept-charset="utf-8">
         {{ getCsrfInput() }}
         <input type="hidden" name="action" value="translate/save">
         <input type="hidden" name="locale" value="{{ craft.locale }}">
@@ -42,4 +44,5 @@
             <a class="btn submit translations-download-button" href="{{ actionUrl('translate/download', {'locale': craft.locale }) }}">{{ "Download"|t }}</a>
         </div>
     </form>
+    #}
 {% endblock %}
