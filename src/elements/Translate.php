@@ -13,7 +13,6 @@ namespace enupal\translate\elements;
 use Craft;
 use craft\base\Element;
 use craft\elements\db\ElementQueryInterface;
-use craft\helpers\UrlHelper;
 use enupal\translate\Translate as TranslatePlugin;
 use enupal\translate\elements\db\TranslateQuery;
 
@@ -57,16 +56,6 @@ class Translate extends Element
         } catch (\Exception $e) {
             ErrorHandler::convertExceptionToError($e);
         }
-    }
-
-    /**
-     * Returns whether the current user can edit the element.
-     *
-     * @return bool
-     */
-    public function getIsEditable(): bool
-    {
-        return true;
     }
 
     /**

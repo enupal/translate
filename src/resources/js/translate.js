@@ -13,21 +13,21 @@
     var $localeMenuBtn = $('.sitemenubtn:first').menubtn().data('menubtn').menu;
     
     // Get locale form element
-    var $localeFormElm = $('input[name="locale"]');
+    var $localeFormElm = $('input[name="siteId"]');
     
     // Get translations download button
     $downloadBtn = $('.translations-download-button');
     
     // Init form with selected locale, if any
-    if(Craft.getLocalStorage('BaseElementIndex.locale')) {
-        $localeFormElm.val(Craft.getLocalStorage('BaseElementIndex.locale'));
-        $downloadBtn.attr('href', $downloadBtn.attr('href').replace(/locale=.*$/, 'locale=' + Craft.getLocalStorage('BaseElementIndex.locale')));
+    if(Craft.getLocalStorage('BaseElementIndex.siteId')) {
+        $localeFormElm.val(Craft.getLocalStorage('BaseElementIndex.siteId'));
+        $downloadBtn.attr('href', $downloadBtn.attr('href').replace(/siteId=.*$/, 'siteId=' + Craft.getLocalStorage('BaseElementIndex.siteId')));
     }
     
     // Change locale on select
     $localeMenuBtn.on('optionselect', function(ev) {
-        $localeFormElm.val($(ev.selectedOption).data('locale'));
-        $downloadBtn.attr('href', $downloadBtn.attr('href').replace(/locale=.*$/, 'locale=' + $(ev.selectedOption).data('locale')));
+        $localeFormElm.val($(ev.selectedOption).data('siteId'));
+        $downloadBtn.attr('href', $downloadBtn.attr('href').replace(/siteId=.*$/, 'siteId=' + $(ev.selectedOption).data('siteId')));
     });
     
     // Upload file on click

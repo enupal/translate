@@ -90,11 +90,13 @@ class TranslateController extends BaseController
      */
     public function actionSave()
     {
-        $locale = Craft::$app->request->getRequiredBodyParam('locale');
+        $siteId = Craft::$app->request->getRequiredBodyParam('siteId');
+        $site = Craft::$app->getSites()->getSiteById($siteId);
+
         $translations = Craft::$app->request->getRequiredBodyParam('translation');
 
         // Save to translation file
-        Translate::$app->translate->set($locale, $translations);
+        Translate::$app->translate->set($site->language, $translations);
 
         // Set a flash message
         Craft::$app->getSession()->setNotice(Craft::t('enupal-translate','The translations have been updated.'));
