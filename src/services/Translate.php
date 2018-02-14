@@ -12,7 +12,7 @@ namespace enupal\translate\services;
 use craft\base\Component;
 use craft\elements\db\ElementQueryInterface;
 use craft\helpers\ElementHelper;
-use yii\helpers\FileHelper;
+use craft\helpers\FileHelper;
 use enupal\translate\elements\Translate as TranslateElement;
 use Craft;
 
@@ -81,11 +81,12 @@ class Translate extends Component
      * @param array  $translations
      *
      * @throws Exception if unable to write to file
+     * @throws \yii\base\ErrorException
      */
     public function set($locale, array $translations)
     {
         // Determine locale's translation destination file
-        $file = __DIR__.'/../translations/'.$locale.'.php';
+        $file = Craft::getAlias('@enupal/translate/translations/'.$locale.'.php');
 
         // Get current translation
         if ($current = @include($file)) {
@@ -105,10 +106,10 @@ class Translate extends Component
         $php = str_replace("  '", "\t'", $php);
 
         // Save code to file
-        if (!IOHelper::writeToFile($file, $php)) {
-
-            // If not, complain
-            throw new Exception(Craft::t('enupal-translate','Something went wrong while saving your translations'));
+        try {
+            FileHelper::writeToFile($file, $php);
+        }catch (\Throwable $e) {
+            throw new \Exception(Craft::t('enupal-translate','Something went wrong while saving your translations: '.$e->getMessage()));
         }
     }
 

@@ -18,8 +18,8 @@
 {% block actionButton %}
     <div class="buttons">
         <form method="post" enctype="multipart/form-data">
-            {{ getCsrfInput() }}
-            <input type="hidden" name="action" value="translate/upload">
+            {{ csrfInput() }}
+            <input type="hidden" name="action" value="enupal-translate/translate/upload">
             <input type="hidden" name="locale" value="{{ craft.locale }}">
             <input type="file" name="translations-upload" style="display: none" />
         </form>
@@ -30,19 +30,16 @@
 {% endblock %}
 
 {% block content %}
-
-    {{ parent() }}
-    {#<form method="post" accept-charset="utf-8">
-        {{ getCsrfInput() }}
-        <input type="hidden" name="action" value="translate/save">
+    <form method="post" id="translate-ajax" accept-charset="utf-8">
+        {{ csrfInput() }}
+        <input type="hidden" name="action" value="enupal-translate/translate/save">
         <input type="hidden" name="locale" value="{{ craft.locale }}">
         
         {{ parent() }}
         
         <div class="buttons hidden">
             <input type="submit" class="btn submit translations-save-button" value="{{ "Save"|t }}"> 
-            <a class="btn submit translations-download-button" href="{{ actionUrl('translate/download', {'locale': craft.locale }) }}">{{ "Download"|t }}</a>
+            <a class="btn submit translations-download-button" href="{{ actionUrl('enupal-translate/translate/download', {'locale': craft.locale }) }}">{{ "Download"|t }}</a>
         </div>
     </form>
-    #}
 {% endblock %}

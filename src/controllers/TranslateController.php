@@ -13,6 +13,7 @@ namespace enupal\translate\controllers;
 
 use craft\web\Controller as BaseController;
 use Craft;
+use enupal\translate\Translate;
 
 class TranslateController extends BaseController
 {
@@ -38,7 +39,7 @@ class TranslateController extends BaseController
         $occurences = Craft::$app->translate->get($criteria);
 
         // Re-order data
-        $data = StringHelper::convertToUTF8('"'.Craft::t('Original').'","'.Craft::t('Translation')."\"\r\n");
+        $data = StringHelper::convertToUTF8('"'.Craft::t('enupal-translate','Original').'","'.Craft::t('enupal-translate','Translation')."\"\r\n");
         foreach ($occurences as $element) {
             $data .= StringHelper::convertToUTF8('"'.$element->original.'","'.$element->translation."\"\r\n");
         }
@@ -76,7 +77,7 @@ class TranslateController extends BaseController
         Craft::$app->translate->set($locale, $translations);
 
         // Set a flash message
-        Craft::$app->userSession->setNotice(Craft::t('The translations have been updated.'));
+        Craft::$app->getSession()->setNotice(Craft::t('enupal-translate','The translations have been updated.'));
 
         // Redirect back to page
         $this->redirectToPostedUrl();
@@ -89,15 +90,14 @@ class TranslateController extends BaseController
      */
     public function actionSave()
     {
-        // Get params
-        $locale = Craft::$app->request->getRequiredPost('locale');
-        $translations = Craft::$app->request->getRequiredPost('translation');
+        $locale = Craft::$app->request->getRequiredBodyParam('locale');
+        $translations = Craft::$app->request->getRequiredBodyParam('translation');
 
         // Save to translation file
-        Craft::$app->translate->set($locale, $translations);
+        Translate::$app->translate->set($locale, $translations);
 
         // Set a flash message
-        Craft::$app->userSession->setNotice(Craft::t('The translations have been updated.'));
+        Craft::$app->getSession()->setNotice(Craft::t('enupal-translate','The translations have been updated.'));
 
         // Redirect back to page
         return $this->redirectToPostedUrl();

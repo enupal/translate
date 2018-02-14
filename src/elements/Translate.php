@@ -13,6 +13,7 @@ namespace enupal\translate\elements;
 use Craft;
 use craft\base\Element;
 use craft\elements\db\ElementQueryInterface;
+use craft\helpers\UrlHelper;
 use enupal\translate\Translate as TranslatePlugin;
 use enupal\translate\elements\db\TranslateQuery;
 
@@ -56,6 +57,16 @@ class Translate extends Element
         } catch (\Exception $e) {
             ErrorHandler::convertExceptionToError($e);
         }
+    }
+
+    /**
+     * Returns whether the current user can edit the element.
+     *
+     * @return bool
+     */
+    public function getIsEditable(): bool
+    {
+        return true;
     }
 
     /**
@@ -124,8 +135,6 @@ class Translate extends Element
      */
     protected function tableAttributeHtml(string $attribute): string
     {
-        $test = $this->$attribute;
-
         return $this->$attribute;
     }
 
@@ -273,5 +282,12 @@ class Translate extends Element
         $template = '_elements/'.$viewState['mode'].'view/'.($includeContainer ? 'container' : 'elements');
 
         return Craft::$app->view->renderTemplate($template, $variables);
+    }
+
+    public function getLocale()
+    {
+        $site = Craft::$app->getSites()->getSiteById($this->siteId);
+
+        return $site->language;
     }
 }
