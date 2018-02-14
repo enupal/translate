@@ -82,11 +82,12 @@ class Translate extends Component
      *
      * @throws Exception if unable to write to file
      * @throws \yii\base\ErrorException
+     * @throws \Exception
      */
     public function set($locale, array $translations)
     {
         // Determine locale's translation destination file
-        $file = Craft::getAlias('@enupal/translate/translations/'.$locale.'.php');
+        $file = Craft::getAlias('@enupal/translate/translations/'.$locale.'/enupal-translate.php');
 
         // Get current translation
         if ($current = @include($file)) {
