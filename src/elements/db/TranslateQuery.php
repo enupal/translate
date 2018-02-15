@@ -20,6 +20,8 @@ class TranslateQuery extends ElementQuery
     // =========================================================================
     public $id;
     public $source;
+    public $translateStatus;
+
     /**
      * @inheritdoc
      */
@@ -39,9 +41,9 @@ class TranslateQuery extends ElementQuery
     /**
      * @inheritdoc
      */
-    public function getSource()
+    public function getStatus()
     {
-        return $this->source;
+        return $this->status;
     }
 
     /**

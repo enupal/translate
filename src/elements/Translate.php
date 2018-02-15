@@ -15,13 +15,14 @@ use craft\base\Element;
 use craft\elements\db\ElementQueryInterface;
 use enupal\translate\Translate as TranslatePlugin;
 use enupal\translate\elements\db\TranslateQuery;
+use craft\helpers\FileHelper;
 
 class Translate extends Element
 {
     /**
      * Status constants.
      */
-    const DONE = 'live';
+    const TRANSLATED = 'live';
     const PENDING = 'pending';
 
     public $original;
@@ -30,6 +31,7 @@ class Translate extends Element
     public $file;
     public $locale = 'en_us';
     public $field;
+    public $translateStatus;
 
     /**
      * Return element type name.
@@ -82,9 +84,21 @@ class Translate extends Element
     public static function statuses(): array
     {
         return [
-            self::DONE => Craft::t('enupal-translate','Done'),
+            self::TRANSLATED => Craft::t('enupal-translate','Done'),
             self::PENDING => Craft::t('enupal-translate','Pending'),
         ];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getStatus()
+    {
+        if ($this->original != $this->translation) {
+            return static::TRANSLATED;
+        }
+
+        return static::PENDING;
     }
 
     public static function find(): ElementQueryInterface
@@ -147,97 +161,98 @@ class Translate extends Element
      */
     protected static function defineSources(string $context = null): array
     {
-        // Get plugin sources
+        $sources = [];
 
-        $sources = [
-            [
-                'key'   => '*',
-                'label' => Craft::t('enupal-translate','All Translations'),
+        $sources[] = ['heading' => Craft::t('enupal-translate','Template Status')];
+
+        $key = 'status:' . self::PENDING;
+        $sources[] = [
+            'status'   => self::PENDING,
+            'key'      => $key,
+            'label'    => Craft::t('enupal-translate', 'Pending'),
+            'criteria' => [
+                'source' => [
+                    Craft::$app->path->getSiteTemplatesPath()
+                ],
+                'translateStatus' => self::PENDING
+            ],
+        ];
+
+        $key = 'status:' . self::TRANSLATED;
+        $sources[] = [
+            'status'   => self::TRANSLATED,
+            'key'      => $key,
+            'label'    => Craft::t('enupal-translate', 'Translated'),
+            'criteria' => [
+                'source' => [
+                    Craft::$app->path->getSiteTemplatesPath()
+                ],
+                'translateStatus' => self::TRANSLATED
+            ],
+        ];
+
+        $pluginSources = array();
+        $plugins = Craft::$app->plugins->getAllPlugins();
+        foreach ($plugins as $path => $plugin) {
+            $pluginSources['plugins:'.$path] = [
+                'label' => $plugin->name,
+                'key' => 'plugins:'.$plugin->getHandle(),
                 'criteria' => [
                     'source' => [
-                        //Craft::$app->path->getPluginsPath(),
-                        Craft::$app->path->getSiteTemplatesPath(),
+                        $plugin->getBasePath()
                     ],
                 ],
-            ]
-        ];
-        /*
-        $pluginSources = array();
-        $plugins = craft()->plugins->getPlugins();
-        foreach ($plugins as $path => $plugin) {
-            $pluginSources['plugins:'.$path] = array(
-                'label' => $plugin->classHandle,
-                'criteria' => array(
-                    'source' => craft()->path->getPluginsPath().$path,
-                ),
-            );
+            ];
         }
 
         // Get template sources
         $templateSources = array();
-        $templates = IOHelper::getFolderContents(craft()->path->getSiteTemplatesPath(), false);
+        $options = [
+            'recursive' => true,
+            'only' => ['*.html','*.twig','*.js','*.json','*.atom','*.rss'],
+            #'except' => 'vendor|node_modules'
+        ];
+        $templates = FileHelper::findFiles(Craft::$app->path->getSiteTemplatesPath(), $options);
         foreach ($templates as $template) {
-
-            // Get path/name of template files and folders
-            if (preg_match('/(.*)\/(.*?)(\.(html|twig|js|json|atom|rss)|\/)$/', $template, $matches)) {
-
-                // If matches, get template name
-                $path = $matches[2];
-
-                // Add template source
-                $templateSources['templates:'.$path] = array(
-                    'label' => $path,
-                    'criteria' => array(
-                        'source' => $template,
-                    ),
-                );
-            }
+            // If matches, get template name
+            $fileName = basename($template);
+            // Add template source
+            $templateSources['templates:'.$fileName] = [
+                'label' => $fileName,
+                'key' => 'templates:'.$template,
+                'criteria' => [
+                    'source' => [
+                        $template
+                    ],
+                ],
+            ];
         }
 
-        // Get default sources
-        $sources = array(
-            '*' => array(
-                'label' => Craft::t('enupal-translate','All translations'),
-                'criteria' => array(
-                    'source' => array(
-                        craft()->path->getPluginsPath(),
-                        craft()->path->getSiteTemplatesPath(),
-                    ),
-                ),
-            ),
-            array('heading' => Craft::t('enupal-translate','Default')),
-            'plugins' => array(
-                'label' => Craft::t('enupal-translate','Plugins'),
-                'criteria' => array(
-                    'source' => craft()->path->getPluginsPath(),
-                ),
-                'nested' => $pluginSources,
-            ),
-            'templates' => array(
-                'label' => Craft::t('enupal-translate','Templates'),
-                'criteria' => array(
-                    'source' => craft()->path->getSiteTemplatesPath(),
-                ),
-                'nested' => $templateSources,
-            ),
-        );
+        $sources[] = ['heading' => Craft::t('enupal-translate','Default')];
 
-        // Get sources by hook
-        $plugins = craft()->plugins->call('registerTranslateSources');
-        if (count($plugins)) {
-            $sources[] = array('heading' => Craft::t('enupal-translate','Custom'));
-            foreach ($plugins as $plugin) {
+        $sources[] = [
+            'label'    => Craft::t('enupal-translate', 'Templates'),
+            'key'      => 'templates',
+            'criteria' => [
+                'source' => [
+                    Craft::$app->path->getSiteTemplatesPath()
+                ]
+            ],
+            'nested' => $templateSources
+        ];
 
-                // Add as own source
-                $sources = array_merge($sources, $plugin);
+        $sources[] = [
+            'label'    => Craft::t('enupal-translate', 'Plugins'),
+            'key' => 'plugins',
+            'criteria' => [
+                'source' => [
+                ],
+            ],
+            'nested' => $pluginSources
+        ];
 
-                // Add to "All translations"
-                foreach ($plugin as $key => $values) {
-                    $sources['*']['criteria']['source'][] = $values['criteria']['source'];
-                }
-            }
-        }
-        */
+        // @todo add hook
+
         // Return sources
         return $sources;
     }
@@ -251,6 +266,10 @@ class Translate extends Element
         if (empty($elementQuery->siteId)) {
             $primarySite = Craft::$app->getSites()->getPrimarySite();
             $elementQuery->siteId = $primarySite->id;
+        }
+
+        if ($elementQuery->translateStatus) {
+            $elementQuery->status = $elementQuery->translateStatus;
         }
 
         $elements = TranslatePlugin::$app->translate->get($elementQuery);
@@ -271,6 +290,16 @@ class Translate extends Element
         $template = '_elements/'.$viewState['mode'].'view/'.($includeContainer ? 'container' : 'elements');
 
         return Craft::$app->view->renderTemplate($template, $variables);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected static function defineActions(string $source = null): array
+    {
+        $actions = [];
+
+        return $actions;
     }
 
     public function getLocale()

@@ -232,7 +232,7 @@ class Translate extends Component
                    # if ($criteria->search && !stristr($element->original, $criteria->search) && !stristr($element->translation, $criteria->search)) {
                    #     continue;
                    # }
-
+                    $test = $element->getStatus();
                     // If wanting one status, ditch the rest
                     if ($criteria->status && $criteria->status != $element->getStatus()) {
                         continue;
