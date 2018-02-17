@@ -90,6 +90,11 @@ class TranslateController extends BaseController
      */
     public function actionSave()
     {
+        $this->requireAcceptsJson();
+        $response = [
+            'success' => true,
+            'errors' => []
+        ];
         $siteId = Craft::$app->request->getRequiredBodyParam('siteId');
         $site = Craft::$app->getSites()->getSiteById($siteId);
 
@@ -98,10 +103,7 @@ class TranslateController extends BaseController
         // Save to translation file
         Translate::$app->translate->set($site->language, $translations);
 
-        // Set a flash message
-        Craft::$app->getSession()->setNotice(Craft::t('enupal-translate','The translations have been updated.'));
-
         // Redirect back to page
-        return $this->redirectToPostedUrl();
+        return $this->asJson($response);
     }
 }

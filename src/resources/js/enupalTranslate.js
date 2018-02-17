@@ -21,8 +21,7 @@
          */
         init: function()
         {
-            console.log(Craft.elementIndex.updateElements());
-            //this.addListener($("#showError1"), 'activate', 'showError');
+            this.addListener($('#save-elements-button'), 'activate', 'processAjaxCall');
             //this.addListener($("#loginfo"), 'activate', 'showLoginfo');
 
             // Get locale menu btn
@@ -53,6 +52,24 @@
                 });
             });
         },
+
+        processAjaxCall: function(event)
+        {
+            event.preventDefault();
+            var data = $("#translate-ajax").serialize();
+            Craft.postActionRequest('enupal-translate/translate/save', data, $.proxy(function(response, textStatus) {
+                if (textStatus === 'success') {
+                    if (response.success)
+                    {
+                        Craft.cp.displayNotice(Craft.t('enupal-translate', 'Translations have been saved successfully.'));
+                        Craft.elementIndex.updateElements();
+                    }
+                }
+                else {
+                    Craft.cp.displayError(Craft.t('app', 'An unknown error occurred.'));
+                }
+            }, this));
+        }
 
 
     });
