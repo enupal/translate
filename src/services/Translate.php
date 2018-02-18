@@ -13,6 +13,7 @@ use craft\base\Component;
 use craft\elements\db\ElementQueryInterface;
 use craft\helpers\ElementHelper;
 use craft\helpers\FileHelper;
+use enupal\translate\contracts\GoogleCloudTranslate;
 use enupal\translate\contracts\GoogleTranslate;
 use enupal\translate\contracts\Yandex;
 use enupal\translate\elements\Translate as TranslateElement;
@@ -299,5 +300,34 @@ class Translate extends Component
         $result = $googleTranslate->translate($text, $from, $language);
 
         return $result;
+    }
+
+    /**
+     * @param      $text
+     * @param      $language
+     * @param null $from
+     *
+     * @return bool|object
+     * @throws \craft\errors\SiteNotFoundException
+     */
+    public function googleCloudTranslate($text, $language, $from = null)
+    {
+        // @todo - add a setting to select the primary site
+        $primarySite = Craft::$app->getSites()->getPrimarySite();
+        $from = $from ?? $primarySite->language;
+        $googleTranslate = new GoogleCloudTranslate();
+        $result = $googleTranslate->translate($text, $from, $language);
+
+        return $result;
+    }
+
+    /**
+     * @return \craft\base\Model|null
+     */
+    public function getPluginSettings()
+    {
+        $plugin = Craft::$app->getPlugins()->getPlugin('enupal-translate');
+
+        return $plugin->getSettings();
     }
 }

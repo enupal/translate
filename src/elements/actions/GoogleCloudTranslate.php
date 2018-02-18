@@ -7,7 +7,7 @@ use craft\base\ElementAction;
 use craft\elements\db\ElementQueryInterface;
 use enupal\translate\Translate as TranslatePlugin;
 
-class GoogleTranslate extends ElementAction
+class GoogleCloudTranslate extends ElementAction
 {
     // Properties
     // =========================================================================
@@ -30,7 +30,7 @@ class GoogleTranslate extends ElementAction
      */
     public function getTriggerLabel(): string
     {
-        return Craft::t('enupal-translate', 'Google Translate (Free)');
+        return Craft::t('enupal-translate', 'Google Cloud Translate');
     }
 
     // Public Methods
@@ -51,7 +51,7 @@ class GoogleTranslate extends ElementAction
             $texts[] = $element->original;
         }
 
-        $results = TranslatePlugin::$app->translate->googleTranslate($texts, $site->language);
+        $results = TranslatePlugin::$app->translate->googleCloudTranslate($texts, $site->language);
 
         if (!$results){
             $message = Craft::t('enupal-translate','Api error - Please check your logs');

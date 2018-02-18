@@ -13,6 +13,7 @@ namespace enupal\translate\elements;
 use Craft;
 use craft\base\Element;
 use craft\elements\db\ElementQueryInterface;
+use enupal\translate\elements\actions\GoogleCloudTranslate;
 use enupal\translate\elements\actions\GoogleTranslate;
 use enupal\translate\elements\actions\Yandex;
 use enupal\translate\Translate as TranslatePlugin;
@@ -300,15 +301,29 @@ class Translate extends Element
     protected static function defineActions(string $source = null): array
     {
         $actions = [];
-        // Yandex
-        $actions[] = Craft::$app->getElements()->createAction([
-            'type' => Yandex::class,
-        ]);
 
-        // Google
-        $actions[] = Craft::$app->getElements()->createAction([
-            'type' => GoogleTranslate::class,
-        ]);
+        $settings = TranslatePlugin::$app->translate->getPluginSettings();
+
+        if ($settings->enableYandex && $settings->yandexApi){
+            // Yandex
+            $actions[] = Craft::$app->getElements()->createAction([
+                'type' => Yandex::class,
+            ]);
+        }
+
+        if ($settings->enableGoogleApi && $settings->googleApi){
+            // Google Cloud Translate
+            $actions[] = Craft::$app->getElements()->createAction([
+                'type' => GoogleCloudTranslate::class,
+            ]);
+        }
+
+        if ($settings->enableFreeGoogleApi) {
+            // Google Translate Free
+            $actions[] = Craft::$app->getElements()->createAction([
+                'type' => GoogleTranslate::class,
+            ]);
+        }
 
         return $actions;
     }

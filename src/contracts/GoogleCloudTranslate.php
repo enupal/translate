@@ -10,36 +10,36 @@
 
 namespace enupal\translate\contracts;
 
-use Beeyev\YaTranslate\Translate;
-use enupal\translate\Translate as TranslatePlugin;
 use Craft;
+use GoogleTranslate\Client;
+use enupal\translate\Translate as TranslatePlugin;
 
-class Yandex
+class GoogleCloudTranslate
 {
-    /**
-     * @var string
-     */
     private $api;
 
     public function __construct()
     {
         $settings = TranslatePlugin::$app->translate->getPluginSettings();
-        $this->api = $settings->yandexApi;
+        $this->api = $settings->googleApi;
     }
 
     /**
      * Translate message
+     *
      * @param string|array $text The text to translate.
-     * @param string $language The translation language.
-     * @return []
+     * @param              $from
+     * @param              $to
+     *
+     * @return bool|[]
      */
-    public function translate($text, $language)
+    public function translate($text, $from, $to)
     {
         $result = false;
         try {
-            $tr = new Translate($this->api);
-            $result = $tr->translate($text, $language);
-        } catch (\Beeyev\YaTranslate\TranslateException $e) {
+            $client = new Client($this->api);
+            $result = $client->translate($text, $to, $from);
+        } catch (\Exception $e) {
             //Handle exception
             Craft::error($e->getMessage(), __METHOD__);
         }
