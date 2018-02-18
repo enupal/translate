@@ -233,11 +233,11 @@ class Translate extends Component
                         'field' => $field,
                     ]);
 
-                    // If searching, only return matches
-                   # if ($criteria->search && !stristr($element->original, $criteria->search) && !stristr($element->translation, $criteria->search)) {
-                   #     continue;
-                   # }
-                    // If wanting one status, ditch the rest
+                    // Searching
+                    if ($criteria->search && !stristr($element->original, $criteria->search) && !stristr($element->translation, $criteria->search)) {
+                        continue;
+                   }
+                    // Status
                     if ($criteria->status && $criteria->status != $element->getStatus()) {
                         continue;
                     }
