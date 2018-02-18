@@ -13,6 +13,7 @@ namespace enupal\translate\elements;
 use Craft;
 use craft\base\Element;
 use craft\elements\db\ElementQueryInterface;
+use enupal\translate\elements\actions\GoogleTranslate;
 use enupal\translate\elements\actions\Yandex;
 use enupal\translate\Translate as TranslatePlugin;
 use enupal\translate\elements\db\TranslateQuery;
@@ -302,6 +303,11 @@ class Translate extends Element
         // Yandex
         $actions[] = Craft::$app->getElements()->createAction([
             'type' => Yandex::class,
+        ]);
+
+        // Google
+        $actions[] = Craft::$app->getElements()->createAction([
+            'type' => GoogleTranslate::class,
         ]);
 
         return $actions;

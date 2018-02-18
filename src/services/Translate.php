@@ -13,6 +13,7 @@ use craft\base\Component;
 use craft\elements\db\ElementQueryInterface;
 use craft\helpers\ElementHelper;
 use craft\helpers\FileHelper;
+use enupal\translate\contracts\GoogleTranslate;
 use enupal\translate\contracts\Yandex;
 use enupal\translate\elements\Translate as TranslateElement;
 use Craft;
@@ -269,7 +270,7 @@ class Translate extends Component
      * @return bool|object
      * @throws \craft\errors\SiteNotFoundException
      */
-    public function translateWithYandex($text, $language, $from = null)
+    public function yandexTranslate($text, $language, $from = null)
     {
         // @todo - add a setting to select the primary site
         $primarySite = Craft::$app->getSites()->getPrimarySite();
@@ -277,6 +278,25 @@ class Translate extends Component
         $language = $from.'-'.$language;
         $yandex = new Yandex();
         $result = $yandex->translate($text, $language);
+
+        return $result;
+    }
+
+    /**
+     * @param      $text
+     * @param      $language
+     * @param null $from
+     *
+     * @return bool|object
+     * @throws \craft\errors\SiteNotFoundException
+     */
+    public function googleTranslate($text, $language, $from = null)
+    {
+        // @todo - add a setting to select the primary site
+        $primarySite = Craft::$app->getSites()->getPrimarySite();
+        $from = $from ?? $primarySite->language;
+        $googleTranslate = new GoogleTranslate();
+        $result = $googleTranslate->translate($text, $from, $language);
 
         return $result;
     }

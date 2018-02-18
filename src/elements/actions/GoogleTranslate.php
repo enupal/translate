@@ -7,7 +7,7 @@ use craft\base\ElementAction;
 use craft\elements\db\ElementQueryInterface;
 use enupal\translate\Translate as TranslatePlugin;
 
-class Yandex extends ElementAction
+class GoogleTranslate extends ElementAction
 {
     // Properties
     // =========================================================================
@@ -30,7 +30,7 @@ class Yandex extends ElementAction
      */
     public function getTriggerLabel(): string
     {
-        return Craft::t('enupal-translate', 'Yandex Translate');
+        return Craft::t('enupal-translate', 'Google Translate');
     }
 
     // Public Methods
@@ -45,13 +45,13 @@ class Yandex extends ElementAction
 
         $elements = $elements = TranslatePlugin::$app->translate->get($query);
 
-        // prepare for yandex
+        // prepare for google
         $texts = [];
         foreach ($elements as $element) {
             $texts[] = $element->original;
         }
 
-        $results = TranslatePlugin::$app->translate->yandexTranslate($texts, $site->language);
+        $results = TranslatePlugin::$app->translate->googleTranslate($texts, $site->language);
 
         if (!$results){
             $message = Craft::t('enupal-translate','Api error - Please check your logs');
@@ -59,7 +59,7 @@ class Yandex extends ElementAction
             return false;
         }
 
-        $translations = $results->translation();
+        $translations = $results;
         $enupalTranslations = [];
         $pos = 0;
         foreach($elements as $element) {
