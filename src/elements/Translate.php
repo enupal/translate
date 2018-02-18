@@ -13,6 +13,7 @@ namespace enupal\translate\elements;
 use Craft;
 use craft\base\Element;
 use craft\elements\db\ElementQueryInterface;
+use enupal\translate\elements\actions\Yandex;
 use enupal\translate\Translate as TranslatePlugin;
 use enupal\translate\elements\db\TranslateQuery;
 use craft\helpers\FileHelper;
@@ -262,7 +263,7 @@ class Translate extends Element
      */
     public static function indexHtml(ElementQueryInterface $elementQuery, array $disabledElementIds = null, array $viewState, string $sourceKey = null, string $context = null, bool $includeContainer, bool $showCheckboxes): string
     {
-        // If the site only has 1 locale enabled, set the translated locale to the primary (and only) locale
+        // just 1 locale enabled
         if (empty($elementQuery->siteId)) {
             $primarySite = Craft::$app->getSites()->getPrimarySite();
             $elementQuery->siteId = $primarySite->id;
@@ -283,7 +284,7 @@ class Translate extends Element
             'showCheckboxes' => $showCheckboxes
         ];
 
-        // Inject some custom js also
+        // Better UI
         Craft::$app->view->registerJs("$('table.fullwidth thead th').css('width', '50%');");
         Craft::$app->view->registerJs("$('.buttons.hidden').removeClass('hidden');");
 
@@ -298,6 +299,10 @@ class Translate extends Element
     protected static function defineActions(string $source = null): array
     {
         $actions = [];
+        // Yandex
+        $actions[] = Craft::$app->getElements()->createAction([
+            'type' => Yandex::class,
+        ]);
 
         return $actions;
     }

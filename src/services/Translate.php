@@ -13,6 +13,7 @@ use craft\base\Component;
 use craft\elements\db\ElementQueryInterface;
 use craft\helpers\ElementHelper;
 use craft\helpers\FileHelper;
+use enupal\translate\contracts\Yandex;
 use enupal\translate\elements\Translate as TranslateElement;
 use Craft;
 
@@ -112,6 +113,8 @@ class Translate extends Component
         }catch (\Throwable $e) {
             throw new \Exception(Craft::t('enupal-translate','Something went wrong while saving your translations: '.$e->getMessage()));
         }
+
+        return true;
     }
 
     /**
@@ -232,19 +235,37 @@ class Translate extends Component
                    # if ($criteria->search && !stristr($element->original, $criteria->search) && !stristr($element->translation, $criteria->search)) {
                    #     continue;
                    # }
-                    $test = $element->getStatus();
                     // If wanting one status, ditch the rest
                     if ($criteria->status && $criteria->status != $element->getStatus()) {
                         continue;
                     }
-
-                    // Collect in array
-                    $occurences[] = $element;
+                    // add actions occurrences
+                    if ($criteria->id)
+                    {
+                        foreach ($criteria->id as $id) {
+                            if ($element->id == $id) {
+                                // Collect in array
+                                $occurences[] = $element;
+                            }
+                        }
+                    }
+                    else{
+                        // Collect in array
+                        $occurences[] = $element;
+                    }
                 }
             }
         }
 
         // Return occurences
         return $occurences;
+    }
+
+    public function translateWithYandex($text, $language)
+    {
+        $yandex = new Yandex();
+        $result = $yandex->translate($text, $language);
+
+        return $result;
     }
 }
