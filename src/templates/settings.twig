@@ -1,0 +1,33 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Translate plugin for Craft CMS 3.x
+ *
+ * Translation management plugin for Craft CMS
+ *
+ * @link      https://enupal.com
+ * @copyright Copyright (c) 2018 Enupal
+ */
+#}
+
+{% import "_includes/forms" as forms %}
+
+{{ forms.textField({
+	label: 'Yandex Translate',
+	instructions: 'This API offers text translation features for over 30 languages. <a href="https://tech.yandex.com/key/form.xml?service=trnsl"> Get your Api for free here</a>'|t('enupal-translate'),
+	id: 'yandexApi',
+	name: 'yandexApi',
+	required: false,
+	errors: settings.getErrors('yandexApi'),
+	value: settings['yandexApi']})
+}}
+
+{{ forms.textField({
+    label: 'Google Translate',
+    instructions: 'This API offers text translation features for over 30 languages. <a href="https://tech.yandex.com/key/form.xml?service=trnsl"> Get your Api for free here</a>'|t('enupal-translate'),
+    id: 'yandexApi',
+    name: 'yandexApi',
+    required: false,
+    errors: settings.getErrors('yandexApi'),
+    value: settings['yandexApi']})
+}}

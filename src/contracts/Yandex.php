@@ -34,7 +34,7 @@ class Yandex
      */
     public function translate($text, $language)
     {
-        $result = $text;
+        $result = false;
         try {
             $tr = new Translate($this->api);
             $result = $tr->translate($text, $language);

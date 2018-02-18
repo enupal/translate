@@ -53,6 +53,12 @@
             });
         },
 
+        onAfterAction: function(action, params)
+        {
+            console.log("as");
+            Craft.elementIndex.updateElements();
+        },
+
         processAjaxCall: function(event)
         {
             event.preventDefault();
@@ -70,8 +76,6 @@
                 }
             }, this));
         }
-
-
     });
 
     window.EnupalTranslate = EnupalTranslate;

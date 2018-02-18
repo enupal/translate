@@ -261,8 +261,20 @@ class Translate extends Component
         return $occurences;
     }
 
-    public function translateWithYandex($text, $language)
+    /**
+     * @param      $text
+     * @param      $language
+     * @param null $from
+     *
+     * @return bool|object
+     * @throws \craft\errors\SiteNotFoundException
+     */
+    public function translateWithYandex($text, $language, $from = null)
     {
+        // @todo - add a setting to select the primary site
+        $primarySite = Craft::$app->getSites()->getPrimarySite();
+        $from = $from ?? $primarySite->language;
+        $language = $from.'-'.$language;
         $yandex = new Yandex();
         $result = $yandex->translate($text, $language);
 

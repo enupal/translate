@@ -61,6 +61,12 @@ class Yandex extends ElementAction
 
         $results = TranslatePlugin::$app->translate->translateWithYandex($texts, $site->language);
 
+        if (!$results){
+            $message = Craft::t('enupal-translate','Api error - Please check your logs');
+            $this->setMessage($message);
+            return false;
+        }
+
         $translations = $results->translation();
         $enupalTranslations = [];
         $pos = 0;
@@ -79,6 +85,6 @@ class Yandex extends ElementAction
 
         $this->setMessage($message);
 
-        return $response;
+        return true;
     }
 }

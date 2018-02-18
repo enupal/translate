@@ -26,4 +26,9 @@ class Settings extends Model
      * @var string
      */
     public $yandexApi = '';
+
+    /**
+     * @var string
+     */
+    public $googleApi = '';
 }

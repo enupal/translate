@@ -30,6 +30,8 @@ class Translate extends Plugin
 
     public $hasCpSection = true;
 
+    public $hasCpSettings = true;
+
     public function init()
     {
         parent::init();
