@@ -14,6 +14,7 @@ namespace enupal\translate\controllers;
 use craft\web\Controller as BaseController;
 use Craft;
 use enupal\translate\Translate;
+use enupal\translate\elements\Translate as ElementTranslate;
 
 class TranslateController extends BaseController
 {
@@ -23,13 +24,16 @@ class TranslateController extends BaseController
     public function actionDownload()
     {
         // Get params
-        $locale = Craft::$app->request->getParam('locale');
+        $siteId = Craft::$app->request->getRequiredBodyParam('siteId');
+        $site = Craft::$app->getSites()->getSiteById($siteId);
 
+        // Call Craft.elementIndex.sourceKey to get the source key on Js
+        // So we can return specific file and not all the translates
         // Set criteria
-        $criteria = Craft::$app->elements->getCriteria('Translate');
+        $criteria = ElementTranslate::find();
         $criteria->search = false;
         $criteria->status = false;
-        $criteria->locale = $locale;
+        $criteria->siteId = $siteId;
         $criteria->source = array(
             Craft::$app->path->getPluginsPath(),
             Craft::$app->path->getSiteTemplatesPath(),

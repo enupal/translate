@@ -54,7 +54,6 @@
         <input type="hidden" name="siteId" value="{{ elementInstance.siteId }}">
         
         {{ parent() }}
-
         <div class="buttons hidden">
             <a class="btn submit translations-download-button" href="{{ actionUrl('enupal-translate/translate/download', {'siteId': elementInstance.siteId }) }}">{{ "Download"|t }}</a>
         </div>

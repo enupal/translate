@@ -51,11 +51,12 @@
                     $(this).parent('form').submit();
                 });
             });
+
+            Craft.elementIndex.on('afterAction', this.manageAfterAction);
         },
 
-        onAfterAction: function(action, params)
+        manageAfterAction: function(action, params)
         {
-            console.log("as");
             Craft.elementIndex.updateElements();
         },
 
