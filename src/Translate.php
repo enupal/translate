@@ -67,10 +67,23 @@ class Translate extends Plugin
                 ],
                 'settings' => [
                     "label" => Craft::t('enupal-translate',"Settings"),
-                    "url" => 'enupal-translate/settings'
+                    "url" => 'settings/plugins/enupal-translate'
                 ]
             ]
         ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function settingsHtml(): string
+    {
+        return Craft::$app->view->renderTemplate(
+            'enupal-translate/settings',
+            [
+                'settings' => $this->getSettings()
+            ]
+        );
     }
 }
 

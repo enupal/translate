@@ -21,11 +21,25 @@ class Settings extends Model
 {
     // Public Properties
     // =========================================================================
+    /**
+     * @var bool
+     */
+    public $enableYandex = 0;
 
     /**
      * @var string
      */
     public $yandexApi = '';
+
+    /**
+     * @var bool
+     */
+    public $enableFreeGoogleApi = 1;
+
+    /**
+     * @var bool
+     */
+    public $enableGoogleApi = 0;
 
     /**
      * @var string

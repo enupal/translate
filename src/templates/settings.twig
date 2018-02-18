@@ -12,22 +12,59 @@
 
 {% import "_includes/forms" as forms %}
 
-{{ forms.textField({
-	label: 'Yandex Translate',
-	instructions: 'This API offers text translation features for over 30 languages. <a href="https://tech.yandex.com/key/form.xml?service=trnsl"> Get your Api for free here</a>'|t('enupal-translate'),
-	id: 'yandexApi',
-	name: 'yandexApi',
-	required: false,
-	errors: settings.getErrors('yandexApi'),
-	value: settings['yandexApi']})
-}}
 
-{{ forms.textField({
-    label: 'Google Translate',
+{{ forms.lightswitchField({
+    label: "Enable Yandex Translate"|t('enupal-translate'),
+    id: 'enableYandex',
+    name: 'enableYandex',
     instructions: 'This API offers text translation features for over 30 languages. <a href="https://tech.yandex.com/key/form.xml?service=trnsl"> Get your Api for free here</a>'|t('enupal-translate'),
-    id: 'yandexApi',
-    name: 'yandexApi',
-    required: false,
-    errors: settings.getErrors('yandexApi'),
-    value: settings['yandexApi']})
-}}
+    on: settings.enableYandex,
+    toggle: 'settings-enableYandex',
+    onLabel: "On"|t('enupal-translate'),
+    offLabel: "Off"|t('enupal-translate')
+}) }}
+<div id="settings-enableYandex" class="{% if not settings.enableYandex %}hidden{% endif %}">
+    {{ forms.textField({
+        label: 'Yandex Translate',
+        instructions: 'Api Key'|t('enupal-translate'),
+        id: 'yandexApi',
+        name: 'yandexApi',
+        required: false,
+        errors: settings.getErrors('yandexApi'),
+        value: settings['yandexApi']})
+    }}
+</div>
+<hr>
+{{ forms.lightswitchField({
+    label: "Enable Google Translate"|t('enupal-translate'),
+    id: 'enableGoogleApi',
+    instructions: 'Dynamically translate between thousands of available language pairs. <a href="https://cloud.google.com/translate/">Get your Api here</a>'|t('enupal-translate'),
+    name: 'enableGoogleApi',
+    on: settings.enableGoogleApi,
+    toggle: 'settings-enableGoogleApi',
+    onLabel: "On"|t('enupal-translate'),
+    offLabel: "Off"|t('enupal-translate')
+}) }}
+
+<div id="settings-enableGoogleApi" class="{% if not settings.enableGoogleApi %}hidden{% endif %}">
+    {{ forms.textField({
+        label: 'Google Translate',
+        instructions: 'Google Cloud Translation API version 2.0'|t('enupal-translate'),
+        id: 'googleApi',
+        name: 'googleApi',
+        required: false,
+        errors: settings.getErrors('googleApi'),
+        value: settings['googleApi']})
+    }}
+</div>
+<hr>
+{{ forms.lightswitchField({
+    label: "Google Translate (Free)"|t('enupal-translate'),
+    instructions: 'Do not depend on this setting as it may break anytime as it is based on crawling the Google Translate website. Consider buying Official Google Translate API for other types of usage. Also, Google might ban your server IP or require to solve CAPTCHA if you send unusual traffic (large amount of data/requests)',
+    id: 'enableFreeGoogleApi',
+    name: 'enableFreeGoogleApi',
+    on: settings.enableFreeGoogleApi,
+    onLabel: "On"|t('enupal-translate'),
+    offLabel: "Off"|t('enupal-translate')
+}) }}
+

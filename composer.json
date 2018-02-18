@@ -1,7 +1,7 @@
 {
   "name": "enupal/translate",
   "description": "Translation management plugin for Craft CMS",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "craft-plugin",
   "autoload": {
     "psr-4": {
@@ -11,7 +11,8 @@
   "minimum-stability": "dev",
   "require": {
     "beeyev/yandex-translate": "dev-master",
-    "stichoza/google-translate-php": "~3.2"
+    "stichoza/google-translate-php": "~3.2",
+    "viniciusgava/google-translate-api": "2.0.1"
   },
   "authors": [
     {
