@@ -56,7 +56,7 @@ class Translate extends Component
             // Single quotes
             '/Craft\.(t|translate)\(.*?\'(.*?)\'.*?\,.*?\'(.*?)\'.*?\)/',
             // Double quotes
-            '/Craft\.(t|translate)\(.*?\"(.*?)\".*?\,.*?"(.*?)".*?\)/',
+            '/Craft\.(t|translate)\(.*?"(.*?)".*?\)/',
         ),
 
     );
@@ -120,39 +120,30 @@ class Translate extends Component
     }
 
     /**
-     * Get translations by criteria.
+     * Get translations by Element Query.
      *
-     * @param ElementQueryInterface $criteria
+     * @param ElementQueryInterface $query
      *
      * @return array
      */
-    public function get(ElementQueryInterface $criteria)
+    public function get(ElementQueryInterface $query)
     {
-        // Ensure source is an array
-        if (!is_array($criteria->source)) {
-            $criteria->source = [$criteria->source];
+        if (!is_array($query->source)) {
+            $query->source = [$query->source];
         }
 
-        // Gather all translatable strings
         $occurences = [];
 
         // Loop through paths
-        foreach ($criteria->source as $path) {
-
+        foreach ($query->source as $path) {
             // Check if this is a folder or a file
             $isDir = is_dir($path);
 
-            // If its not a file
             if ($isDir) {
-
-                // Set filter - no vendor folders, only template files
-                #$filter = '^((?!vendor|node_modules).)*(\.(php|html|twig|js|json|atom|rss)?)$';
-
-                // Get files
                 $options = [
                     'recursive' => true,
                     'only' => ['*.php','*.html','*.twig','*.js','*.json','*.atom','*.rss'],
-                    #'except' => 'vendor|node_modules'
+                    'except' => ['vendor/', 'node_modules/']
                 ];
 
                 $files = FileHelper::findFiles($path, $options);
@@ -161,7 +152,7 @@ class Translate extends Component
                 foreach ($files as $file) {
 
                     // Parse file
-                    $elements = $this->_parseFile($path, $file, $criteria);
+                    $elements = $this->_parseFile($path, $file, $query);
 
                     // Collect in array
                     $occurences = array_merge($occurences, $elements);
@@ -169,7 +160,7 @@ class Translate extends Component
             } elseif (file_exists($path)) {
 
                 // Parse file
-                $elements = $this->_parseFile($path, $path, $criteria);
+                $elements = $this->_parseFile($path, $path, $query);
 
                 // Collect in array
                 $occurences = array_merge($occurences, $elements);
@@ -184,11 +175,11 @@ class Translate extends Component
      *
      * @param string               $path
      * @param string               $file
-     * @param ElementQueryInterface $criteria
+     * @param ElementQueryInterface $query
      *
      * @return array
      */
-    protected function _parseFile($path, $file, ElementQueryInterface $criteria)
+    protected function _parseFile($path, $file, ElementQueryInterface $query)
     {
         // Collect matches in file
         $occurences = array();
@@ -204,19 +195,23 @@ class Translate extends Component
 
             // Match translation functions
             if (preg_match_all($regex, $contents, $matches)) {
-
+                $pos = 2;
                 // Collect
-                foreach ($matches[2] as $original) {
+                if ($extension == 'js' || $extension == 'php'){
+                    $pos = 3;
+                }
+                foreach ($matches[$pos] as $original) {
 
                     // Translate
-                    $site = Craft::$app->getSites()->getSiteById($criteria->siteId);
+                    $site = Craft::$app->getSites()->getSiteById($query->siteId);
                     $translation = Craft::t('enupal-translate', $original, null, $site->language);
 
                     // Show translation in textfield
                     $view = Craft::$app->getView();
+                    $elementId = ElementHelper::createSlug($original);
 
                     $field = $view->renderTemplate('_includes/forms/text', [
-                        'id' => ElementHelper::createSlug($original),
+                        'id' => $elementId,
                         'name' => 'translation['.$original.']',
                         'value' => $translation,
                         'placeholder' => $translation,
@@ -229,37 +224,34 @@ class Translate extends Component
                         'translation' => $translation,
                         'source' => $path,
                         'file' => $file,
-                        'siteId' => $criteria->siteId,
+                        'siteId' => $query->siteId,
                         'field' => $field,
                     ]);
 
                     // Searching
-                    if ($criteria->search && !stristr($element->original, $criteria->search) && !stristr($element->translation, $criteria->search)) {
+                    if ($query->search && !stristr($element->original, $query->search) && !stristr($element->translation, $query->search)) {
                         continue;
                    }
                     // Status
-                    if ($criteria->status && $criteria->status != $element->getStatus()) {
+                    if ($query->status && $query->status != $element->getStatus()) {
                         continue;
                     }
                     // add actions occurrences
-                    if ($criteria->id)
+                    if ($query->id)
                     {
-                        foreach ($criteria->id as $id) {
+                        foreach ($query->id as $id) {
                             if ($element->id == $id) {
-                                // Collect in array
-                                $occurences[] = $element;
+                                $occurences[$element->original] = $element;
                             }
                         }
                     }
                     else{
-                        // Collect in array
-                        $occurences[] = $element;
+                        $occurences[$element->original] = $element;
                     }
                 }
             }
         }
 
-        // Return occurences
         return $occurences;
     }
 

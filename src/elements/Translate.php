@@ -260,8 +260,6 @@ class Translate extends Element
         ];
 
         // @todo add hook
-
-        // Return sources
         return $sources;
     }
 
