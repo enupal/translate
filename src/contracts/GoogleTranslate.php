@@ -32,6 +32,8 @@ class GoogleTranslate
             $tr = new TranslateClient($from, $to);
             $results = $tr->translate($transBlock);
             $result = explode('||',$results);
+            // removes white spaces
+            $result=array_map('trim',$result);
         } catch (\Exception $e) {
             //Handle exception
             Craft::error($e->getMessage(), __METHOD__);

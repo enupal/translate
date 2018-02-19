@@ -22,12 +22,12 @@ use Craft;
 class Translate extends Component
 {
     /**
-     * Translate tag finding regular expressions.
-     *
-     * @var array
+     * Translate REGEX.
+     * @credits to boboldehampsink
+     * @var []
      */
-    protected $_expressions = array(
-        // Expressions for Craft::t() variants
+    private $_expressions = array(
+        // Regex for Craft::t('category', '..')
         'php' => array(
             // Single quotes
             '/Craft::(t|translate)\(.*?\'(.*?)\'.*?\,.*?\'(.*?)\'.*?\)/',
@@ -35,15 +35,7 @@ class Translate extends Component
             '/Craft::(t|translate)\(.*?"(.*?)".*?\,.*?"(.*?)".*?\)/',
         ),
 
-        // Expressions for |t() variants
-        'html' => array(
-            // Single quotes
-            '/(\{\{\s*|\{\%.*?|:\s*)\'(.*?)\'.*?\|.*?(t|translate)(\(.*?\)|).*?(\}\}|\%\}|,)/',
-            // Double quotes
-            '/(\{\{\s*|\{\%.*?|:\s*)"(.*?)".*?\|.*?(t|translate)(\(.*?\)|).*?(\}\}|\%\}|,)/',
-        ),
-
-        // Expressions for |t() variants
+        // Regex for |t('category')
         'twig' => array(
             // Single quotes
             '/(\{\{\s*|\{\%.*?|:\s*)\'(.*?)\'.*?\|.*?(t|translate)(\(.*?\)|).*?(\}\}|\%\}|,)/',
@@ -51,14 +43,13 @@ class Translate extends Component
             '/(\{\{\s*|\{\%.*?|:\s*)"(.*?)".*?\|.*?(t|translate)(\(.*?\)|).*?(\}\}|\%\}|,)/',
         ),
 
-        // Expressions for Craft.t() variants
+        // Regex for Craft.t('category', '..')
         'js' => array(
             // Single quotes
             '/Craft\.(t|translate)\(.*?\'(.*?)\'.*?\,.*?\'(.*?)\'.*?\)/',
             // Double quotes
-            '/Craft\.(t|translate)\(.*?"(.*?)".*?\)/',
-        ),
-
+            '/Craft\.(t|translate)\(.*?"(.*?)".*?\,.*?"(.*?)".*?\)/',
+        )
     );
 
     /**
@@ -70,11 +61,10 @@ class Translate extends Component
     {
         parent::init();
 
-        // Also use html expressions for twig/json/atom/rss templates
-        $this->_expressions['twig'] = $this->_expressions['html'];
-        $this->_expressions['json'] = $this->_expressions['html'];
-        $this->_expressions['atom'] = $this->_expressions['html'];
-        $this->_expressions['rss'] = $this->_expressions['html'];
+        $this->_expressions['html'] = $this->_expressions['twig'];
+        $this->_expressions['json'] = $this->_expressions['twig'];
+        $this->_expressions['atom'] = $this->_expressions['twig'];
+        $this->_expressions['rss'] = $this->_expressions['twig'];
     }
 
     /**
@@ -132,7 +122,7 @@ class Translate extends Component
             $query->source = [$query->source];
         }
 
-        $occurences = [];
+        $translations = [];
 
         // Loop through paths
         foreach ($query->source as $path) {
@@ -152,61 +142,55 @@ class Translate extends Component
                 foreach ($files as $file) {
 
                     // Parse file
-                    $elements = $this->_parseFile($path, $file, $query);
+                    $elements = $this->_processFile($path, $file, $query);
 
                     // Collect in array
-                    $occurences = array_merge($occurences, $elements);
+                    $translations = array_merge($translations, $elements);
                 }
             } elseif (file_exists($path)) {
 
                 // Parse file
-                $elements = $this->_parseFile($path, $path, $query);
+                $elements = $this->_processFile($path, $path, $query);
 
                 // Collect in array
-                $occurences = array_merge($occurences, $elements);
+                $translations = array_merge($translations, $elements);
             }
         }
 
-        return $occurences;
+        return $translations;
     }
 
     /**
-     * Open file and parse translate tags.
+     * Apply regex search into file
      *
-     * @param string               $path
-     * @param string               $file
+     * @param string                $path
+     * @param string                $file
      * @param ElementQueryInterface $query
      *
      * @return array
+     * @throws \Twig_Error_Loader
+     * @throws \yii\base\Exception
      */
-    protected function _parseFile($path, $file, ElementQueryInterface $query)
+    private function _processFile($path, $file, ElementQueryInterface $query)
     {
-        // Collect matches in file
-        $occurences = array();
+        $translations = array();
+        $contents     = file_get_contents($file);
+        $extension    = pathinfo($file, PATHINFO_EXTENSION);
 
-        // Get file contents
-        $contents = file_get_contents($file);
-
-        // Get extension
-        $extension = pathinfo($file, PATHINFO_EXTENSION);
-
-        // Get matches per extension
+        // Process the file
         foreach ($this->_expressions[$extension] as $regex) {
-
-            // Match translation functions
+            // Do it!
             if (preg_match_all($regex, $contents, $matches)) {
                 $pos = 2;
-                // Collect
+                // Js and php files goes to 3
                 if ($extension == 'js' || $extension == 'php'){
                     $pos = 3;
                 }
                 foreach ($matches[$pos] as $original) {
-
-                    // Translate
+                    // Apply the Craft Translate
                     $site = Craft::$app->getSites()->getSiteById($query->siteId);
                     $translation = Craft::t('enupal-translate', $original, null, $site->language);
 
-                    // Show translation in textfield
                     $view = Craft::$app->getView();
                     $elementId = ElementHelper::createSlug($original);
 
@@ -217,7 +201,7 @@ class Translate extends Component
                         'placeholder' => $translation,
                     ]);
 
-                    // Fill element with translation data
+                    // Let's create our translate element with all the info
                     $element = new TranslateElement([
                         'id' => ElementHelper::createSlug($original),
                         'original' => $original,
@@ -228,11 +212,11 @@ class Translate extends Component
                         'field' => $field,
                     ]);
 
-                    // Searching
+                    // Continue when Searching
                     if ($query->search && !stristr($element->original, $query->search) && !stristr($element->translation, $query->search)) {
                         continue;
                    }
-                    // Status
+                    // Continue when filter by status
                     if ($query->status && $query->status != $element->getStatus()) {
                         continue;
                     }
@@ -241,18 +225,18 @@ class Translate extends Component
                     {
                         foreach ($query->id as $id) {
                             if ($element->id == $id) {
-                                $occurences[$element->original] = $element;
+                                $translations[$element->original] = $element;
                             }
                         }
                     }
                     else{
-                        $occurences[$element->original] = $element;
+                        $translations[$element->original] = $element;
                     }
                 }
             }
         }
 
-        return $occurences;
+        return $translations;
     }
 
     /**
