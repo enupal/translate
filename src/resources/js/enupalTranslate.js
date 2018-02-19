@@ -15,6 +15,7 @@
     var EnupalTranslate = Garnish.Base.extend({
 
         options: null,
+        $toHeader:null,
 
         /**
          * The constructor.

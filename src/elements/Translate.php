@@ -114,8 +114,13 @@ class Translate extends Element
      */
     protected static function defineTableAttributes(): array
     {
-        $attributes['original'] = ['label' => Craft::t('enupal-translate','Original')];
-        $attributes['field']     = ['label' => Craft::t('enupal-translate','Field')];
+        $primary = Craft::$app->getSites()->getPrimarySite();
+        $locale = Craft::$app->getI18n()->getLocaleById($primary->language);
+        $attributes['original'] = ['label' => Craft::t('enupal-translate','Source: {region} ({language})', [
+            'language'=>$primary->language,
+            'region' => $locale->displayName
+        ])];
+        $attributes['field']     = ['label' => Craft::t('app','Translation')];
 
         return $attributes;
     }
