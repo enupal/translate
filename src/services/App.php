@@ -15,9 +15,11 @@ use craft\base\Component;
 class App extends Component
 {
     public $translate;
+    public $settings;
 
     public function init()
     {
         $this->translate = new Translate();
+        $this->settings = new Settings();
     }
 }

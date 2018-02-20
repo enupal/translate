@@ -1,0 +1,33 @@
+{#
+/**
+ * Translate plugin for Craft CMS 3.x
+ *
+ * Translation management plugin for Craft CMS
+ *
+ * @link      https://enupal.com
+ * @copyright Copyright (c) 2018 Enupal
+ */
+#}
+
+{% extends "_layouts/cp" %}
+
+{% set title  = "Settings"|t %}
+{% set bodyClass = craft.request.getSegments()|slice(0, 3)|join(' ') %}
+
+{% set selectedSubnavItem = craft.request.getSegment(2) %}
+{% set selectedSidebarItem = craft.request.getSegment(3) %}
+
+{% set sidebar %}
+
+    <nav class="last">
+        <ul>
+            <li>
+                <a  href="{{ cpUrl('enupal-translate/settings/general') }}" {% if selectedSidebarItem == 'general' %}class="sel"{% endif %}><i class="fa fa-cog fa-fw" aria-hidden="true"></i>&nbsp;{{"General"|t('enupal-translate')}}
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+{% endset %}
+
+{% do view.registerAssetBundle("enupal\\translate\\assetbundles\\FontAwesomeAsset") %}
