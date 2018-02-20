@@ -1,3 +1,5 @@
+Original work (c) 2015 Bob Olde Hampsink
+
 Copyright © Enupal
 
 Permission is hereby granted to any person obtaining a copy of this software
