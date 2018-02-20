@@ -240,7 +240,7 @@ class Translate extends Element
 
         $sources[] = [
             'label'    => Craft::t('enupal-translate', 'Templates'),
-            'key'      => 'templates',
+            'key'      => 'all-Templates:',
             'criteria' => [
                 'source' => [
                     Craft::$app->path->getSiteTemplatesPath()

@@ -56,6 +56,12 @@
                             $("#translate-ajax").append($iframe);
                             Craft.cp.displayNotice(Craft.t('enupal-translate', 'Download file!'));
                         }
+                        else {
+                            Craft.cp.displayError(Craft.t('app', 'There was an error when generating the file'));
+                        }
+                    }
+                    else {
+                        Craft.cp.displayError(Craft.t('app', 'Please select a different source'));
                     }
                 }
                 else {

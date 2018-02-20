@@ -35,6 +35,7 @@ class TranslateController extends BaseController
         $statusSubString = 'status:';
         $templateSubString = 'templates/templates:';
         $pluginSubString = 'plugins/plugins:';
+        $allTemplatesSubString = 'all-Templates:';
 
         $sources = [];
         $query = ElementTranslate::find();
@@ -56,6 +57,14 @@ class TranslateController extends BaseController
             $criteria = explode($pluginSubString, $sourceKey);
             $plugin = Craft::$app->plugins->getPlugin($criteria[1]);
             $sources[] = $plugin->getBasePath() ?? '';
+        }
+        // All templates
+        if (strpos($sourceKey, $allTemplatesSubString) !== false) {
+            $sources[] = Craft::$app->path->getSiteTemplatesPath();
+        }
+
+        if (empty($sources)){
+            return $this->asJson(['success'=> false]);
         }
 
         $site = Craft::$app->getSites()->getSiteById($siteId);
@@ -79,7 +88,6 @@ class TranslateController extends BaseController
         fclose($fd);
 
         // Download the file
-        //Craft::$app->getResponse()->sendFile('translations_'.$site->language.'.csv', $data, ['forceDownload' => true, 'mimeType' => 'text/csv']);
         $response = [
             'success'=> true,
             'filePath' => $file
