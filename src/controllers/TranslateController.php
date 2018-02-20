@@ -30,17 +30,17 @@ class TranslateController extends BaseController
         // Call Craft.elementIndex.sourceKey to get the source key on Js
         // So we can return specific file and not all the translates
         // Set criteria
-        $criteria = ElementTranslate::find();
-        $criteria->search = false;
-        $criteria->status = false;
-        $criteria->siteId = $siteId;
-        $criteria->source = array(
+        $query = ElementTranslate::find();
+        $query->search = false;
+        $query->status = false;
+        $query->siteId = $siteId;
+        $query->source = array(
             Craft::$app->path->getPluginsPath(),
             Craft::$app->path->getSiteTemplatesPath(),
         );
 
         // Get occurences
-        $occurences = Craft::$app->translate->get($criteria);
+        $occurences = Craft::$app->translate->get($query);
 
         // Re-order data
         $data = StringHelper::convertToUTF8('"'.Craft::t('enupal-translate','Original').'","'.Craft::t('enupal-translate','Translation')."\"\r\n");
