@@ -16,6 +16,8 @@
 
         options: null,
         $toHeader:null,
+        $menu: null,
+        $form: null,
 
         /**
          * The constructor.
@@ -23,25 +25,9 @@
         init: function()
         {
             this.addListener($('#save-elements-button'), 'activate', 'processAjaxCall');
-
-            var $siteMenu = $('.sitemenubtn:first').menubtn().data('menubtn').menu;
-
-            var $siteIdInput = $('input[name="siteId"]');
-
-            // Get translations download button
-            $downloadBtn = $('.translations-download-button');
-
-            // Init form with selected locale, if any
-            if(Craft.getLocalStorage('BaseElementIndex.siteId')) {
-                $siteIdInput.val(Craft.getLocalStorage('BaseElementIndex.siteId'));
-                $downloadBtn.attr('href', $downloadBtn.attr('href').replace(/siteId=.*$/, 'siteId=' + Craft.getLocalStorage('BaseElementIndex.siteId')));
-            }
-
-            // Change the siteId when on hidden values
-            $siteMenu.on('optionselect', function(ev) {
-                $siteIdInput.val($(ev.selectedOption).data('siteId'));
-                $downloadBtn.attr('href', $downloadBtn.attr('href').replace(/siteId=.*$/, 'siteId=' + $(ev.selectedOption).data('siteId')));
-            });
+            this.$form = $("#translate-ajax");
+            var settings = {};
+            this.$menu = new Garnish.MenuBtn("#enupal-menubtn", settings);
 
             // Upload file on click
             $('.translations-upload-button').click(function() {
@@ -51,6 +37,31 @@
             });
 
             Craft.elementIndex.on('afterAction', this.manageAfterAction);
+            this.$menu.on('optionSelect', this.manageMenu)
+        },
+
+        manageMenu: function(event)
+        {
+            var data = {
+                siteId: Craft.elementIndex.siteId,
+                sourceKey: Craft.elementIndex.sourceKey
+            };
+            var that = this;
+            Craft.postActionRequest('enupal-translate/translate/download', data, $.proxy(function(response, textStatus) {
+                if (textStatus === 'success') {
+                    if (response.success)
+                    {
+                        if (response.filePath){
+                            var $iframe = $('<iframe/>', {'src': Craft.getActionUrl('enupal-translate/translate/download-csv-file', {'filepath': response.filePath})}).hide();
+                            $("#translate-ajax").append($iframe);
+                            Craft.cp.displayNotice(Craft.t('enupal-translate', 'Download file!'));
+                        }
+                    }
+                }
+                else {
+                    Craft.cp.displayError(Craft.t('app', 'An unknown error occurred.'));
+                }
+            }, this));
         },
 
         manageAfterAction: function(action, params)
@@ -61,7 +72,7 @@
         processAjaxCall: function(event)
         {
             event.preventDefault();
-            var data = $("#translate-ajax").serialize();
+            var data = this.$form.serialize();
             Craft.postActionRequest('enupal-translate/translate/save', data, $.proxy(function(response, textStatus) {
                 if (textStatus === 'success') {
                     if (response.success)
