@@ -63,7 +63,7 @@ class Translate extends Plugin
             'subnav' => [
                 'translates' => [
                     "label" => Craft::t('enupal-translate',"Translates"),
-                    "url" => 'enupal-translate/translates'
+                    "url" => 'enupal-translate/index'
                 ],
                 'settings' => [
                     "label" => Craft::t('enupal-translate',"Settings"),
