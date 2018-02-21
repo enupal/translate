@@ -37,11 +37,14 @@ class Translate extends Plugin
         parent::init();
         self::$app = $this->get('app');
 
+        // Register our variables
         Event::on(
             CraftVariable::class,
-            CraftVariable::EVENT_DEFINE_COMPONENTS,
-            function(DefineComponentsEvent $event) {
-                $event->components['enupaltranslate'] = TranslateVariable::class;
+            CraftVariable::EVENT_INIT,
+            function (Event $event) {
+                /** @var CraftVariable $variable */
+                $variable = $event->sender;
+                $variable->set('enupaltranslate', TranslateVariable::class);
             }
         );
     }
