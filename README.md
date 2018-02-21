@@ -5,7 +5,7 @@
 
 # Enupal Translate Plugin for Craft CMS 3.x
 
-Translation management plugin for Craft CMS
+Translate your website templates and plugins into multiple languages. Bulk translate with Google Translate or Yandex.
 
 ## Features
 

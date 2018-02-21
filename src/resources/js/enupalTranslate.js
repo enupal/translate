@@ -28,12 +28,19 @@
             this.$form = $("#translate-ajax");
             var settings = {};
             this.$menu = new Garnish.MenuBtn("#enupal-menubtn", settings);
+            var $siteMenu = $('.sitemenubtn:first').menubtn().data('menubtn').menu;
+            var $siteIdInput = $('input[name="siteId"]');
 
             // Upload file on click
             $('.translations-upload-button').click(function() {
                 $('input[name="translations-upload"]').click().change(function() {
                     $(this).parent('form').submit();
                 });
+            });
+
+            // Change the siteId when on hidden values
+            $siteMenu.on('optionselect', function(ev) {
+                $siteIdInput.val($(ev.selectedOption).data('siteId'));
             });
 
             Craft.elementIndex.on('afterAction', this.manageAfterAction);

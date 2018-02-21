@@ -1,6 +1,6 @@
 {
   "name": "enupal/translate",
-  "description": "Translation management plugin for Craft CMS",
+  "description": "Translate your website templates and plugins into multiple languages. Bulk translate with Google Translate or Yandex.",
   "version": "1.0.2",
   "type": "craft-plugin",
   "autoload": {
