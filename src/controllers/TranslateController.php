@@ -11,6 +11,7 @@
 
 namespace enupal\translate\controllers;
 
+use craft\helpers\FileHelper;
 use craft\helpers\Path;
 use craft\helpers\StringHelper;
 use craft\web\Controller as BaseController;
@@ -40,6 +41,7 @@ class TranslateController extends BaseController
         $sources = [];
         $query = ElementTranslate::find();
         $query->status = null;
+        $pluginName = null;
         // Get params
         // Process Template Status
         if (strpos($sourceKey, $statusSubString) !== false) {
@@ -56,6 +58,7 @@ class TranslateController extends BaseController
         if (strpos($sourceKey, $pluginSubString) !== false) {
             $criteria = explode($pluginSubString, $sourceKey);
             $plugin = Craft::$app->plugins->getPlugin($criteria[1]);
+            $pluginName = $plugin->getHandle();
             $sources[] = $plugin->getBasePath() ?? '';
         }
         // All templates
@@ -82,7 +85,20 @@ class TranslateController extends BaseController
             $data .= StringHelper::convertToUTF8('"'.$element->original.'","'.$element->translation."\"\r\n");
         }
 
-        $file = Craft::$app->getPath()->getTempPath().DIRECTORY_SEPARATOR.StringHelper::toLowerCase('translations_'.$site->language.'.csv');
+        $info = Craft::$app->getInfo();
+        $systemName = FileHelper::sanitizeFilename(
+            $pluginName ?? $info->name,
+            [
+                'asciiOnly' => true,
+                'separator' => '_'
+            ]
+        );
+        $date = date('YmdHis');
+        $primarySite = Craft::$app->getSites()->getPrimarySite();
+        $sourceTo = $primarySite->language.'_to_'.$site->language;
+        $fileName = strtolower($systemName.'_translations_'.$sourceTo.'_'.$date);
+
+        $file = Craft::$app->getPath()->getTempPath().DIRECTORY_SEPARATOR.StringHelper::toLowerCase($fileName.'.csv');
         $fd = fopen ($file, "w");
         fputs($fd, $data);
         fclose($fd);

@@ -61,7 +61,7 @@
                         if (response.filePath){
                             var $iframe = $('<iframe/>', {'src': Craft.getActionUrl('enupal-translate/translate/download-csv-file', {'filepath': response.filePath})}).hide();
                             $("#translate-ajax").append($iframe);
-                            Craft.cp.displayNotice(Craft.t('enupal-translate', 'Download file!'));
+                            Craft.cp.displayNotice(Craft.t('enupal-translate', 'Downloading file'));
                         }
                         else {
                             Craft.cp.displayError(Craft.t('app', 'There was an error when generating the file'));
