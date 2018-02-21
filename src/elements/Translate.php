@@ -218,14 +218,14 @@ class Translate extends Element
         $options = [
             'recursive' => true,
             'only' => ['*.html','*.twig','*.js','*.json','*.atom','*.rss'],
-            #'except' => 'vendor|node_modules'
+            'except' => ['vendor/', 'node_modules/']
         ];
         $templates = FileHelper::findFiles(Craft::$app->path->getSiteTemplatesPath(), $options);
         foreach ($templates as $template) {
             // If matches, get template name
             $fileName = basename($template);
             // Add template source
-            $templateSources['templates:'.$fileName] = [
+            $templateSources['templates2:'.$fileName] = [
                 'label' => $fileName,
                 'key' => 'templates:'.$template,
                 'criteria' => [
@@ -240,7 +240,7 @@ class Translate extends Element
 
         $sources[] = [
             'label'    => Craft::t('enupal-translate', 'Templates'),
-            'key'      => 'templates',
+            'key'      => 'all-Templates:',
             'criteria' => [
                 'source' => [
                     Craft::$app->path->getSiteTemplatesPath()

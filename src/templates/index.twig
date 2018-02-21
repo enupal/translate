@@ -18,12 +18,12 @@
 {% block actionButton %}
     <div class="btngroup">
         <input id="save-elements-button" type="submit" class="btn submit" value="{{ 'Save'|t('app') }}">
-        {# IF we need a submenu
-        <div class="btn submit menubtn"></div>
+        {# IF we need a submenu #}
+        <div id="enupal-menubtn" class="btn submit menubtn"></div>
         <div class="menu">
             <ul>
                 <li>
-                    <a class="formsubmit translations-download-button"
+                    <a id="donwload-button" class="formsubmit translations-download-button"
                        data-action="enupal-translate/translate/download"
                        data-siteId="{{ elementInstance.siteId }}">
                         {{ "Download"|t('enupal-translate') }}
@@ -31,10 +31,9 @@
                 </li>
             </ul>
         </div>
-        #}
     </div>
 
-    {# TODO move this to settings
+    {# TODO move this to settings or sidebar
     <div class="buttons">
         <form method="post" enctype="multipart/form-data">
             {{ csrfInput() }}
@@ -54,14 +53,11 @@
         <input type="hidden" name="siteId" value="{{ elementInstance.siteId }}">
         
         {{ parent() }}
-        <div class="buttons hidden">
-            <a class="btn submit translations-download-button" href="{{ actionUrl('enupal-translate/translate/download', {'siteId': elementInstance.siteId }) }}">{{ "Download"|t }}</a>
-        </div>
     </form>
 {% endblock %}
 
 {% js %}
     $(document).ready(function() {
-    new EnupalTranslate();
+        new EnupalTranslate();
     });
 {% endjs %}

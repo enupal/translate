@@ -11,45 +11,108 @@
 
 namespace enupal\translate\controllers;
 
+use craft\helpers\Path;
+use craft\helpers\StringHelper;
 use craft\web\Controller as BaseController;
 use Craft;
+use craft\web\Response;
 use enupal\translate\Translate;
 use enupal\translate\elements\Translate as ElementTranslate;
+use yii\web\NotFoundHttpException;
 
 class TranslateController extends BaseController
 {
     /**
      * Download translations.
+     *
+     * @throws \yii\base\Exception
      */
     public function actionDownload()
     {
-        // Get params
+        $this->requireAcceptsJson();
         $siteId = Craft::$app->request->getRequiredBodyParam('siteId');
-        $site = Craft::$app->getSites()->getSiteById($siteId);
+        $sourceKey = Craft::$app->request->getRequiredBodyParam('sourceKey');
+        $statusSubString = 'status:';
+        $templateSubString = 'templates/templates:';
+        $pluginSubString = 'plugins/plugins:';
+        $allTemplatesSubString = 'all-Templates:';
 
-        // Call Craft.elementIndex.sourceKey to get the source key on Js
-        // So we can return specific file and not all the translates
-        // Set criteria
+        $sources = [];
         $query = ElementTranslate::find();
+        $query->status = null;
+        // Get params
+        // Process Template Status
+        if (strpos($sourceKey, $statusSubString) !== false) {
+            $criteria = explode($statusSubString, $sourceKey);
+            $query->status = $criteria[1] ?? null;
+            $sources[] = Craft::$app->path->getSiteTemplatesPath();
+        }
+        // Process Templates Status
+        if (strpos($sourceKey, $templateSubString) !== false) {
+            $criteria = explode($templateSubString, $sourceKey);
+            $sources[] = $criteria[1] ?? Craft::$app->path->getSiteTemplatesPath();
+        }
+        // Process Plugin Status
+        if (strpos($sourceKey, $pluginSubString) !== false) {
+            $criteria = explode($pluginSubString, $sourceKey);
+            $plugin = Craft::$app->plugins->getPlugin($criteria[1]);
+            $sources[] = $plugin->getBasePath() ?? '';
+        }
+        // All templates
+        if (strpos($sourceKey, $allTemplatesSubString) !== false) {
+            $sources[] = Craft::$app->path->getSiteTemplatesPath();
+        }
+
+        if (empty($sources)){
+            return $this->asJson(['success'=> false]);
+        }
+
+        $site = Craft::$app->getSites()->getSiteById($siteId);
+        // @todo add support for search
         $query->search = false;
-        $query->status = false;
         $query->siteId = $siteId;
-        $query->source = array(
-            Craft::$app->path->getPluginsPath(),
-            Craft::$app->path->getSiteTemplatesPath(),
-        );
+        $query->source = $sources;
 
         // Get occurences
-        $occurences = Craft::$app->translate->get($query);
+        $occurences = Translate::$app->translate->get($query);
 
         // Re-order data
-        $data = StringHelper::convertToUTF8('"'.Craft::t('enupal-translate','Original').'","'.Craft::t('enupal-translate','Translation')."\"\r\n");
+        $data = StringHelper::convertToUTF8('"'.Craft::t('enupal-translate','Source {language}',['language'=> $site->language]).'","'.Craft::t('enupal-translate','Translation')."\"\r\n");
         foreach ($occurences as $element) {
             $data .= StringHelper::convertToUTF8('"'.$element->original.'","'.$element->translation."\"\r\n");
         }
 
+        $file = Craft::$app->getPath()->getTempPath().DIRECTORY_SEPARATOR.StringHelper::toLowerCase('translations_'.$site->language.'.csv');
+        $fd = fopen ($file, "w");
+        fputs($fd, $data);
+        fclose($fd);
+
         // Download the file
-        Craft::$app->request->sendFile('translations_'.$locale.'.csv', $data, array('forceDownload' => true, 'mimeType' => 'text/csv'));
+        $response = [
+            'success'=> true,
+            'filePath' => $file
+        ];
+
+        return $this->asJson($response);
+    }
+
+    /**
+     * Returns Translate csv file
+     *
+     * @return Response
+     * @throws ForbiddenHttpException if the user doesn't have access to the DB Backup utility
+     * @throws NotFoundHttpException if the requested backup cannot be found
+     * @throws \yii\web\BadRequestHttpException
+     */
+    public function actionDownloadCsvFile(): Response
+    {
+        $filePath = Craft::$app->getRequest()->getRequiredQueryParam('filepath');
+
+        if (!is_file($filePath) || !Path::ensurePathIsContained($filePath)) {
+            throw new NotFoundHttpException(Craft::t('enupal-translate', 'Invalid Translate File path'));
+        }
+
+        return Craft::$app->getResponse()->sendFile($filePath);
     }
 
     /**

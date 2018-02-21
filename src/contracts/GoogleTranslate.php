@@ -28,12 +28,17 @@ class GoogleTranslate
     {
         $result = false;
         try {
-            $transBlock = implode('||', $text);
+            $transBlock = implode(' || ', $text);
             $tr = new TranslateClient($from, $to);
             $results = $tr->translate($transBlock);
-            $result = explode('||',$results);
+            $result = explode(' || ',$results);
             // removes white spaces
             $result=array_map('trim',$result);
+            // something went wrong
+            if (count($result) != count($text)){
+                Craft::error('The array sizes does not match', __METHOD__);
+                $result = false;
+            }
         } catch (\Exception $e) {
             //Handle exception
             Craft::error($e->getMessage(), __METHOD__);
