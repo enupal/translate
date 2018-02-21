@@ -87,7 +87,7 @@ class Translate extends Element
     public static function statuses(): array
     {
         return [
-            self::TRANSLATED => Craft::t('enupal-translate','Done'),
+            self::TRANSLATED => Craft::t('enupal-translate','Translated'),
             self::PENDING => Craft::t('enupal-translate','Pending'),
         ];
     }
