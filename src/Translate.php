@@ -46,11 +46,6 @@ class Translate extends Plugin
         );
     }
 
-    protected function afterInstall()
-    {
-        //self::$app->translates->installDefaultValues();
-    }
-
     protected function createSettingsModel()
     {
         return new Settings();
