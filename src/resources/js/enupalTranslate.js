@@ -38,6 +38,11 @@
                 });
             });
 
+            // Init the form
+            if(Craft.getLocalStorage('BaseElementIndex.siteId')) {
+                $siteIdInput.val(Craft.getLocalStorage('BaseElementIndex.siteId'));
+            }
+
             // Change the siteId when on hidden values
             $siteMenu.on('optionselect', function(ev) {
                 $siteIdInput.val($(ev.selectedOption).data('siteId'));
