@@ -14,7 +14,7 @@ use craft\base\Model;
 
 /**
  * @author    Enupal
- * @package   Snapshot
+ * @package   Translate
  * @since     1.0.0
  */
 class Settings extends Model
