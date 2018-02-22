@@ -58,7 +58,7 @@
                 siteId: Craft.elementIndex.siteId,
                 sourceKey: Craft.elementIndex.sourceKey
             };
-            var that = this;
+            
             Craft.postActionRequest('enupal-translate/translate/download', data, $.proxy(function(response, textStatus) {
                 if (textStatus === 'success') {
                     if (response.success)
