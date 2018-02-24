@@ -1,8 +1,8 @@
 <?php
 
 return array (
-	'Settings saved.' => 'Guarda la configuración.',
-	'Source {language}' => 'Fuente {idioma}',
+	'Settings saved.' => 'Ajustes guardados.',
+	'Source {language}' => 'Fuente {language}',
 	'Translation' => 'Traducción',
 	'Invalid Translate File path' => 'Ruta de archivo de traducción no válida',
 	'The translations have been updated.' => 'Las traducciones han sido actualizadas',
@@ -24,9 +24,8 @@ return array (
 	'Please select a different source' => 'Seleccione una fuente diferente',
 	'An unknown error occurred.' => 'Un error desconocido ocurrió.',
 	'Translations saved' => 'Traducciones guardadas',
-	'..' => '..',
 	'Something went wrong while saving your translations: ' => 'Algo salió mal al guardar sus traducciones:',
-	'{total} {message} saved' => '{total} {mensaje} guardado',
+	'{total} {message} saved' => '{total} {message} guardado',
 	'Save' => 'Guardar',
 	'Translate' => 'Traducir',
 	'Download' => 'Descargar',
@@ -45,4 +44,5 @@ return array (
 	'Settings' => 'Configuraciones',
 	'sel' => 'sel',
 	'Allows Enupal Translate create the `translations` folder inside the plugin path and check translated strings from that folder' => 'Permite a Enupal Translate crear la carpeta `translations` dentro de la ruta del complemento y verificar las cadenas traducidas desde esa carpeta',
+	'Allows Enupal Translate create the `translations` folder inside the plugin path and check translated strings from the plugin handle as <a href=\'https://github.com/craftcms/docs/blob/v3/en/updating-plugins.md#translations\'>category</a>' => 'Permite a Enupal Translate crear la carpeta `translations` dentro de la ruta del complemento y comprobar las cadenas traducidas desde el manejador del complemento como <a href = \'https: //github.com/craftcms/docs/blob/v3/en/updating-plugins.md #translations \'> categoría </a>',
 );
