@@ -80,7 +80,8 @@ class Translate extends Component
     public function set($locale, array $translations)
     {
         // Determine locale's translation destination file
-        $file = Craft::getAlias('@enupal/translate/translations/'.$locale.'/enupal-translate.php');
+        $sitePath = Craft::$app->getPath()->getSiteTranslationsPath();
+        $file = $sitePath.DIRECTORY_SEPARATOR.$locale.DIRECTORY_SEPARATOR.'site.php';
 
         // Get current translation
         if ($current = @include($file)) {
@@ -189,7 +190,7 @@ class Translate extends Component
                 foreach ($matches[$pos] as $original) {
                     // Apply the Craft Translate
                     $site = Craft::$app->getSites()->getSiteById($query->siteId);
-                    $translation = Craft::t('enupal-translate', $original, null, $site->language);
+                    $translation = Craft::t('site', $original, null, $site->language);
 
                     $view = Craft::$app->getView();
                     $elementId = ElementHelper::createSlug($original);
