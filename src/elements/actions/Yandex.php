@@ -69,7 +69,7 @@ class Yandex extends ElementAction
         // Save to translation file
         $response = TranslatePlugin::$app->translate->set($site->language, $enupalTranslations);
 
-        $message = Craft::t('enupal-translate','{total} Translations have been saved successfully.', ['total' => count($enupalTranslations)]);
+        $message = TranslatePlugin::$app->translate->getSuccessMessage(count($enupalTranslations));
 
         if (!$response) {
             $message = Craft::t('enupal-translate','Something went wrong');

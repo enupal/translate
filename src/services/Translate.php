@@ -306,4 +306,15 @@ class Translate extends Component
 
         return $plugin->getSettings();
     }
+
+    /**
+     * @param $total int
+     * @return string
+     */
+    public function getSuccessMessage($total = 0)
+    {
+        $message = $total>1 ? 'Translations' : 'Translation';
+
+        return  Craft::t('enupal-translate','{total} {message} saved', ['total' => $total, 'message' => $message]);;
+    }
 }

@@ -34,7 +34,7 @@ class Settings extends Model
     /**
      * @var bool
      */
-    public $enableFreeGoogleApi = 1;
+    public $enableFreeGoogleApi = 0;
 
     /**
      * @var bool

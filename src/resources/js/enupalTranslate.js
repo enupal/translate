@@ -95,7 +95,7 @@
                 if (textStatus === 'success') {
                     if (response.success)
                     {
-                        Craft.cp.displayNotice(Craft.t('enupal-translate', 'Translations have been saved successfully.'));
+                        Craft.cp.displayNotice(Craft.t('enupal-translate', 'Translations saved'));
                         Craft.elementIndex.updateElements();
                     }
                 }
