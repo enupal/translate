@@ -1,0 +1,63 @@
+{#
+/**
+ * Translate plugin for Craft CMS 3.x
+ *
+ * Translation management plugin for Craft CMS
+ *
+ * @link      https://enupal.com
+ * @copyright Copyright (c) 2018 Enupal
+ */
+#}
+
+{% extends "_layouts/elementindex" %}
+{% set title = "Translate"|t %}
+{% set elementType = 'enupal\\translate\\elements\\Translate' %}
+
+{% do view.registerAssetBundle("enupal\\translate\\assetbundles\\TranslateAsset") %}
+
+{% block actionButton %}
+    <div class="btngroup">
+        <input id="save-elements-button" type="submit" class="btn submit" value="{{ 'Save'|t('app') }}">
+        {# IF we need a submenu #}
+        <div id="enupal-menubtn" class="btn submit menubtn"></div>
+        <div class="menu">
+            <ul>
+                <li>
+                    <a id="donwload-button" class="formsubmit translations-download-button"
+                       data-action="enupal-translate/translate/download"
+                       data-siteId="{{ elementInstance.siteId }}">
+                        {{ "Download"|t('enupal-translate') }}
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    {# TODO move this to settings or sidebar
+    <div class="buttons">
+        <form method="post" enctype="multipart/form-data">
+            {{ csrfInput() }}
+            <input type="hidden" name="action" value="enupal-translate/translate/upload">
+            <input type="hidden" name="siteId" value="{{ elementInstance.siteId }}">
+            <input type="file" name="translations-upload" style="display: none" />
+        </form>
+        <div class="btn submit translations-upload-button" data-icon="upload" style="position: relative; overflow: hidden;" role="button">{{ "Upload file"|t }}</div>
+    </div>
+    #}
+{% endblock %}
+
+{% block content %}
+    <form method="post" id="translate-ajax" accept-charset="utf-8">
+        {{ csrfInput() }}
+        <input type="hidden" name="action" value="enupal-translate/translate/save">
+        <input type="hidden" name="siteId" value="{{ elementInstance.siteId }}">
+        
+        {{ parent() }}
+    </form>
+{% endblock %}
+
+{% js %}
+    $(document).ready(function() {
+        new EnupalTranslate();
+    });
+{% endjs %}
