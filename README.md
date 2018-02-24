@@ -1,11 +1,11 @@
 <p align="center">
 	<a href="https://enupal.com/en/craft-plugins/enupal-translate/docs/" target="_blank">
-	<img width="312" height="312" src="https://enupal.com/assets/docs/translate-icon.svg" alt="Enupal Translate"></a>
+	<img width="212" height="212" src="https://enupal.com/assets/docs/translate-icon.svg" alt="Enupal Translate"></a>
 </p>
 
 # Enupal Translate Plugin for Craft CMS 3.x
 
-Translate your website templates and plugins into multiple languages. Bulk translate with Google Translate or Yandex.
+Translate your website templates and plugins into multiple languages. Bulk translation with Google Translate or Yandex.
 
 ## Features
 
