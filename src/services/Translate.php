@@ -340,4 +340,25 @@ class Translate extends Component
 
         return $file;
     }
+
+    /**
+     * @param $query
+     *
+     * @return null|string
+     */
+    public function getPluginPath($query, $language)
+    {
+        $settings = TranslatePlugin::$app->settings->getSettings();
+        $translatePath = null;
+        // Process Plugin Status
+        if ($query->pluginHandle && $settings->createPluginTranslationFolder) {
+            $plugin = Craft::$app->plugins->getPlugin($query->pluginHandle);
+            $translatePath = $plugin->getBasePath() ?? null;
+            if ($translatePath){
+                $translatePath = $translatePath.DIRECTORY_SEPARATOR.'translations'.DIRECTORY_SEPARATOR.$language.DIRECTORY_SEPARATOR.$query->pluginHandle.'.php';
+            }
+        }
+
+        return $translatePath;
+    }
 }

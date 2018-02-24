@@ -66,8 +66,10 @@ class Yandex extends ElementAction
             $enupalTranslations[$element->original] = $translations[$pos];
             $pos++;
         }
+
+        $translatePluginPath = TranslatePlugin::$app->translate->getPluginPath($query, $site->language) ?? null;
         // Save to translation file
-        $response = TranslatePlugin::$app->translate->set($site->language, $enupalTranslations);
+        $response = TranslatePlugin::$app->translate->set($site->language, $enupalTranslations, $translatePluginPath);
 
         $message = TranslatePlugin::$app->translate->getSuccessMessage(count($enupalTranslations));
 
