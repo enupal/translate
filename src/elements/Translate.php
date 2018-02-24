@@ -206,6 +206,7 @@ class Translate extends Element
                 'label' => $plugin->name,
                 'key' => 'plugins:'.$plugin->getHandle(),
                 'criteria' => [
+                    'pluginHandle' => $plugin->getHandle(),
                     'source' => [
                         $plugin->getBasePath()
                     ],

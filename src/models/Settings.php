@@ -45,4 +45,9 @@ class Settings extends Model
      * @var string
      */
     public $googleApi = '';
+
+    /**
+     * @var string
+     */
+    public $createPluginTranslationFolder = 0;
 }

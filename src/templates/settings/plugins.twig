@@ -1,0 +1,49 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Translate plugin for Craft CMS 3.x
+ *
+ * Translation management plugin for Craft CMS
+ *
+ * @link      https://enupal.com
+ * @copyright Copyright (c) 2018 Enupal
+ */
+#}
+{% extends "enupal-translate/_layouts/settings" %}
+{% import "_includes/forms" as forms %}
+
+{% set settings = craft.enupaltranslate.getSettings() %}
+{% set fullPageForm = true %}
+{% set saveShortcutRedirect = 'enupal-translate/settings/general' %}
+
+{% set saveButton %}
+    <div class="buttons">
+        <input class="btn submit" type="submit" value="{{ 'Save'|t('app') }}">
+    </div>
+{% endset %}
+
+{% set content %}
+
+    <input type="hidden" name="action" value="enupal-translate/settings/save-settings">
+
+    <div id="settings-cp">
+
+        {% namespace 'settings' %}
+            {{ forms.field({
+                label: "Plugins settings"|t('enupal-translate')|upper
+            }, null) }}
+            <hr>
+            {{ forms.lightswitchField({
+                label: "Create Plugin's translation folder"|t('enupal-translate'),
+                instructions: "Allows Enupal Translate create the `translations` folder inside the plugin path and check translated strings from that folder"|t('enupal-translate'),
+                id: 'createPluginTranslationFolder',
+                name: 'createPluginTranslationFolder',
+                on: settings.createPluginTranslationFolder,
+                onLabel: "On"|t('enupal-translate'),
+                offLabel: "Off"|t('enupal-translate')
+            }) }}
+
+        {% endnamespace %}
+    </div>
+
+{% endset %}

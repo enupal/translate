@@ -21,6 +21,7 @@ class TranslateQuery extends ElementQuery
     public $id;
     public $source;
     public $translateStatus;
+    public $pluginHandle;
 
     /**
      * @inheritdoc

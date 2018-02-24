@@ -90,7 +90,8 @@
         processAjaxCall: function(event)
         {
             event.preventDefault();
-            var data = this.$form.serialize();
+            var data = this.$form.serializeArray();
+            data.push({name: 'sourceKey', value: Craft.elementIndex.sourceKey});
             Craft.postActionRequest('enupal-translate/translate/save', data, $.proxy(function(response, textStatus) {
                 if (textStatus === 'success') {
                     if (response.success)

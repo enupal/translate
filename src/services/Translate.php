@@ -17,6 +17,7 @@ use enupal\translate\contracts\GoogleCloudTranslate;
 use enupal\translate\contracts\GoogleTranslate;
 use enupal\translate\contracts\Yandex;
 use enupal\translate\elements\Translate as TranslateElement;
+use enupal\translate\Translate as TranslatePlugin;
 use Craft;
 
 class Translate extends Component
@@ -72,16 +73,15 @@ class Translate extends Component
      *
      * @param string $locale
      * @param array  $translations
+     * @param string $translationPath
      *
-     * @throws Exception if unable to write to file
-     * @throws \yii\base\ErrorException
-     * @throws \Exception
+     * @return bool
+     * @throws \Exception if unable to write to file
      */
-    public function set($locale, array $translations)
+    public function set($locale, array $translations, $translationPath = null)
     {
         // Determine locale's translation destination file
-        $sitePath = Craft::$app->getPath()->getSiteTranslationsPath();
-        $file = $sitePath.DIRECTORY_SEPARATOR.$locale.DIRECTORY_SEPARATOR.'site.php';
+        $file = $translationPath ?? $this->getSitePath($locale);
 
         // Get current translation
         if ($current = @include($file)) {
@@ -116,14 +116,21 @@ class Translate extends Component
      * @param ElementQueryInterface $query
      *
      * @return array
+     * @throws \Twig_Error_Loader
+     * @throws \yii\base\Exception
      */
-    public function get(ElementQueryInterface $query)
+    public function get(ElementQueryInterface $query, $category = 'site')
     {
         if (!is_array($query->source)) {
             $query->source = [$query->source];
         }
 
         $translations = [];
+
+        $settings = TranslatePlugin::$app->settings->getSettings();
+        if ($query->pluginHandle && $settings->createPluginTranslationFolder){
+            $category = $query->pluginHandle;
+        }
 
         // Loop through paths
         foreach ($query->source as $path) {
@@ -143,7 +150,7 @@ class Translate extends Component
                 foreach ($files as $file) {
 
                     // Parse file
-                    $elements = $this->_processFile($path, $file, $query);
+                    $elements = $this->_processFile($path, $file, $query, $category);
 
                     // Collect in array
                     $translations = array_merge($translations, $elements);
@@ -151,7 +158,7 @@ class Translate extends Component
             } elseif (file_exists($path)) {
 
                 // Parse file
-                $elements = $this->_processFile($path, $path, $query);
+                $elements = $this->_processFile($path, $path, $query, $category);
 
                 // Collect in array
                 $translations = array_merge($translations, $elements);
@@ -167,12 +174,13 @@ class Translate extends Component
      * @param string                $path
      * @param string                $file
      * @param ElementQueryInterface $query
+     * @param string                $category
      *
      * @return array
      * @throws \Twig_Error_Loader
      * @throws \yii\base\Exception
      */
-    private function _processFile($path, $file, ElementQueryInterface $query)
+    private function _processFile($path, $file, ElementQueryInterface $query, $category)
     {
         $translations = array();
         $contents     = file_get_contents($file);
@@ -190,7 +198,7 @@ class Translate extends Component
                 foreach ($matches[$pos] as $original) {
                     // Apply the Craft Translate
                     $site = Craft::$app->getSites()->getSiteById($query->siteId);
-                    $translation = Craft::t('site', $original, null, $site->language);
+                    $translation = Craft::t($category, $original, null, $site->language);
 
                     $view = Craft::$app->getView();
                     $elementId = ElementHelper::createSlug($original);
@@ -317,5 +325,19 @@ class Translate extends Component
         $message = $total>1 ? 'Translations' : 'Translation';
 
         return  Craft::t('enupal-translate','{total} {message} saved', ['total' => $total, 'message' => $message]);;
+    }
+
+    /**
+     * @param $locale
+     *
+     * @return string
+     * @throws \yii\base\Exception
+     */
+    public function getSitePath($locale)
+    {
+        $sitePath = Craft::$app->getPath()->getSiteTranslationsPath();
+        $file = $sitePath.DIRECTORY_SEPARATOR.$locale.DIRECTORY_SEPARATOR.'site.php';
+
+        return $file;
     }
 }

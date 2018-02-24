@@ -60,6 +60,10 @@ class TranslateController extends BaseController
             $plugin = Craft::$app->plugins->getPlugin($criteria[1]);
             $pluginName = $plugin->getHandle();
             $sources[] = $plugin->getBasePath() ?? '';
+            $settings = Translate::$app->settings->getSettings();
+            if ($settings->createPluginTranslationFolder){
+                $query->pluginHandle = $plugin->getHandle();
+            }
         }
         // All templates
         if (strpos($sourceKey, $allTemplatesSubString) !== false) {
@@ -179,12 +183,27 @@ class TranslateController extends BaseController
             'errors' => []
         ];
         $siteId = Craft::$app->request->getRequiredBodyParam('siteId');
+        $sourceKey = Craft::$app->request->getRequiredBodyParam('sourceKey');
         $site = Craft::$app->getSites()->getSiteById($siteId);
+
+        $pluginSubString = 'plugins/plugins:';
+        $translatePath = null;
+        $settings = Translate::$app->settings->getSettings();
+        // Process Plugin Status
+        if (strpos($sourceKey, $pluginSubString) !== false && $settings->createPluginTranslationFolder) {
+            $criteria = explode($pluginSubString, $sourceKey);
+            $plugin = Craft::$app->plugins->getPlugin($criteria[1]);
+            $pluginHandle = $plugin->getHandle();
+            $translatePath = $plugin->getBasePath() ?? null;
+            if ($translatePath && $pluginHandle){
+                $translatePath = $translatePath.DIRECTORY_SEPARATOR.'translations'.DIRECTORY_SEPARATOR.$site->language.DIRECTORY_SEPARATOR.$pluginHandle.'.php';
+            }
+        }
 
         $translations = Craft::$app->request->getRequiredBodyParam('translation');
 
         // Save to translation file
-        Translate::$app->translate->set($site->language, $translations);
+        Translate::$app->translate->set($site->language, $translations, $translatePath);
 
         // Redirect back to page
         return $this->asJson($response);
