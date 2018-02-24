@@ -2,7 +2,7 @@
 /**
  * Translate plugin for Craft CMS 3.x
  *
- * Translation management plugin for Craft CMS
+ * Translate your website templates and plugins into multiple languages. Bulk translation with Google Translate or Yandex.
  *
  * @link      https://enupal.com
  * @copyright Copyright (c) 2018 Enupal
