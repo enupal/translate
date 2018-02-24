@@ -15,11 +15,25 @@ Translate your website templates and plugins into multiple languages. Bulk trans
 *  [Google Translate](https://cloud.google.com/translate/?hl=es)
 *  Manually
 
+Translating your static texts has never been so easy:
+
+![Screenshot](resources/screenshots/enupal-translate-final-1.gif)
+
 ### Download translations:
+
+Download your translations as CSV file from the top right dropdown menu.
 
 * For all templates
 * Specific templates
 * Plugins
+
+![Screenshot](resources/screenshots/6-enupal-translate.png)
+
+### Plugins Developers!
+
+Enupal translate will generate all the translation in your Plugin Path. Internationalize your plugins to reach more users in different countries!
+
+![Screenshot](resources/screenshots/7-enupal-translate.png)
 
 ## Documentation
 
