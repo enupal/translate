@@ -1,7 +1,7 @@
 {
   "name": "enupal/translate",
   "description": "Translate your website templates and plugins into multiple languages. Bulk translation with Google Translate or Yandex.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "craft-plugin",
   "autoload": {
     "psr-4": {
@@ -10,6 +10,7 @@
   },
   "minimum-stability": "dev",
   "require": {
+    "craftcms/cms": "^3.0.0-RC1",
     "beeyev/yandex-translate": "dev-master",
     "stichoza/google-translate-php": "3.2.13",
     "viniciusgava/google-translate-api": "2.0.2"
