@@ -1,7 +1,7 @@
 {
   "name": "enupal/translate",
   "description": "Translate your website templates and plugins into multiple languages. Bulk translation with Google Translate or Yandex.",
-  "version": "1.0.2",
+  "version": "1.0.0",
   "type": "craft-plugin",
   "autoload": {
     "psr-4": {
@@ -11,13 +11,13 @@
   "minimum-stability": "dev",
   "require": {
     "beeyev/yandex-translate": "dev-master",
-    "stichoza/google-translate-php": "~3.2",
-    "viniciusgava/google-translate-api": "2.0.1"
+    "stichoza/google-translate-php": "3.2.13",
+    "viniciusgava/google-translate-api": "2.0.2"
   },
   "authors": [
     {
       "name": "Enupal",
-      "homepage": "http://enupal.com/"
+      "homepage": "http://enupal.com/en"
     }
   ],
   "support": {
@@ -28,10 +28,8 @@
   "extra": {
     "name": "Enupal Translate",
     "handle": "enupal-translate",
-    "version": "1.0.0",
     "schemaVersion": "1.0.0",
     "hasSettings": true,
-    "hasCpSection": true,
     "developer": "Enupal",
     "class": "enupal\\translate\\Translate",
     "components": {
