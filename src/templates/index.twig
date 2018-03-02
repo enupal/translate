@@ -10,7 +10,8 @@
 #}
 
 {% extends "_layouts/elementindex" %}
-{% set title = "Translate"|t %}
+
+{% set title = "Translate to"|t('enupal-translate') %}
 {% set elementType = 'enupal\\translate\\elements\\Translate' %}
 
 {% do view.registerAssetBundle("enupal\\translate\\assetbundles\\TranslateAsset") %}
