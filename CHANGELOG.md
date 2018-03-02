@@ -1,5 +1,9 @@
 # Enupal Translate Changelog
 
+## 1.0.2 - 2018-03-02
+### Improved
+- Improved UI labels
+
 ## 1.0.1 - 2018-02-25
 ### Improved
 - Improved code conventions 
