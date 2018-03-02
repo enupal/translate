@@ -60,7 +60,7 @@ class Translate extends Plugin
         return array_merge($parent, [
             'subnav' => [
                 'translates' => [
-                    "label" => Craft::t('enupal-translate',"Translates"),
+                    "label" => Craft::t('enupal-translate',"Translations"),
                     "url" => 'enupal-translate/index'
                 ],
                 'settings' => [

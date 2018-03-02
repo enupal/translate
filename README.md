@@ -29,7 +29,7 @@ Download your translations as CSV file from the top right dropdown menu.
 
 ![Screenshot](resources/screenshots/6-enupal-translate.png)
 
-### Plugins Developers!
+### Plugin Developers!
 
 Enupal translate will generate all the translation files in your Plugin Path. Internationalize your plugins to reach more users in different countries!
 
