@@ -1,5 +1,9 @@
 # Enupal Translate Changelog
 
+## 1.0.4 - 2018.03.14
+### Fixed
+- Fixed composer error
+
 ## 1.0.3 - 2018.03.02
 ### Fixed
 - Fixed composer error
