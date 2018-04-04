@@ -115,6 +115,8 @@ class Translate extends Component
      *
      * @param ElementQueryInterface $query
      *
+     * @param string                $category
+     *
      * @return array
      * @throws \Twig_Error_Loader
      * @throws \yii\base\Exception
@@ -344,6 +346,7 @@ class Translate extends Component
     /**
      * @param $query
      *
+     * @param $language
      * @return null|string
      */
     public function getPluginPath($query, $language)

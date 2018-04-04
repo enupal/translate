@@ -13,6 +13,7 @@ namespace enupal\translate\elements;
 use Craft;
 use craft\base\Element;
 use craft\elements\db\ElementQueryInterface;
+use craft\web\ErrorHandler;
 use enupal\translate\elements\actions\GoogleCloudTranslate;
 use enupal\translate\elements\actions\GoogleTranslate;
 use enupal\translate\elements\actions\Yandex;
@@ -54,9 +55,7 @@ class Translate extends Element
     /** @noinspection PhpInconsistentReturnPointsInspection */
     public function __toString()
     {
-        try
-        {
-            // @todo - For some reason the Title returns null possible Craft3 bug
+        try{
             return $this->original;
         } catch (\Exception $e) {
             ErrorHandler::convertExceptionToError($e);
