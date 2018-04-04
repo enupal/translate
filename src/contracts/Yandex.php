@@ -29,9 +29,11 @@ class Yandex
 
     /**
      * Translate message
-     * @param string|array $text The text to translate.
-     * @param string $language The translation language.
-     * @return []
+     *
+     * @param string|array $text     The text to translate.
+     * @param string       $language The translation language.
+     *
+     * @return bool|object []
      */
     public function translate($text, $language)
     {

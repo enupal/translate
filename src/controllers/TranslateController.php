@@ -120,7 +120,7 @@ class TranslateController extends BaseController
      * Returns Translate csv file
      *
      * @return Response
-     * @throws ForbiddenHttpException if the user doesn't have access to the DB Backup utility
+     * @throws ForbiddenHttpException if the user doesn't have access to the DB Paypal utility
      * @throws NotFoundHttpException if the requested backup cannot be found
      * @throws \yii\web\BadRequestHttpException
      */
