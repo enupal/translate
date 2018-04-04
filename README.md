@@ -1,6 +1,7 @@
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/enupal/translate/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/enupal/translate/?branch=master) [![Code Coverage](https://scrutinizer-ci.com/g/enupal/translate/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/enupal/translate/?branch=master) [![Build Status](https://scrutinizer-ci.com/g/enupal/translate/badges/build.png?b=master)](https://scrutinizer-ci.com/g/enupal/translate/build-status/master) [![Code Intelligence Status](https://scrutinizer-ci.com/g/enupal/translate/badges/code-intelligence.svg?b=master)](https://scrutinizer-ci.com/code-intelligence)
 
 <p align="center">
+  <img src="https://scrutinizer-ci.com/g/enupal/translate/badges/quality-score.png?b=master"> <img src="https://scrutinizer-ci.com/g/enupal/translate/badges/coverage.png?b=master">
 	<a href="https://enupal.com/en/craft-plugins/enupal-translate/docs/" target="_blank">
 	<img width="212" height="212" src="https://enupal.com/assets/docs/translate-icon.svg" alt="Enupal Translate"></a>
 </p>
