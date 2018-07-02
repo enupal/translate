@@ -44,9 +44,9 @@ https://enupal.com/en/craft-plugins/enupal-translate/docs/
 
 ## Enupal Translate Support
 
-Via Email:
+* Send us a note at: support@enupal.com
 
-Send us a note at: info@enupal.com
+* Create an [issue](https://github.com/enupal/translate/issues) on Github
 
 ------------------------------------------------------------
 
