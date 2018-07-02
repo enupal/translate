@@ -36,7 +36,7 @@ class TranslateController extends BaseController
         $statusSubString = 'status:';
         $templateSubString = 'templates/templates:';
         $pluginSubString = 'plugins/plugins:';
-        $allTemplatesSubString = 'all-Templates:';
+        $allTemplatesSubString = 'all-templates:';
 
         $sources = [];
         $query = ElementTranslate::find();

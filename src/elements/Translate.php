@@ -216,17 +216,40 @@ class Translate extends Element
         // Get template sources
         $templateSources = array();
         $options = [
-            'recursive' => true,
+            'recursive' => false,
             'only' => ['*.html','*.twig','*.js','*.json','*.atom','*.rss'],
             'except' => ['vendor/', 'node_modules/']
         ];
         $templates = FileHelper::findFiles(Craft::$app->path->getSiteTemplatesPath(), $options);
+
         foreach ($templates as $template) {
             // If matches, get template name
             $fileName = basename($template);
             // Add template source
-            $templateSources['templates2:'.$fileName] = [
+            $templateSources['templatessources:'.$fileName] = [
                 'label' => $fileName,
+                'key' => 'templates:'.$template,
+                'criteria' => [
+                    'source' => [
+                        $template
+                    ],
+                ],
+            ];
+        }
+
+        // Folders
+        $options = [
+            'recursive' => false,
+            'except' => ['vendor/', 'node_modules/']
+        ];
+        $templates = FileHelper::findDirectories(Craft::$app->path->getSiteTemplatesPath(), $options);
+
+        foreach ($templates as $template) {
+            // If matches, get template name
+            $fileName = basename($template);
+            // Add template source
+            $templateSources['templatessources:'.$fileName] = [
+                'label' => $fileName.'/',
                 'key' => 'templates:'.$template,
                 'criteria' => [
                     'source' => [
@@ -240,7 +263,7 @@ class Translate extends Element
 
         $sources[] = [
             'label'    => Craft::t('enupal-translate', 'Templates'),
-            'key'      => 'all-Templates:',
+            'key'      => 'all-templates:',
             'criteria' => [
                 'source' => [
                     Craft::$app->path->getSiteTemplatesPath()
@@ -331,6 +354,9 @@ class Translate extends Element
         return $actions;
     }
 
+    /**
+     * @return null|string
+     */
     public function getLocale()
     {
         $site = Craft::$app->getSites()->getSiteById($this->siteId);

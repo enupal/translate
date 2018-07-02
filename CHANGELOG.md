@@ -1,5 +1,9 @@
 # Enupal Translate Changelog
 
+## 1.1.0 - 2018.07.02
+### Improved
+- Improved template sources
+
 ## 1.0.5 - 2018.04.03
 ### Improved
 - Improved code inspections
