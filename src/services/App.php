@@ -14,7 +14,14 @@ use craft\base\Component;
 
 class App extends Component
 {
+    /**
+     * @var Translate
+     */
     public $translate;
+
+    /**
+     * @var Settings
+     */
     public $settings;
 
     public function init()
