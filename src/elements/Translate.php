@@ -225,10 +225,12 @@ class Translate extends Element
         foreach ($templates as $template) {
             // If matches, get template name
             $fileName = basename($template);
+            // Fixes bug in ElementHelper::findSource in Linux OS
+            $cleanTemplateKey = str_replace('/', '*', $template);
             // Add template source
             $templateSources['templatessources:'.$fileName] = [
                 'label' => $fileName,
-                'key' => 'templates:'.$template,
+                'key' => 'templates:'.$cleanTemplateKey,
                 'criteria' => [
                     'source' => [
                         $template
@@ -247,10 +249,12 @@ class Translate extends Element
         foreach ($templates as $template) {
             // If matches, get template name
             $fileName = basename($template);
+            // Fixes bug in ElementHelper::findSource in Linux OS
+            $cleanTemplateKey = str_replace('/', '*', $template);
             // Add template source
             $templateSources['templatessources:'.$fileName] = [
                 'label' => $fileName.'/',
-                'key' => 'templates:'.$template,
+                'key' => 'templates:'.$cleanTemplateKey,
                 'criteria' => [
                     'source' => [
                         $template
