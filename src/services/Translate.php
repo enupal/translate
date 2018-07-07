@@ -263,11 +263,18 @@ class Translate extends Component
         // @todo - add a setting to select the primary site
         $primarySite = Craft::$app->getSites()->getPrimarySite();
         $from = $from ?? $primarySite->language;
-        $language = $from.'-'.$language;
+        $language = $this->sanitizeLanguage($from).'-'. $this->sanitizeLanguage($language);
         $yandex = new Yandex();
         $result = $yandex->translate($text, $language);
 
         return $result;
+    }
+
+    private function sanitizeLanguage($language)
+    {
+        $lang = explode('-', $language);
+
+        return isset($lang[0]) ? $lang[0] : $language;
     }
 
     /**
