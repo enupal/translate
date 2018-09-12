@@ -19,8 +19,11 @@ use craft\base\Model;
  */
 class Settings extends Model
 {
-    // Public Properties
-    // =========================================================================
+    /**
+     * @var string
+     */
+    public $pluginNameOverride;
+
     /**
      * @var bool
      */

@@ -33,6 +33,18 @@
             label: "General settings"|t('enupal-translate')|upper
         }, null) }}
         <hr>
+        {{ forms.textField({
+            label: "Plugin Name"|t,
+            id: 'pluginNameOverride',
+            name: 'pluginNameOverride',
+            instructions: "Intuitive, human-readable plugin name for the end user."|t('enupal-backup'),
+            value: settings.pluginNameOverride,
+            placeholder: "Enupal Translate"|t('enupal-translate'),
+            autofocus: true,
+            first: true,
+            errors: ''
+        }) }}
+        <hr>
         {{ forms.lightswitchField({
             label: "Enable Yandex Translate"|t('enupal-translate'),
             id: 'enableYandex',
