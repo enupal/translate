@@ -1,5 +1,9 @@
 # Enupal Translate Changelog
 
+## 1.1.3 - 2018.09.12
+### Added
+- Added plugin name override setting
+
 ## 1.1.2 - 2018.07.07
 ### Fixed
 - Fixes issue with Yandex when using lang by region in the Site settings. #4
