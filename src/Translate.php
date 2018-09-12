@@ -13,7 +13,7 @@ namespace enupal\translate;
 use Craft;
 use craft\base\Plugin;
 use craft\web\twig\variables\CraftVariable;
-use craft\events\DefineComponentsEvent;
+use enupal\translate\services\App;
 use yii\base\Event;
 
 use enupal\translate\variables\TranslateVariable;
@@ -24,7 +24,7 @@ class Translate extends Plugin
     /**
      * Enable use of Translate::$app-> in place of Craft::$app->
      *
-     * @var [type]
+     * @var App
      */
     public static $app;
 
@@ -36,6 +36,12 @@ class Translate extends Plugin
     {
         parent::init();
         self::$app = $this->get('app');
+
+        $settings = Translate::$app->settings->getDbSettings();
+
+        if (isset($settings['pluginNameOverride']) && $settings['pluginNameOverride']){
+            $this->name = $settings['pluginNameOverride'];
+        }
 
         // Register our variables
         Event::on(

@@ -11,6 +11,7 @@
 namespace enupal\translate\services;
 
 use Craft;
+use craft\db\Query;
 use yii\base\Component;
 
 class Settings extends Component
@@ -48,6 +49,22 @@ class Settings extends Component
         $translatePlugin = $this->getPlugin();
 
         return $translatePlugin->getSettings();
+    }
+
+    /**
+     * @return array|bool|mixed
+     */
+    public function getDbSettings()
+    {
+        $settings = (new Query())
+            ->select('settings')
+            ->from(['{{%plugins}}'])
+            ->where(['handle' => 'enupal-translate'])
+            ->one();
+
+        $settings = json_decode($settings['settings'], true);
+
+        return $settings;
     }
 
     public function getPlugin()
