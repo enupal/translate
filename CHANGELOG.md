@@ -1,5 +1,12 @@
 # Enupal Translate Changelog
 
+## 1.1.4 - 2018.10.12
+### Improved
+-Improved folder location of assets
+
+### Fixed
+- Fixed bug when using Google Translate API
+
 ## 1.1.3 - 2018.09.12
 ### Added
 - Added plugin name override setting
