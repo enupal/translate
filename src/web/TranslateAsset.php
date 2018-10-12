@@ -8,7 +8,7 @@
  * @copyright Copyright (c) 2018 Enupal
  */
 
-namespace enupal\translate\assetbundles;
+namespace enupal\translate\web;
 
 use craft\web\AssetBundle;
 use craft\web\assets\cp\CpAsset;
