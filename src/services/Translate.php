@@ -135,6 +135,7 @@ class Translate extends Component
         }
 
         // Loop through paths
+        $elementIdAsInt = 0;
         foreach ($query->source as $path) {
             // Check if this is a folder or a file
             $isDir = is_dir($path);
@@ -152,7 +153,7 @@ class Translate extends Component
                 foreach ($files as $file) {
 
                     // Parse file
-                    $elements = $this->_processFile($path, $file, $query, $category);
+                    $elements = $this->_processFile($path, $file, $query, $category, $elementIdAsInt);
 
                     // Collect in array
                     $translations = array_merge($translations, $elements);
@@ -160,7 +161,7 @@ class Translate extends Component
             } elseif (file_exists($path)) {
 
                 // Parse file
-                $elements = $this->_processFile($path, $path, $query, $category);
+                $elements = $this->_processFile($path, $path, $query, $category, $elementIdAsInt);
 
                 // Collect in array
                 $translations = array_merge($translations, $elements);
@@ -173,16 +174,15 @@ class Translate extends Component
     /**
      * Apply regex search into file
      *
-     * @param string                $path
-     * @param string                $file
+     * @param string $path
+     * @param string $file
      * @param ElementQueryInterface $query
-     * @param string                $category
+     * @param string $category
      *
+     * @param $elementIdAsInt
      * @return array
-     * @throws \Twig_Error_Loader
-     * @throws \yii\base\Exception
      */
-    private function _processFile($path, $file, ElementQueryInterface $query, $category)
+    private function _processFile($path, $file, ElementQueryInterface $query, $category, &$elementIdAsInt)
     {
         $translations = array();
         $contents     = file_get_contents($file);
@@ -203,10 +203,11 @@ class Translate extends Component
                     $translation = Craft::t($category, $original, null, $site->language);
 
                     $view = Craft::$app->getView();
-                    $elementId = ElementHelper::createSlug($original);
+                    $elementIdAsInt++;
+                    $translateId = ElementHelper::createSlug($original);
 
                     $field = $view->renderTemplate('_includes/forms/text', [
-                        'id' => $elementId,
+                        'id' => $translateId,
                         'name' => 'translation['.$original.']',
                         'value' => $translation,
                         'placeholder' => $translation,
@@ -214,7 +215,8 @@ class Translate extends Component
 
                     // Let's create our translate element with all the info
                     $element = new TranslateElement([
-                        'id' => ElementHelper::createSlug($original),
+                        'id' => $elementIdAsInt,
+                        'translateId' => ElementHelper::createSlug($original),
                         'original' => $original,
                         'translation' => $translation,
                         'source' => $path,
@@ -289,7 +291,8 @@ class Translate extends Component
     {
         // @todo - add a setting to select the primary site
         $primarySite = Craft::$app->getSites()->getPrimarySite();
-        $from = $from ?? $primarySite->language;
+        $from = is_null($from) ? $this->sanitizeLanguage($primarySite->language) : $this->sanitizeLanguage($from);
+        $language = $this->sanitizeLanguage($language);
         $googleTranslate = new GoogleTranslate();
         $result = $googleTranslate->translate($text, $from, $language);
 
@@ -308,7 +311,8 @@ class Translate extends Component
     {
         // @todo - add a setting to select the primary site
         $primarySite = Craft::$app->getSites()->getPrimarySite();
-        $from = $from ?? $primarySite->language;
+        $from = is_null($from) ? $this->sanitizeLanguage($primarySite->language) : $this->sanitizeLanguage($from);
+        $language = $this->sanitizeLanguage($language);
         $googleTranslate = new GoogleCloudTranslate();
         $result = $googleTranslate->translate($text, $from, $language);
 
