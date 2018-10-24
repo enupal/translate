@@ -309,7 +309,8 @@ class Translate extends Component
     {
         // @todo - add a setting to select the primary site
         $primarySite = Craft::$app->getSites()->getPrimarySite();
-        $from = $from ?? $primarySite->language;
+        $from = is_null($from) ? $this->sanitizeLanguage($primarySite->language) : $this->sanitizeLanguage($from);
+        $language = $this->sanitizeLanguage($language);
         $googleTranslate = new GoogleCloudTranslate();
         $result = $googleTranslate->translate($text, $from, $language);
 
