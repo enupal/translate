@@ -1,5 +1,10 @@
 # Enupal Translate Changelog
 
+## 1.1.5 - 2018.10.24
+### Fixed
+- Fixed issue with regional codes when using Google Cloud Translate
+- Fixed `Argument 1 passed to craft\services\TemplateCaches::includeElementInTemplateCaches() must be of the type integer, string given` error 
+
 ## 1.1.4 - 2018.10.12
 ### Improved
 -Improved folder location of assets
