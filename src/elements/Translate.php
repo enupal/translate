@@ -30,6 +30,7 @@ class Translate extends Element
     const PENDING = 'pending';
 
     public $original;
+    public $translateId;
     public $translation;
     public $source;
     public $file;
