@@ -135,7 +135,7 @@ class Translate extends Component
         }
 
         // Loop through paths
-        $elementIdAsInt = 1;
+        $elementIdAsInt = 0;
         foreach ($query->source as $path) {
             // Check if this is a folder or a file
             $isDir = is_dir($path);
@@ -234,9 +234,9 @@ class Translate extends Component
                         continue;
                     }
                     // add actions occurrences
-                    if ($query->translateId)
+                    if ($query->id)
                     {
-                        foreach ($query->translateId as $id) {
+                        foreach ($query->id as $id) {
                             if ($element->id == $id) {
                                 $translations[$element->original] = $element;
                             }
