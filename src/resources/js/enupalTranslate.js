@@ -24,7 +24,7 @@
          */
         init: function()
         {
-            this.addListener($('#save-elements-button'), 'activate', 'processAjaxCall');
+            this.addListener($('.save-elements-button'), 'activate', 'processAjaxCall');
             this.$form = $("#translate-ajax");
             var settings = {};
             this.$menu = new Garnish.MenuBtn("#enupal-menubtn", settings);
