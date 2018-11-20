@@ -24,7 +24,16 @@
          */
         init: function()
         {
-            this.addListener($('#save-elements-button'), 'activate', 'processAjaxCall');
+            var that = this;
+            this.addListener($('.save-elements-button'), 'activate', 'processAjaxCall');
+            // Add support for CMD + S
+            this.addListener(Garnish.$doc, 'keydown', function(ev) {
+                if (Garnish.isCtrlKeyPressed(ev) && ev.keyCode === Garnish.S_KEY) {
+                    that.processAjaxCall(ev);
+                }
+
+                return true;
+            });
             this.$form = $("#translate-ajax");
             var settings = {};
             this.$menu = new Garnish.MenuBtn("#enupal-menubtn", settings);
@@ -39,9 +48,19 @@
             });
 
             // Init the form
-            if(Craft.getLocalStorage('BaseElementIndex.siteId')) {
-                $siteIdInput.val(Craft.getLocalStorage('BaseElementIndex.siteId'));
+            // Figure out the initial site to Translate
+            var $option = $siteMenu.$options.filter('.sel:first');
+            var siteIdToTranslate = Craft.getLocalStorage('BaseElementIndex.siteId');
+
+            if (!$option.length) {
+                $option = $siteMenu.$options.first();
             }
+
+            if ($option.length) {
+                siteIdToTranslate = $option.data('site-id');
+            }
+            
+            $siteIdInput.val(siteIdToTranslate);
 
             // Change the siteId when on hidden values
             $siteMenu.on('optionselect', function(ev) {
@@ -49,37 +68,42 @@
             });
 
             Craft.elementIndex.on('afterAction', this.manageAfterAction);
-            this.$menu.on('optionSelect', this.manageMenu)
-        },
 
-        manageMenu: function(event)
-        {
-            var data = {
-                siteId: Craft.elementIndex.siteId,
-                sourceKey: Craft.elementIndex.sourceKey
-            };
+            // Manage Menu
+            this.$menu.on('optionSelect', function(event) {
+                // Download action
+                if (event.option.dataset.process == 'download'){
+                    var data = {
+                        siteId: Craft.elementIndex.siteId,
+                        sourceKey: Craft.elementIndex.sourceKey
+                    };
 
-            Craft.postActionRequest('enupal-translate/translate/download', data, $.proxy(function(response, textStatus) {
-                if (textStatus === 'success') {
-                    if (response.success)
-                    {
-                        if (response.filePath){
-                            var $iframe = $('<iframe/>', {'src': Craft.getActionUrl('enupal-translate/translate/download-csv-file', {'filepath': response.filePath})}).hide();
-                            $("#translate-ajax").append($iframe);
-                            Craft.cp.displayNotice(Craft.t('enupal-translate', 'Downloading file'));
+                    Craft.postActionRequest('enupal-translate/translate/download', data, $.proxy(function(response, textStatus) {
+                        if (textStatus === 'success') {
+                            if (response.success)
+                            {
+                                if (response.filePath){
+                                    var $iframe = $('<iframe/>', {'src': Craft.getActionUrl('enupal-translate/translate/download-csv-file', {'filepath': response.filePath})}).hide();
+                                    $("#translate-ajax").append($iframe);
+                                    Craft.cp.displayNotice(Craft.t('enupal-translate', 'Downloading file'));
+                                }
+                                else {
+                                    Craft.cp.displayError(Craft.t('app', 'There was an error when generating the file'));
+                                }
+                            }
+                            else {
+                                Craft.cp.displayError(Craft.t('app', 'Please select a different source'));
+                            }
                         }
                         else {
-                            Craft.cp.displayError(Craft.t('app', 'There was an error when generating the file'));
+                            Craft.cp.displayError(Craft.t('app', 'An unknown error occurred.'));
                         }
-                    }
-                    else {
-                        Craft.cp.displayError(Craft.t('app', 'Please select a different source'));
-                    }
+                    }, this));
+                } else if (event.option.dataset.process == 'save'){
+                    that.processAjaxCall(event);
                 }
-                else {
-                    Craft.cp.displayError(Craft.t('app', 'An unknown error occurred.'));
-                }
-            }, this));
+
+            });
         },
 
         manageAfterAction: function(action, params)
@@ -89,7 +113,9 @@
 
         processAjaxCall: function(event)
         {
-            event.preventDefault();
+            if (typeof event.preventDefault === "function") {
+                event.preventDefault();
+            }
             var data = this.$form.serializeArray();
             data.push({name: 'sourceKey', value: Craft.elementIndex.sourceKey});
             Craft.postActionRequest('enupal-translate/translate/save', data, $.proxy(function(response, textStatus) {
