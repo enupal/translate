@@ -1,5 +1,12 @@
 # Enupal Translate Changelog
 
+## 1.1.6 - 2018.11.20
+### Added
+- Added support for "CMD + S" shortcut
+
+### Fixed
+- Fixed issue when only one site available to translate in dropdown was not saving 
+
 ## 1.1.5 - 2018.10.24
 ### Fixed
 - Fixed issue with regional codes when using Google Cloud Translate
