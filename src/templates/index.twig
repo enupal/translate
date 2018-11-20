@@ -27,6 +27,7 @@
         <div class="menu">
             <ul>
                 <li><a class="formsubmit save-elements-button"
+                       data-process="save"
                        data-redirect="{{ continueEditingUrl|hash }}">
                         {{ forms.optionShortcutLabel('S') }}
                         {{ "Save and continue editing"|t('app') }}
@@ -36,6 +37,7 @@
             <ul>
                 <li>
                     <a id="donwload-button" class="formsubmit translations-download-button"
+                       data-process="download"
                        data-action="enupal-translate/translate/download"
                        data-siteId="{{ elementInstance.siteId }}">
                         {{ "Download"|t('enupal-translate') }}
