@@ -30,6 +30,10 @@ Download your translations as CSV file from the top right dropdown menu.
 * Specific templates
 * Plugins
 
+### Import translations:
+
+Import your translations from a CSV file
+
 ![Screenshot](resources/screenshots/6-enupal-translate.png)
 
 ### Plugin Developers!

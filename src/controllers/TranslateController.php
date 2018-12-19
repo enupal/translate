@@ -17,6 +17,7 @@ use craft\helpers\StringHelper;
 use craft\web\Controller as BaseController;
 use Craft;
 use craft\web\Response;
+use craft\web\UploadedFile;
 use enupal\translate\Translate;
 use enupal\translate\elements\Translate as ElementTranslate;
 use yii\web\NotFoundHttpException;
@@ -61,7 +62,7 @@ class TranslateController extends BaseController
             $pluginName = $plugin->getHandle();
             $sources[] = $plugin->getBasePath() ?? '';
             $settings = Translate::$app->settings->getSettings();
-            if ($settings->createPluginTranslationFolder){
+            if ($settings->createPluginTranslationFolder) {
                 $query->pluginHandle = $plugin->getHandle();
             }
         }
@@ -70,8 +71,8 @@ class TranslateController extends BaseController
             $sources[] = Craft::$app->path->getSiteTemplatesPath();
         }
 
-        if (empty($sources)){
-            return $this->asJson(['success'=> false]);
+        if (empty($sources)) {
+            return $this->asJson(['success' => false]);
         }
 
         $site = Craft::$app->getSites()->getSiteById($siteId);
@@ -84,9 +85,9 @@ class TranslateController extends BaseController
         $occurences = Translate::$app->translate->get($query);
 
         // Re-order data
-        $data = StringHelper::convertToUTF8('"'.Craft::t('enupal-translate','Source {language}',['language'=> $site->language]).'","'.Craft::t('enupal-translate','Translation')."\"\r\n");
+        $data = StringHelper::convertToUTF8('"' . Craft::t('enupal-translate', 'Source {language}', ['language' => $site->language]) . '","' . Craft::t('enupal-translate', 'Translation') . "\"\r\n");
         foreach ($occurences as $element) {
-            $data .= StringHelper::convertToUTF8('"'.$element->original.'","'.$element->translation."\"\r\n");
+            $data .= StringHelper::convertToUTF8('"' . $element->original . '","' . $element->translation . "\"\r\n");
         }
 
         $info = Craft::$app->getInfo();
@@ -99,17 +100,17 @@ class TranslateController extends BaseController
         );
         $date = date('YmdHis');
         $primarySite = Craft::$app->getSites()->getPrimarySite();
-        $sourceTo = $primarySite->language.'_to_'.$site->language;
-        $fileName = strtolower($systemName.'_translations_'.$sourceTo.'_'.$date);
+        $sourceTo = $primarySite->language . '_to_' . $site->language;
+        $fileName = strtolower($systemName . '_translations_' . $sourceTo . '_' . $date);
 
-        $file = Craft::$app->getPath()->getTempPath().DIRECTORY_SEPARATOR.StringHelper::toLowerCase($fileName.'.csv');
-        $fd = fopen ($file, "w");
+        $file = Craft::$app->getPath()->getTempPath() . DIRECTORY_SEPARATOR . StringHelper::toLowerCase($fileName . '.csv');
+        $fd = fopen($file, "w");
         fputs($fd, $data);
         fclose($fd);
 
         // Download the file
         $response = [
-            'success'=> true,
+            'success' => true,
             'filePath' => $file
         ];
 
@@ -135,38 +136,56 @@ class TranslateController extends BaseController
     }
 
     /**
-     * Upload translations.
+     * Upload translations
+     *
+     * @return \yii\web\Response
+     * @throws \craft\errors\MissingComponentException
+     * @throws \yii\web\BadRequestHttpException
      */
     public function actionUpload()
     {
         // Get params
-        $locale = Craft::$app->request->getRequiredPost('locale');
-
+        $siteId = Craft::$app->getRequest()->getRequiredBodyParam('importSiteId');
+        $site = Craft::$app->getSites()->getSiteById($siteId);
         // Get file
-        $file = \CUploadedFile::getInstanceByName('translations-upload');
+        $file = UploadedFile::getInstanceByName('translations-upload');
 
-        // Get filepath
-        $path = Craft::$app->path->getTempUploadsPath().$file->getName();
+        if ($this->validateCSV($file)) {
+            try {
+                // Get filepath
+                $path = Craft::$app->getPath()->getTempAssetUploadsPath() . DIRECTORY_SEPARATOR . $file->name;
 
-        // Save file to Craft's temp folder
-        $file->saveAs($path);
+                // Save file to Craft's temp folder
+                $file->saveAs($path);
 
-        // Open file and parse csv rows
-        $translations = array();
-        $handle = fopen($path, 'r');
-        while (($row = fgetcsv($handle)) !== false) {
-            $translations[$row[0]] = $row[1];
+                // Open file and parse csv rows
+                $translations = [];
+                $handle = fopen($path, 'r');
+
+                while (($row = fgetcsv($handle)) !== false) {
+                    if (isset($row[0]) && isset($row[1])) {
+                        $translations[$row[0]] = $row[1];
+                    }
+                }
+                fclose($handle);
+
+                if ($translations) {
+                    $total = count($translations);
+                    Translate::$app->translate->set($site->language, $translations);
+                    Craft::$app->getSession()->setNotice(Craft::t('enupal-translate', $total . ' translations were imported'));
+                } else {
+                    Craft::$app->getSession()->setError(Craft::t('enupal-translate', 'Zero translations were read from file'));
+                }
+            } catch (\Exception $e) {
+                Craft::$app->getSession()->setError(Craft::t('enupal-translate', $e->getMessage()));
+            }
+        } else {
+            Craft::$app->getSession()->setError(Craft::t('enupal-translate', 'Invalid file type'));
         }
-        fclose($handle);
 
-        // Save
-        Craft::$app->translate->set($locale, $translations);
-
-        // Set a flash message
-        Craft::$app->getSession()->setNotice(Craft::t('enupal-translate','The translations have been updated.'));
 
         // Redirect back to page
-        $this->redirectToPostedUrl();
+        return $this->redirectToPostedUrl();
     }
 
     /**
@@ -195,8 +214,8 @@ class TranslateController extends BaseController
             $plugin = Craft::$app->plugins->getPlugin($criteria[1]);
             $pluginHandle = $plugin->getHandle();
             $translatePath = $plugin->getBasePath() ?? null;
-            if ($translatePath && $pluginHandle){
-                $translatePath = $translatePath.DIRECTORY_SEPARATOR.'translations'.DIRECTORY_SEPARATOR.$site->language.DIRECTORY_SEPARATOR.$pluginHandle.'.php';
+            if ($translatePath && $pluginHandle) {
+                $translatePath = $translatePath . DIRECTORY_SEPARATOR . 'translations' . DIRECTORY_SEPARATOR . $site->language . DIRECTORY_SEPARATOR . $pluginHandle . '.php';
             }
         }
 
@@ -207,5 +226,36 @@ class TranslateController extends BaseController
 
         // Redirect back to page
         return $this->asJson($response);
+    }
+
+    /**
+     * @param $file UploadedFile
+     * @return bool
+     */
+    private function validateCSV($file)
+    {
+        $result = true;
+        $csvMimeTypes = [
+            'text/csv',
+            'text/plain',
+            'application/csv',
+            'text/comma-separated-values',
+            'application/excel',
+            'application/vnd.ms-excel',
+            'application/vnd.msexcel',
+            'text/anytext',
+            'application/octet-stream',
+            'application/txt'
+        ];
+
+        if ($file->getExtension() !== 'csv') {
+            $result = false;
+        }
+
+        if (!in_array($file->type, $csvMimeTypes)) {
+            $result = false;
+        }
+
+        return $result;
     }
 }
