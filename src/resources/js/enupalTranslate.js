@@ -39,6 +39,7 @@
             this.$menu = new Garnish.MenuBtn("#enupal-menubtn", settings);
             var $siteMenu = $('.sitemenubtn:first').menubtn().data('menubtn').menu;
             var $siteIdInput = $('input[name="siteId"]');
+            var $importSiteId = $('input[name="importSiteId"]');
 
             // Upload file on click
             $('.translations-upload-button').click(function() {
@@ -61,10 +62,12 @@
             }
             
             $siteIdInput.val(siteIdToTranslate);
+            $importSiteId.val(siteIdToTranslate);
 
             // Change the siteId when on hidden values
             $siteMenu.on('optionselect', function(ev) {
                 $siteIdInput.val($(ev.selectedOption).data('siteId'));
+                $importSiteId.val($(ev.selectedOption).data('siteId'));
             });
 
             Craft.elementIndex.on('afterAction', this.manageAfterAction);

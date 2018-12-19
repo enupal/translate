@@ -17,6 +17,7 @@ use craft\helpers\StringHelper;
 use craft\web\Controller as BaseController;
 use Craft;
 use craft\web\Response;
+use craft\web\UploadedFile;
 use enupal\translate\Translate;
 use enupal\translate\elements\Translate as ElementTranslate;
 use yii\web\NotFoundHttpException;
@@ -135,38 +136,52 @@ class TranslateController extends BaseController
     }
 
     /**
-     * Upload translations.
+     * Upload translations
+     *
+     * @return \yii\web\Response
+     * @throws \craft\errors\MissingComponentException
+     * @throws \yii\web\BadRequestHttpException
      */
     public function actionUpload()
     {
         // Get params
-        $locale = Craft::$app->request->getRequiredPost('locale');
+        $siteId = Craft::$app->getRequest()->getRequiredBodyParam('importSiteId');
+        $site = Craft::$app->getSites()->getSiteById($siteId);
 
-        // Get file
-        $file = \CUploadedFile::getInstanceByName('translations-upload');
+        try {
+            // Get file
+            $file = UploadedFile::getInstanceByName('translations-upload');
 
-        // Get filepath
-        $path = Craft::$app->path->getTempUploadsPath().$file->getName();
+            // Get filepath
+            $path = Craft::$app->getPath()->getTempAssetUploadsPath().DIRECTORY_SEPARATOR.$file->name;
 
-        // Save file to Craft's temp folder
-        $file->saveAs($path);
+            // Save file to Craft's temp folder
+            $file->saveAs($path);
 
-        // Open file and parse csv rows
-        $translations = array();
-        $handle = fopen($path, 'r');
-        while (($row = fgetcsv($handle)) !== false) {
-            $translations[$row[0]] = $row[1];
+            // Open file and parse csv rows
+            $translations = [];
+            $handle = fopen($path, 'r');
+
+            while (($row = fgetcsv($handle)) !== false) {
+                if (isset($row[0]) && isset($row[1])){
+                    $translations[$row[0]] = $row[1];
+                }
+            }
+            fclose($handle);
+
+            if ($translations){
+                $total = count($translations);
+                Translate::$app->translate->set($site->language, $translations);
+                Craft::$app->getSession()->setNotice(Craft::t('enupal-translate',$total.' translations were imported'));
+            }else{
+                Craft::$app->getSession()->setError(Craft::t('enupal-translate','Zero translations were read from file'));
+            }
+        } catch (\Exception $e) {
+            Craft::$app->getSession()->setError(Craft::t('enupal-translate',$e->getMessage()));
         }
-        fclose($handle);
-
-        // Save
-        Craft::$app->translate->set($locale, $translations);
-
-        // Set a flash message
-        Craft::$app->getSession()->setNotice(Craft::t('enupal-translate','The translations have been updated.'));
 
         // Redirect back to page
-        $this->redirectToPostedUrl();
+        return $this->redirectToPostedUrl();
     }
 
     /**

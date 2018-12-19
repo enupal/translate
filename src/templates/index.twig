@@ -46,18 +46,20 @@
             </ul>
         </div>
     </div>
+{% endblock %}
 
-    {# TODO move this to settings or sidebar
+{% block sidebar %}
+    {{ parent() }}
     <div class="buttons">
         <form method="post" enctype="multipart/form-data">
             {{ csrfInput() }}
             <input type="hidden" name="action" value="enupal-translate/translate/upload">
-            <input type="hidden" name="siteId" value="{{ elementInstance.siteId }}">
-            <input type="file" name="translations-upload" style="display: none" />
+            {{ redirectInput('enupal-translate') }}
+            <input type="hidden" id="importSiteId" name="importSiteId" value="{{ elementInstance.siteId }}">
+            <input type="file" accept=".csv" name="translations-upload" style="display: none" />
         </form>
-        <div class="btn submit translations-upload-button" data-icon="upload" style="position: relative; overflow: hidden;" role="button">{{ "Upload file"|t }}</div>
+        <div class="btn submit translations-upload-button" data-icon="upload" style="position: relative; overflow: hidden;" role="button">{{ "Import file"|t('enupal-translate') }}</div>
     </div>
-    #}
 {% endblock %}
 
 {% block content %}
