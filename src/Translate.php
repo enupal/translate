@@ -37,10 +37,10 @@ class Translate extends Plugin
         parent::init();
         self::$app = $this->get('app');
 
-        $settings = Translate::$app->settings->getDbSettings();
+        $settings = $this->getSettings();
 
-        if (isset($settings['pluginNameOverride']) && $settings['pluginNameOverride']){
-            $this->name = $settings['pluginNameOverride'];
+        if ($settings->pluginNameOverride){
+            $this->name = $settings->pluginNameOverride;
         }
 
         // Register our variables
