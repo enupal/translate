@@ -51,22 +51,6 @@ class Settings extends Component
         return $translatePlugin->getSettings();
     }
 
-    /**
-     * @return array|bool|mixed
-     */
-    public function getDbSettings()
-    {
-        $settings = (new Query())
-            ->select('settings')
-            ->from(['{{%plugins}}'])
-            ->where(['handle' => 'enupal-translate'])
-            ->one();
-
-        $settings = json_decode($settings['settings'], true);
-
-        return $settings;
-    }
-
     public function getPlugin()
     {
         return Craft::$app->getPlugins()->getPlugin('enupal-translate');
