@@ -39,9 +39,9 @@ class Translate extends Component
         // Regex for |t('category')
         'twig' => array(
             // Single quotes
-            '/(\{\{\s*|\{\%.*?|:\s*)\'(.*?)\'.*?\|.*?(t|translate)(\(.*?\)|).*?(\}\}|\%\}|,)/',
+            "/'((?:[^']|\\\\')*)'\s*\|\s*t(?:ranslate)?\b/",
             // Double quotes
-            '/(\{\{\s*|\{\%.*?|:\s*)"(.*?)".*?\|.*?(t|translate)(\(.*?\)|).*?(\}\}|\%\}|,)/',
+            '/"((?:[^"]|\\\\")*)"\s*\|\s*t(?:ranslate)?\b/',
         ),
 
         // Regex for Craft.t('category', '..')
@@ -192,7 +192,7 @@ class Translate extends Component
         foreach ($this->_expressions[$extension] as $regex) {
             // Do it!
             if (preg_match_all($regex, $contents, $matches)) {
-                $pos = 2;
+                $pos = 1;
                 // Js and php files goes to 3
                 if ($extension == 'js' || $extension == 'php'){
                     $pos = 3;
