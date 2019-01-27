@@ -121,7 +121,7 @@ class TranslateController extends BaseController
      * Returns Translate csv file
      *
      * @return Response
-     * @throws NotFoundHttpException if the requested backup cannot be found
+     * @throws NotFoundHttpException if the requested download cannot be found
      * @throws \yii\web\BadRequestHttpException
      */
     public function actionDownloadCsvFile(): Response

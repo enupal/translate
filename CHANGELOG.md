@@ -1,5 +1,15 @@
 # Enupal Translate Changelog
 
+## 1.2.0 - 2019.01.27
+### Added
+- Added Craft 3.1 requirement
+- Added twig search method under general Settings
+- Added regex search API
+- Added twig search Legacy method 
+- Added twig search optimized method 
+- Added php search method 
+- Added js search method 
+
 ## 1.1.8 - 2018.12.22
 ### Fixed
 - Fixed issue on Craft 3.1
