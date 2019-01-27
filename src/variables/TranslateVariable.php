@@ -48,5 +48,12 @@ class TranslateVariable
 		return Translate::$app->settings->getSettings();
 	}
 
+    /**
+     * @return array
+     */
+    public function getTwigSearchMethods()
+    {
+        return Translate::$app->settings->getTwigSearchMethods();
+    }
 }
 

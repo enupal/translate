@@ -15,6 +15,7 @@
 {% set settings = craft.enupaltranslate.getSettings() %}
 {% set fullPageForm = true %}
 {% set saveShortcutRedirect = 'enupal-translate/settings/general' %}
+{% set twigSearchMethods = craft.enupaltranslate.getTwigSearchMethods() %}
 
 {% set saveButton %}
     <div class="buttons">
@@ -37,13 +38,23 @@
             label: "Plugin Name"|t,
             id: 'pluginNameOverride',
             name: 'pluginNameOverride',
-            instructions: "Intuitive, human-readable plugin name for the end user."|t('enupal-backup'),
+            instructions: "Intuitive, human-readable plugin name for the end user."|t('enupal-translate'),
             value: settings.pluginNameOverride,
             placeholder: "Enupal Translate"|t('enupal-translate'),
             autofocus: true,
             first: true,
             errors: ''
         }) }}
+
+        {{ forms.selectField({
+            label: "Twig search method"|t('enupal-translate'),
+            id: 'twigRegexMethod',
+            name: 'twigRegexMethod',
+            instructions: "Enupal Translate uses regex to search the translatable string in your templates. Choose the method of your preference, you can change it whenever you want."|t('enupal-translate'),
+            options: twigSearchMethods,
+            value: settings.twigRegexMethod
+        }) }}
+
         <hr>
         {{ forms.lightswitchField({
             label: "Enable Yandex Translate"|t('enupal-translate'),

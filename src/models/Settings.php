@@ -11,6 +11,7 @@
 namespace enupal\translate\models;
 
 use craft\base\Model;
+use enupal\translate\integrations\OptimizedTwigSearch;
 
 /**
  * @author    Enupal
@@ -53,4 +54,14 @@ class Settings extends Model
      * @var string
      */
     public $createPluginTranslationFolder = 0;
+
+    /**
+     * @var bool
+     */
+    public $displayPlugins = 1;
+
+    /**
+     * @var string
+     */
+    public $twigRegexMethod = OptimizedTwigSearch::class;
 }

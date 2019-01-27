@@ -17,6 +17,10 @@ use enupal\translate\contracts\GoogleCloudTranslate;
 use enupal\translate\contracts\GoogleTranslate;
 use enupal\translate\contracts\Yandex;
 use enupal\translate\elements\Translate as TranslateElement;
+use enupal\translate\integrations\JsSearch;
+use enupal\translate\integrations\LegacyTwigSearch;
+use enupal\translate\integrations\OptimizedTwigSearch;
+use enupal\translate\integrations\PhpSearch;
 use enupal\translate\Translate as TranslatePlugin;
 use Craft;
 
@@ -24,34 +28,9 @@ class Translate extends Component
 {
     /**
      * Translate REGEX.
-     * @credits to boboldehampsink
      * @var []
      */
-    private $_expressions = array(
-        // Regex for Craft::t('category', '..')
-        'php' => array(
-            // Single quotes
-            '/Craft::(t|translate)\(.*?\'(.*?)\'.*?\,.*?\'(.*?)\'.*?\)/',
-            // Double quotes
-            '/Craft::(t|translate)\(.*?"(.*?)".*?\,.*?"(.*?)".*?\)/',
-        ),
-
-        // Regex for |t('category')
-        'twig' => array(
-            // Single quotes
-            '/(\{\{\s*|\{\%.*?|:\s*)\'(.*?)\'.*?\|.*?(t|translate)(\(.*?\)|).*?(\}\}|\%\}|,)/',
-            // Double quotes
-            '/(\{\{\s*|\{\%.*?|:\s*)"(.*?)".*?\|.*?(t|translate)(\(.*?\)|).*?(\}\}|\%\}|,)/',
-        ),
-
-        // Regex for Craft.t('category', '..')
-        'js' => array(
-            // Single quotes
-            '/Craft\.(t|translate)\(.*?\'(.*?)\'.*?\,.*?\'(.*?)\'.*?\)/',
-            // Double quotes
-            '/Craft\.(t|translate)\(.*?"(.*?)".*?\,.*?"(.*?)".*?\)/',
-        )
-    );
+    private $_expressions = [];
 
     /**
      * Initialize service.
@@ -61,6 +40,47 @@ class Translate extends Component
     public function init()
     {
         parent::init();
+
+        $phpSearch = new PhpSearch();
+        $jsSearch = new JsSearch();
+        // Let's default the optimized method
+        $twigSearch = new OptimizedTwigSearch();
+        $settings = TranslatePlugin::getInstance()->getSettings();
+
+        if ($settings->twigRegexMethod){
+            if (class_exists($settings->twigRegexMethod)){
+                $twigSearch = new $settings->twigRegexMethod;
+            }
+        }
+
+        $this->_expressions = [
+            // Regex for Craft::t('category', '..')
+            'php' => [
+                'matchPosition' => $phpSearch->getMatchPosition(),
+                'regex' => [
+                    $phpSearch->getSingleQuoteRegex(),
+                    $phpSearch->getDoubleQuoteRegex(),
+                ]
+            ],
+
+            // Regex for |t('category')
+            'twig' => array(
+                'matchPosition' => $twigSearch->getMatchPosition(),
+                'regex' => [
+                    $twigSearch->getSingleQuoteRegex(),
+                    $twigSearch->getDoubleQuoteRegex(),
+                ]
+            ),
+
+            // Regex for Craft.t('category', '..')
+            'js' => array(
+                'matchPosition' => $jsSearch->getMatchPosition(),
+                'regex' => [
+                    $jsSearch->getSingleQuoteRegex(),
+                    $jsSearch->getDoubleQuoteRegex(),
+                ]
+            )
+        ];
 
         $this->_expressions['html'] = $this->_expressions['twig'];
         $this->_expressions['json'] = $this->_expressions['twig'];
@@ -189,15 +209,12 @@ class Translate extends Component
         $extension    = pathinfo($file, PATHINFO_EXTENSION);
 
         // Process the file
-        foreach ($this->_expressions[$extension] as $regex) {
+        $fileOptions = $this->_expressions[$extension];
+        foreach ($fileOptions['regex'] as $regex) {
             // Do it!
             if (preg_match_all($regex, $contents, $matches)) {
-                $pos = 2;
-                // Js and php files goes to 3
-                if ($extension == 'js' || $extension == 'php'){
-                    $pos = 3;
-                }
-                foreach ($matches[$pos] as $original) {
+                $matchPosition = $fileOptions['matchPosition'];
+                foreach ($matches[$matchPosition] as $original) {
                     // Apply the Craft Translate
                     $site = Craft::$app->getSites()->getSiteById($query->siteId);
                     $translation = Craft::t($category, $original, null, $site->language);
@@ -374,5 +391,18 @@ class Translate extends Component
         }
 
         return $translatePath;
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllTwigSearchMethods()
+    {
+        $searchMethods = [];
+
+        $searchMethods[LegacyTwigSearch::class] = new LegacyTwigSearch();
+        $searchMethods[OptimizedTwigSearch::class] = new OptimizedTwigSearch();
+
+        return $searchMethods;
     }
 }
