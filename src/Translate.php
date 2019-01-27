@@ -32,6 +32,8 @@ class Translate extends Plugin
 
     public $hasCpSettings = true;
 
+    public $schemaVersion = '1.2.0';
+
     public function init()
     {
         parent::init();
