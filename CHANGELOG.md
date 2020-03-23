@@ -1,5 +1,11 @@
 # Enupal Translate Changelog
 
+## 1.2.1 - 2020.03.23
+### Fixed
+- Fixed issue on "Google Translate Free" ([#28]) 
+
+[#28]: https://github.com/enupal/translate/issues/28
+
 ## 1.2.0 - 2019.01.27
 ### Added
 - Added Craft 3.1 requirement
