@@ -1,5 +1,11 @@
 # Enupal Translate Changelog
 
+## 1.2.2 - 2020.04.19
+### Added
+- Added `guzzlehttp/guzzle ^6.3.0` ([#30]) 
+
+[#30]: https://github.com/enupal/translate/issues/30
+
 ## 1.2.1 - 2020.03.23
 ### Fixed
 - Fixed issue on "Google Translate Free" ([#28]) 
