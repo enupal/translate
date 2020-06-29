@@ -10,7 +10,7 @@
 
 namespace enupal\translate\contracts;
 
-use Beeyev\YaTranslate\Translate;
+use Enupal\YaTranslate\Translate;
 use enupal\translate\Translate as TranslatePlugin;
 use Craft;
 
@@ -41,7 +41,7 @@ class Yandex
         try {
             $tr = new Translate($this->api);
             $result = $tr->translate($text, $language);
-        } catch (\Beeyev\YaTranslate\TranslateException $e) {
+        } catch (\Enupal\YaTranslate\TranslateException $e) {
             //Handle exception
             Craft::error($e->getMessage(), __METHOD__);
         }
