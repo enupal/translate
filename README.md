@@ -2,7 +2,7 @@
 <img src="https://scrutinizer-ci.com/g/enupal/translate/badges/quality-score.png?b=master"> <img src="https://scrutinizer-ci.com/g/enupal/translate/badges/coverage.png?b=master"> <img src="https://scrutinizer-ci.com/g/enupal/translate/badges/build.png?b=master"> <img src="https://scrutinizer-ci.com/g/enupal/translate/badges/code-intelligence.svg?b=master">
 </p>
 <p align="center">
-	<a href="https://enupal.com/en/craft-plugins/enupal-translate/docs/" target="_blank">
+	<a href="https://docs.enupal.com/translate/" target="_blank">
 	<img width="212" height="212" src="https://enupal.com/assets/docs/translate-icon.svg" alt="Enupal Translate"></a>
 </p>
 
@@ -44,7 +44,7 @@ Enupal translate will generate all the translation files in your Plugin Path. In
 
 ## Documentation
 
-https://enupal.com/en/craft-plugins/enupal-translate/docs/
+https://docs.enupal.com/translate/
 
 ## Enupal Translate Support
 

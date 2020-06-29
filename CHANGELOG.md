@@ -1,5 +1,9 @@
 # Enupal Translate Changelog
 
+## 1.3.0 - 2020.06.29
+### Fixed
+- Fixed issue with Yandex lib
+
 ## 1.2.2 - 2020.04.19
 ### Added
 - Added `guzzlehttp/guzzle ^6.3.0` ([#30]) 
