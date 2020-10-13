@@ -298,8 +298,8 @@ class Translate extends Element
     {
         // just 1 locale enabled
         if (empty($elementQuery->siteId)) {
-            $primarySite = Craft::$app->getSites()->getPrimarySite();
-            $elementQuery->siteId = $primarySite->id;
+            $defaultSite = Craft::$app->getSites()->getEditableSites()[0];
+            $elementQuery->siteId = $defaultSite->id;
         }
 
         if ($elementQuery->translateStatus) {
