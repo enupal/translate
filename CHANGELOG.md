@@ -1,5 +1,9 @@
 # Enupal Translate Changelog
 
+## 1.3.1 - 2020.10.26
+### Fixed
+- Fixes issue with composer v2
+
 ## 1.3.0 - 2020.06.29
 ### Fixed
 - Fixed issue with Yandex lib
