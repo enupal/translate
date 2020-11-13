@@ -72,6 +72,11 @@
     </form>
 {% endblock %}
 
+{% block footer %}
+    <div id="count-spinner" class="spinner hidden"></div>
+    <div id="count-container" class="light flex-grow">&nbsp;</div>
+{% endblock %}
+
 {% js %}
     $(document).ready(function() {
         new EnupalTranslate();

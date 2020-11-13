@@ -15,6 +15,7 @@ use craft\base\Plugin;
 use craft\web\twig\variables\CraftVariable;
 use enupal\translate\services\App;
 use yii\base\Event;
+use craft\db\Query;
 
 use enupal\translate\variables\TranslateVariable;
 use enupal\translate\models\Settings;
@@ -32,12 +33,50 @@ class Translate extends Plugin
 
     public $hasCpSettings = true;
 
-    public $schemaVersion = '1.2.0';
+    public $schemaVersion = '1.2.1';
+
+    private function getL2Keys($array)
+    {
+        $result = array();
+        foreach($array as $sub) {
+            $result = array_merge($result, $sub);
+        }
+        return array_values($result);
+    }
 
     public function init()
     {
         parent::init();
         self::$app = $this->get('app');
+
+        $siteLocales = Craft::$app->i18n->getSiteLocales();
+        sort($siteLocales);
+        $translations = [];
+        $sourceMessages = [];
+
+        $rows = (new Query())
+            ->select('message')
+            ->from('{{%enupaltranslate_sourcemessage}}')
+            ->limit(null)
+            ->all();
+
+        $rows = $this->getL2Keys($rows);
+
+        foreach ($siteLocales as $siteLocale) {
+            // Determine locale's translation destination file
+            $file = self::$app->translate->getSitePath($siteLocale->id);
+            // Get current translation
+            $current = @include($file);
+            if (is_array($current)) {
+                $translations[$siteLocale->id] = $current;
+                $sourceMessage = array_keys($current);
+                $sourceMessages = array_unique(array_merge($sourceMessages, $sourceMessage), SORT_REGULAR);
+            }
+        }
+
+        $newSources = array_diff($sourceMessages, $rows);
+
+        Craft::dd($newSources);
 
         $settings = $this->getSettings();
 
