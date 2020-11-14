@@ -28,7 +28,7 @@ class Install extends Migration
 
         $this->createTable($sourceMessage, [
             'id' => $this->primaryKey(),
-            'category' => $this->string(),
+            'category' => $this->string()->defaultValue('site'),
             'message' => $this->text(),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),

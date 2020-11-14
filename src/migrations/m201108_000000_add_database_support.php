@@ -20,7 +20,7 @@ class m201108_000000_add_database_support extends Migration
 
         $this->createTable($sourceMessage, [
             'id' => $this->primaryKey(),
-            'category' => $this->string(),
+            'category' => $this->string()->defaultValue('site'),
             'message' => $this->text(),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),
@@ -39,12 +39,13 @@ class m201108_000000_add_database_support extends Migration
         if ($this->db->driverName === 'mysql') {
             $name = $this->db->getIndexName($sourceMessage, ['message'], false);
             $this->execute("ALTER TABLE ".$sourceMessage." ADD FULLTEXT INDEX ".$name." (`message`)");
-            $this->createIndex(null, $sourceMessage, 'category');
 
             $name = $this->db->getIndexName($message, ['translation'], false);
             $this->execute("ALTER TABLE ".$message." ADD FULLTEXT INDEX ".$name." (`translation`)");
-            $this->createIndex(null, $message, 'language');
         }
+
+        $this->createIndex(null, $sourceMessage, 'category');
+        $this->createIndex(null, $message, ['language', 'id'], true);
 
         $this->addForeignKey(null, $message, ['id'], $sourceMessage, ['id'], 'CASCADE', 'RESTRICT');
 

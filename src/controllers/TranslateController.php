@@ -183,7 +183,7 @@ class TranslateController extends BaseController
             Craft::$app->getSession()->setError(Craft::t('enupal-translate', 'Invalid file type'));
         }
 
-
+        Translate::$app->translate->runSync();
         // Redirect back to page
         return $this->redirectToPostedUrl();
     }
@@ -223,6 +223,8 @@ class TranslateController extends BaseController
 
         // Save to translation file
         Translate::$app->translate->set($site->language, $translations, $translatePath);
+
+        Translate::$app->translate->runSync();
 
         // Redirect back to page
         return $this->asJson($response);
