@@ -145,6 +145,7 @@ class TranslateController extends BaseController
     public function actionSync()
     {
         Translate::$app->translate->runSync();
+        Craft::$app->getSession()->setNotice(Craft::t('enupal-translate', 'Sync translations job was added to the queue'));
         // Redirect back to page
         return $this->redirectToPostedUrl();
     }
