@@ -77,6 +77,8 @@ class GoogleCloudTranslate extends ElementAction
             $message = Craft::t('enupal-translate','Something went wrong');
         }
 
+        TranslatePlugin::$app->translate->runSync();
+
         $this->setMessage($message);
 
         return true;
