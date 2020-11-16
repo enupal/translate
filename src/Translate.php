@@ -15,7 +15,6 @@ use craft\base\Plugin;
 use craft\web\twig\variables\CraftVariable;
 use enupal\translate\services\App;
 use yii\base\Event;
-use craft\db\Query;
 
 use enupal\translate\variables\TranslateVariable;
 use enupal\translate\models\Settings;
