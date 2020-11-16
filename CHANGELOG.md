@@ -1,5 +1,14 @@
 # Enupal Translate Changelog
 
+## 2.0.0 - 2020.11.16
+
+> {tip} The most requested feature is here, Sync your static translations into your database without no extra queries that may impact your page load time. [docs](https://docs.enupal.com/translate/translate/sync-with-db.html). Enjoy!
+
+### Added
+- Added support to Sync translations with Database. ([#34]) 
+
+[#34]: https://github.com/enupal/translate/issues/34
+
 ## 1.3.1 - 2020.10.26
 ### Fixed
 - Fixes issue with composer v2
