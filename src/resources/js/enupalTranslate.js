@@ -48,6 +48,10 @@
                 });
             });
 
+            $('.translations-sync-button').click(function() {
+                $("#sync-db-form").submit();
+            });
+
             // Init the form
             // Figure out the initial site to Translate
             var $option = $siteMenu.$options.filter('.sel:first');

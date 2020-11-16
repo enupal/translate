@@ -136,6 +136,20 @@ class TranslateController extends BaseController
     }
 
     /**
+     * Run sync-db translations
+     *
+     * @return \yii\web\Response
+     * @throws \craft\errors\MissingComponentException
+     * @throws \yii\web\BadRequestHttpException
+     */
+    public function actionSync()
+    {
+        Translate::$app->translate->runSync();
+        // Redirect back to page
+        return $this->redirectToPostedUrl();
+    }
+
+    /**
      * Upload translations
      *
      * @return \yii\web\Response
