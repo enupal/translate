@@ -21,6 +21,7 @@ use enupal\translate\integrations\JsSearch;
 use enupal\translate\integrations\LegacyTwigSearch;
 use enupal\translate\integrations\OptimizedTwigSearch;
 use enupal\translate\integrations\PhpSearch;
+use enupal\translate\jobs\SyncTranslationsWithDb;
 use enupal\translate\Translate as TranslatePlugin;
 use Craft;
 
@@ -108,6 +109,21 @@ class Translate extends Component
             $translations = array_merge($current, $translations);
         }
 
+        $this->writeToFile($translations, $file);
+
+        return true;
+    }
+
+    /**
+     * @return void
+     */
+    public function runSync()
+    {
+        Craft::$app->queue->push(new SyncTranslationsWithDb());
+    }
+
+    public function writeToFile($translations, $file)
+    {
         // Prepare php file
         $php = "<?php\r\n\r\nreturn ";
 
@@ -126,8 +142,6 @@ class Translate extends Component
         }catch (\Throwable $e) {
             throw new \Exception(Craft::t('enupal-translate','Something went wrong while saving your translations: '.$e->getMessage()));
         }
-
-        return true;
     }
 
     /**

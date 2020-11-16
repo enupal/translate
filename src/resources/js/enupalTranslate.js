@@ -48,6 +48,10 @@
                 });
             });
 
+            $('.translations-sync-button').click(function() {
+                $("#sync-db-form").submit();
+            });
+
             // Init the form
             // Figure out the initial site to Translate
             var $option = $siteMenu.$options.filter('.sel:first');
@@ -125,6 +129,7 @@
                 if (textStatus === 'success') {
                     if (response.success)
                     {
+                        Craft.cp.runQueue();
                         Craft.cp.displayNotice(Craft.t('enupal-translate', 'Translations saved'));
                         Craft.elementIndex.updateElements();
                     }
