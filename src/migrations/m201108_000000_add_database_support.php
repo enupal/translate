@@ -1,25 +1,17 @@
 <?php
-/**
- * Translate plugin for Craft CMS 3.x
- *
- * Translation management plugin for Craft CMS
- *
- * @link      https://enupal.com
- * @copyright Copyright (c) 2018 Enupal
- */
-
 
 namespace enupal\translate\migrations;
 
 use craft\db\Migration;
-use Craft;
+
 /**
- * Installation Migration
+ * m201108_000000_add_database_support migration.
  */
-class Install extends Migration
+class m201108_000000_add_database_support extends Migration
 {
     /**
-     * @inheritdoc
+     * @return bool
+     * @throws \yii\base\NotSupportedException
      */
     public function safeUp()
     {
@@ -65,9 +57,8 @@ class Install extends Migration
      */
     public function safeDown()
     {
-        $this->dropTableIfExists('{{%enupaltranslate_message}}');
-        $this->dropTableIfExists('{{%enupaltranslate_sourcemessage}}');
+        echo "m201108_000000_add_database_support cannot be reverted.\n";
 
-        return true;
+        return false;
     }
 }

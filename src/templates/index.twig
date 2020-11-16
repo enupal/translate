@@ -60,6 +60,14 @@
         </form>
         <div class="btn submit translations-upload-button" data-icon="upload" style="position: relative; overflow: hidden;" role="button">{{ "Import file"|t('enupal-translate') }}</div>
     </div>
+    <div class="buttons">
+        <form method="post" id="sync-db-form">
+            {{ csrfInput() }}
+            <input type="hidden" name="action" value="enupal-translate/translate/sync">
+            {{ redirectInput('enupal-translate') }}
+        </form>
+        <div class="btn submit translations-sync-button" data-icon="db" style="position: relative; overflow: hidden;" role="button">{{ "Sync with DB"|t('enupal-translate') }}</div>
+    </div>
 {% endblock %}
 
 {% block content %}
@@ -70,6 +78,11 @@
         
         {{ parent() }}
     </form>
+{% endblock %}
+
+{% block footer %}
+    <div id="count-spinner" class="spinner hidden"></div>
+    <div id="count-container" class="light flex-grow">&nbsp;</div>
 {% endblock %}
 
 {% js %}

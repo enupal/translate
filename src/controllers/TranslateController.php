@@ -136,6 +136,21 @@ class TranslateController extends BaseController
     }
 
     /**
+     * Run sync-db translations
+     *
+     * @return \yii\web\Response
+     * @throws \craft\errors\MissingComponentException
+     * @throws \yii\web\BadRequestHttpException
+     */
+    public function actionSync()
+    {
+        Translate::$app->translate->runSync();
+        Craft::$app->getSession()->setNotice(Craft::t('enupal-translate', 'Sync translations job was added to the queue'));
+        // Redirect back to page
+        return $this->redirectToPostedUrl();
+    }
+
+    /**
      * Upload translations
      *
      * @return \yii\web\Response
@@ -183,7 +198,7 @@ class TranslateController extends BaseController
             Craft::$app->getSession()->setError(Craft::t('enupal-translate', 'Invalid file type'));
         }
 
-
+        Translate::$app->translate->runSync();
         // Redirect back to page
         return $this->redirectToPostedUrl();
     }
@@ -223,6 +238,8 @@ class TranslateController extends BaseController
 
         // Save to translation file
         Translate::$app->translate->set($site->language, $translations, $translatePath);
+
+        Translate::$app->translate->runSync();
 
         // Redirect back to page
         return $this->asJson($response);

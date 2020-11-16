@@ -32,11 +32,12 @@ class Translate extends Plugin
 
     public $hasCpSettings = true;
 
-    public $schemaVersion = '1.2.0';
+    public $schemaVersion = '2.0.0';
 
     public function init()
     {
         parent::init();
+
         self::$app = $this->get('app');
 
         $settings = $this->getSettings();

@@ -22,6 +22,12 @@ Translating your static texts has never been so easy:
 
 ![Screenshot](resources/screenshots/enupal-translate-final-1.gif)
 
+### SYNC with database:
+
+Sync your static translations into your database without no extra queries that may impact your page load time.
+
+This feature simply keeps a copy of your translations folder in the Database to facilitate your deployments and syncing your database translations with your templates folders. This feature avoids adding your translations folder to your version control system (git).
+
 ### Download translations:
 
 Download your translations as CSV file from the top right dropdown menu.
