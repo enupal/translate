@@ -129,6 +129,7 @@
                 if (textStatus === 'success') {
                     if (response.success)
                     {
+                        Craft.cp.runQueue();
                         Craft.cp.displayNotice(Craft.t('enupal-translate', 'Translations saved'));
                         Craft.elementIndex.updateElements();
                     }
