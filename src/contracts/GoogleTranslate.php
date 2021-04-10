@@ -10,7 +10,7 @@
 
 namespace enupal\translate\contracts;
 
-use Stichoza\GoogleTranslate\TranslateClient;
+use Stichoza\GoogleTranslate\GoogleTranslate as TranslateClient;
 use Craft;
 
 class GoogleTranslate
@@ -29,7 +29,7 @@ class GoogleTranslate
         $result = false;
         try {
             $transBlock = implode(' || ', $text);
-            $tr = new TranslateClient($from, $to);
+            $tr = new TranslateClient($to, $from);
             $results = $tr->translate($transBlock);
             $result = explode(' || ',$results);
             // removes white spaces
