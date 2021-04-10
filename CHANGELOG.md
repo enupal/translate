@@ -1,5 +1,17 @@
 # Enupal Translate Changelog
 
+## 2.2.0 - 2021.04.10
+
+### Fixed
+- Fixed issue on mysql 8 ([#41])
+
+### Updated
+- Updated requirement `craftcms/cms ^3.6.0` ([#43])
+- Updated requirement `stichoza/google-translate-php" 4.1.4`
+
+[#43]: https://github.com/enupal/translate/issues/43
+[#41]: https://github.com/enupal/translate/issues/41
+
 ## 2.0.0 - 2020.11.16
 
 > {tip} The most requested feature is here, Sync your static translations into your database without no extra queries that may impact your page load time. [docs](https://docs.enupal.com/translate/translate/sync-with-db.html). Enjoy!
