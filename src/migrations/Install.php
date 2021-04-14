@@ -36,7 +36,7 @@ class Install extends Migration
         ]);
 
         $this->createTable($message, [
-            'id' => $this->primaryKey(),
+            'id' => $this->integer()->notNull(),
             'language' => $this->string(),
             'translation' => $this->text(),
             'dateCreated' => $this->dateTime()->notNull(),

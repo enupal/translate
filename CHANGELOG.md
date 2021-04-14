@@ -1,5 +1,12 @@
 # Enupal Translate Changelog
 
+## 2.2.1 - 2021.04.14
+
+### Fixed
+- Revert mysql change ([#41])
+  
+[#41]: https://github.com/enupal/translate/issues/41
+
 ## 2.2.0 - 2021.04.10
 
 ### Fixed
