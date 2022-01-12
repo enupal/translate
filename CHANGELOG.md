@@ -1,5 +1,12 @@
 # Enupal Translate Changelog
 
+## 2.3.0 - 2022.01.12
+
+### Fixed
+- Fixed guzzle error ([#43])
+
+[#43]: https://github.com/enupal/translate/issues/43
+
 ## 2.2.1 - 2021.04.14
 
 ### Fixed
