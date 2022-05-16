@@ -54,7 +54,7 @@ class Translate extends Element
      * @return string
      */
     /** @noinspection PhpInconsistentReturnPointsInspection */
-    public function __toString()
+    public function __toString(): string
     {
         try{
             return $this->original;
@@ -95,7 +95,7 @@ class Translate extends Element
     /**
      * @inheritdoc
      */
-    public function getStatus()
+    public function getStatus(): ?string
     {
         if ($this->original != $this->translation) {
             return static::TRANSLATED;
@@ -294,7 +294,7 @@ class Translate extends Element
     /**
      * @inheritdoc
      */
-    public static function indexHtml(ElementQueryInterface $elementQuery, array $disabledElementIds = null, array $viewState, string $sourceKey = null, string $context = null, bool $includeContainer, bool $showCheckboxes): string
+    public static function indexHtml(ElementQueryInterface $elementQuery, ?array $disabledElementIds = null, array $viewState, ?string $sourceKey = null, ?string $context = null, bool $includeContainer, bool $showCheckboxes): string
     {
         // just 1 locale enabled
         if (empty($elementQuery->siteId)) {

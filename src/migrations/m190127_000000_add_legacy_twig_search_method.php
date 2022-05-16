@@ -24,7 +24,7 @@ class m190127_000000_add_legacy_twig_search_method extends Migration
         $settings->twigRegexMethod = LegacyTwigSearch::class;
 
         $projectConfig = Craft::$app->getProjectConfig();
-        $projectConfig->set(Plugins::CONFIG_PLUGINS_KEY . '.' . $plugin->handle . '.settings', $settings->toArray());
+        $projectConfig->set(\craft\services\ProjectConfig::PATH_PLUGINS . '.' . $plugin->handle . '.settings', $settings->toArray());
 
         return true;
     }
