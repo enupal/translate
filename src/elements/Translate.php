@@ -49,6 +49,20 @@ class Translate extends Element
     }
 
     /**
+     * @inheritdoc
+     */
+    public static function displayName(): string
+    {
+        $primary = Craft::$app->getSites()->getPrimarySite();
+        $locale = Craft::$app->getI18n()->getLocaleById($primary->language);
+
+        return Craft::t('app', Craft::t('enupal-translate','Source: {region} ({language})', [
+            'language'=>$primary->language,
+            'region' => $locale->displayName
+        ]));
+    }
+
+    /**
      * Use the name as the string representation.
      *
      * @return string
@@ -134,7 +148,7 @@ class Translate extends Element
      */
     protected static function defineDefaultTableAttributes(string $source): array
     {
-        return ['original', 'field'];
+        return ['field'];
     }
 
     /**
@@ -312,7 +326,7 @@ class Translate extends Element
             'viewMode' => $viewState['mode'],
             'context' => $context,
             'disabledElementIds' => $disabledElementIds,
-            'attributes' => Craft::$app->getElementIndexes()->getTableAttributes(static::class, $sourceKey),
+            'attributes' => Craft::$app->getElementSources()->getTableAttributes(static::class, $sourceKey),
             'elements' => $elements,
             'showCheckboxes' => $showCheckboxes
         ];
