@@ -122,8 +122,6 @@ class SyncTranslationsWithDb extends BaseJob
         }
 
         $this->setProgress($queue, 1);
-
-        return true;
     }
 
     private function getLevel2Keys($array)
