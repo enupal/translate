@@ -6,7 +6,7 @@
 	<img width="212" height="212" src="https://enupal.com/assets/docs/translate-icon.svg" alt="Enupal Translate"></a>
 </p>
 
-# Enupal Translate Plugin for Craft CMS 3.x
+# Enupal Translate Plugin for Craft CMS 3 and 4
 
 Translate your website templates and plugins into multiple languages. Bulk translation with Google Translate or Yandex.
 

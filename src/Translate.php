@@ -32,7 +32,7 @@ class Translate extends Plugin
 
     public bool $hasCpSettings = true;
 
-    public string $schemaVersion = '2.2.1';
+    public string $schemaVersion = '3.0.0';
 
     public function init()
     {
