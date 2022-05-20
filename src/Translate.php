@@ -28,11 +28,11 @@ class Translate extends Plugin
      */
     public static $app;
 
-    public $hasCpSection = true;
+    public bool $hasCpSection = true;
 
-    public $hasCpSettings = true;
+    public bool $hasCpSettings = true;
 
-    public $schemaVersion = '2.2.1';
+    public string $schemaVersion = '3.0.0';
 
     public function init()
     {
@@ -58,12 +58,12 @@ class Translate extends Plugin
         );
     }
 
-    protected function createSettingsModel()
+    protected function createSettingsModel(): ?\craft\base\Model
     {
         return new Settings();
     }
 
-    public function getCpNavItem()
+    public function getCpNavItem(): ?array
     {
         $parent = parent::getCpNavItem();
         return array_merge($parent, [
@@ -83,7 +83,7 @@ class Translate extends Plugin
     /**
      * @inheritdoc
      */
-    protected function settingsHtml(): string
+    protected function settingsHtml(): ?string
     {
         return Craft::$app->view->renderTemplate('enupal-translate/settings/index');
     }

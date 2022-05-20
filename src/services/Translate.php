@@ -38,7 +38,7 @@ class Translate extends Component
      *
      * @codeCoverageIgnore
      */
-    public function init()
+    public function init(): void
     {
         parent::init();
 
@@ -152,7 +152,7 @@ class Translate extends Component
      * @param string                $category
      *
      * @return array
-     * @throws \Twig_Error_Loader
+     * @throws \Twig\Error\LoaderError
      * @throws \yii\base\Exception
      */
     public function get(ElementQueryInterface $query, $category = 'site')
@@ -235,7 +235,7 @@ class Translate extends Component
 
                     $view = Craft::$app->getView();
                     $elementIdAsInt++;
-                    $translateId = ElementHelper::createSlug($original);
+                    $translateId = ElementHelper::normalizeSlug($original);
 
                     $field = $view->renderTemplate('_includes/forms/text', [
                         'id' => $translateId,
@@ -247,7 +247,7 @@ class Translate extends Component
                     // Let's create our translate element with all the info
                     $element = new TranslateElement([
                         'id' => $elementIdAsInt,
-                        'translateId' => ElementHelper::createSlug($original),
+                        'translateId' => ElementHelper::normalizeSlug($original),
                         'original' => $original,
                         'translation' => $translation,
                         'source' => $path,

@@ -14,7 +14,7 @@ class SyncTranslationsWithDb extends BaseJob
      *
      * @return string
      */
-    protected function defaultDescription(): string
+    protected function defaultDescription(): ?string
     {
         return Craft::t('enupal-translate','Syncing translations with DB');
     }
@@ -22,7 +22,7 @@ class SyncTranslationsWithDb extends BaseJob
     /**
      * @inheritdoc
      */
-    public function execute($queue)
+    public function execute($queue): void
     {
         $this->setProgress($queue, 1/4);
         $sourceMessageTable = "{{%enupaltranslate_sourcemessage}}";
@@ -122,8 +122,6 @@ class SyncTranslationsWithDb extends BaseJob
         }
 
         $this->setProgress($queue, 1);
-
-        return true;
     }
 
     private function getLevel2Keys($array)
