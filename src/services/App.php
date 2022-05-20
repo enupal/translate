@@ -24,7 +24,7 @@ class App extends Component
      */
     public $settings;
 
-    public function init()
+    public function init(): void
     {
         $this->translate = new Translate();
         $this->settings = new Settings();

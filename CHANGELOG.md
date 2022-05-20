@@ -1,5 +1,10 @@
 # Enupal Translate Changelog
 
+## 3.0.0 - 2022.05.20
+
+### Added
+- Added Craft CMS 4 support
+
 ## 2.3.0 - 2022.01.12
 
 ### Fixed

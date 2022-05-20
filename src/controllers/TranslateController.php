@@ -89,17 +89,16 @@ class TranslateController extends BaseController
         foreach ($occurences as $element) {
             $data .= StringHelper::convertToUTF8('"' . $element->original . '","' . $element->translation . "\"\r\n");
         }
-
-        $info = Craft::$app->getInfo();
+        
+        $primarySite = Craft::$app->getSites()->getPrimarySite();
         $systemName = FileHelper::sanitizeFilename(
-            $pluginName ?? $info->name,
+            $pluginName ?? $primarySite->getName(),
             [
                 'asciiOnly' => true,
                 'separator' => '_'
             ]
         );
         $date = date('YmdHis');
-        $primarySite = Craft::$app->getSites()->getPrimarySite();
         $sourceTo = $primarySite->language . '_to_' . $site->language;
         $fileName = strtolower($systemName . '_translations_' . $sourceTo . '_' . $date);
 

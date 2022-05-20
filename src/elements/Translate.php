@@ -49,12 +49,26 @@ class Translate extends Element
     }
 
     /**
+     * @inheritdoc
+     */
+    public static function displayName(): string
+    {
+        $primary = Craft::$app->getSites()->getPrimarySite();
+        $locale = Craft::$app->getI18n()->getLocaleById($primary->language);
+
+        return Craft::t('app', Craft::t('enupal-translate','Source: {region} ({language})', [
+            'language'=>$primary->language,
+            'region' => $locale->displayName
+        ]));
+    }
+
+    /**
      * Use the name as the string representation.
      *
      * @return string
      */
     /** @noinspection PhpInconsistentReturnPointsInspection */
-    public function __toString()
+    public function __toString(): string
     {
         try{
             return $this->original;
@@ -95,7 +109,7 @@ class Translate extends Element
     /**
      * @inheritdoc
      */
-    public function getStatus()
+    public function getStatus(): ?string
     {
         if ($this->original != $this->translation) {
             return static::TRANSLATED;
@@ -134,7 +148,7 @@ class Translate extends Element
      */
     protected static function defineDefaultTableAttributes(string $source): array
     {
-        return ['original', 'field'];
+        return ['field'];
     }
 
     /**
@@ -294,7 +308,7 @@ class Translate extends Element
     /**
      * @inheritdoc
      */
-    public static function indexHtml(ElementQueryInterface $elementQuery, array $disabledElementIds = null, array $viewState, string $sourceKey = null, string $context = null, bool $includeContainer, bool $showCheckboxes): string
+    public static function indexHtml(ElementQueryInterface $elementQuery, ?array $disabledElementIds = null, array $viewState, ?string $sourceKey = null, ?string $context = null, bool $includeContainer, bool $showCheckboxes): string
     {
         // just 1 locale enabled
         if (empty($elementQuery->siteId)) {
@@ -312,7 +326,7 @@ class Translate extends Element
             'viewMode' => $viewState['mode'],
             'context' => $context,
             'disabledElementIds' => $disabledElementIds,
-            'attributes' => Craft::$app->getElementIndexes()->getTableAttributes(static::class, $sourceKey),
+            'attributes' => Craft::$app->getElementSources()->getTableAttributes(static::class, $sourceKey),
             'elements' => $elements,
             'showCheckboxes' => $showCheckboxes
         ];
