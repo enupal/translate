@@ -35,14 +35,25 @@ class Install extends Migration
             'uid' => $this->uid(),
         ]);
 
-        $this->createTable($message, [
-            'id' => $this->integer()->notNull(),
-            'language' => $this->string(),
-            'translation' => $this->text(),
-            'dateCreated' => $this->dateTime()->notNull(),
-            'dateUpdated' => $this->dateTime()->notNull(),
-            'uid' => $this->uid(),
-        ]);
+        if ($this->db->driverName === 'mysql') {
+            $this->createTable($message, [
+                'id' => $this->primaryKey(),
+                'language' => $this->string(),
+                'translation' => $this->text(),
+                'dateCreated' => $this->dateTime()->notNull(),
+                'dateUpdated' => $this->dateTime()->notNull(),
+                'uid' => $this->uid(),
+            ]);
+        } else {
+            $this->createTable($message, [
+                'id' => $this->integer()->notNull(),
+                'language' => $this->string(),
+                'translation' => $this->text(),
+                'dateCreated' => $this->dateTime()->notNull(),
+                'dateUpdated' => $this->dateTime()->notNull(),
+                'uid' => $this->uid(),
+            ]);
+        }
 
         if ($this->db->driverName === 'mysql') {
             $name = $this->db->getIndexName($sourceMessage, ['message'], false);
