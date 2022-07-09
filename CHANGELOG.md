@@ -1,5 +1,12 @@
 # Enupal Translate Changelog
 
+## 2.3.1 - 2022.07.09
+
+### Fixed
+- Fixed issue on mysql ([#56])
+
+[#56]: https://github.com/enupal/translate/issues/56
+
 ## 2.3.0 - 2022.01.12
 
 ### Fixed
