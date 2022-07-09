@@ -37,7 +37,14 @@
             this.$form = $("#translate-ajax");
             var settings = {};
             this.$menu = new Garnish.MenuBtn("#enupal-menubtn", settings);
-            var $siteMenu = $('.sitemenubtn:first').menubtn().data('menubtn').menu;
+            var $menuBtn = $('.sitemenubtn:first').menubtn().data('menubtn');
+            var $siteMenu = null;
+
+            // check is only one site on craft cms (we don't have a dropdown menu if only 1 site)
+            if (typeof $menuBtn != "undefined") {
+                $siteMenu = $menuBtn.menu;
+            }
+
             var $siteIdInput = $('input[name="siteId"]');
             var $importSiteId = $('input[name="importSiteId"]');
 
@@ -54,25 +61,28 @@
 
             // Init the form
             // Figure out the initial site to Translate
-            var $option = $siteMenu.$options.filter('.sel:first');
             var siteIdToTranslate = Craft.getLocalStorage('BaseElementIndex.siteId');
 
-            if (!$option.length) {
-                $option = $siteMenu.$options.first();
-            }
+            if (typeof $menuBtn != "undefined") {
+                var $option = $siteMenu.$options.filter('.sel:first');
+                if (!$option.length) {
+                    $option = $siteMenu.$options.first();
+                }
 
-            if ($option.length) {
-                siteIdToTranslate = $option.data('site-id');
-            }
-            
-            $siteIdInput.val(siteIdToTranslate);
-            $importSiteId.val(siteIdToTranslate);
+                if ($option.length) {
+                    siteIdToTranslate = $option.data('site-id');
+                }
 
-            // Change the siteId when on hidden values
-            $siteMenu.on('optionselect', function(ev) {
-                $siteIdInput.val($(ev.selectedOption).data('siteId'));
-                $importSiteId.val($(ev.selectedOption).data('siteId'));
-            });
+                $siteMenu.on('optionselect', function(ev) {
+                    $siteIdInput.val($(ev.selectedOption).data('siteId'));
+                    $importSiteId.val($(ev.selectedOption).data('siteId'));
+                });
+
+                $siteIdInput.val(siteIdToTranslate);
+                $importSiteId.val(siteIdToTranslate);
+            } else {
+                $siteIdInput.val($importSiteId.val());
+            }
 
             Craft.elementIndex.on('afterAction', this.manageAfterAction);
 
