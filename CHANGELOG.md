@@ -1,5 +1,14 @@
 # Enupal Translate Changelog
 
+## 3.0.1 - 2022.07.12
+
+### Fixed
+- Fixed issue on mysql ([#56])
+- Fixed issue where there is only one site on Craft CMS ([#55])
+
+[#55]: https://github.com/enupal/translate/issues/55
+[#56]: https://github.com/enupal/translate/issues/56
+
 ## 3.0.0 - 2022.05.20
 
 ### Added
