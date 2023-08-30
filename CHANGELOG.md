@@ -1,5 +1,16 @@
 # Enupal Translate Changelog
 
+## 3.1.0 - 2023.08.30
+
+### Added
+- Adds support to the `enupal-translate/translate/sync` craft command to sync translations from DB ([#61])
+
+### Fixed
+- Fixed issue on Craft 4.5 ([#64])
+
+[#64]: https://github.com/enupal/translate/issues/64
+[#61]: https://github.com/enupal/translate/issues/61
+
 ## 3.0.1 - 2022.07.12
 
 ### Fixed
