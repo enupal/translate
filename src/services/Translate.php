@@ -231,7 +231,7 @@ class Translate extends Component
                 foreach ($matches[$matchPosition] as $original) {
                     // Apply the Craft Translate
                     $site = Craft::$app->getSites()->getSiteById($query->siteId);
-                    $translation = Craft::t($category, $original, null, $site->language);
+                    $translation = Craft::t($category, $original, [], $site->language);
 
                     $view = Craft::$app->getView();
                     $elementIdAsInt++;
