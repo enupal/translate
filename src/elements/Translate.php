@@ -158,7 +158,7 @@ class Translate extends Element
      *
      * @return string
      */
-    protected function tableAttributeHtml(string $attribute): string
+    protected function attributeHtml(string $attribute): string
     {
         return $this->$attribute;
     }
@@ -308,7 +308,7 @@ class Translate extends Element
     /**
      * @inheritdoc
      */
-    public static function indexHtml(ElementQueryInterface $elementQuery, ?array $disabledElementIds = null, array $viewState, ?string $sourceKey = null, ?string $context = null, bool $includeContainer, bool $showCheckboxes): string
+    public static function indexHtml(ElementQueryInterface $elementQuery, ?array $disabledElementIds = null, array $viewState, ?string $sourceKey = null, ?string $context = null, bool $includeContainer, bool $showCheckboxes, bool $sortable = false): string
     {
         // just 1 locale enabled
         if (empty($elementQuery->siteId)) {
