@@ -158,7 +158,7 @@ class Translate extends Element
      *
      * @return string
      */
-    protected function tableAttributeHtml(string $attribute): string
+    protected function attributeHtml(string $attribute): string
     {
         return $this->$attribute;
     }
@@ -308,7 +308,7 @@ class Translate extends Element
     /**
      * @inheritdoc
      */
-    public static function indexHtml(ElementQueryInterface $elementQuery, ?array $disabledElementIds = null, array $viewState, ?string $sourceKey = null, ?string $context = null, bool $includeContainer, bool $showCheckboxes): string
+    public static function indexHtml(ElementQueryInterface $elementQuery, ?array $disabledElementIds = null, array $viewState, ?string $sourceKey = null, ?string $context = null, bool $includeContainer, bool $showCheckboxes, bool $sortable = false): string
     {
         // just 1 locale enabled
         if (empty($elementQuery->siteId)) {
@@ -328,11 +328,16 @@ class Translate extends Element
             'disabledElementIds' => $disabledElementIds,
             'attributes' => Craft::$app->getElementSources()->getTableAttributes(static::class, $sourceKey),
             'elements' => $elements,
-            'showCheckboxes' => $showCheckboxes
+            'showCheckboxes' => $showCheckboxes,
+            'selectable' => true,
+            'sortable' => false,
+            'inlineEditing' => false
         ];
 
         // Better UI
         Craft::$app->view->registerJs("$('table.fullwidth thead th').css('width', '50%');");
+        Craft::$app->view->registerJs("$('div.chip').removeClass('hidden');");
+        Craft::$app->view->registerCss('table.data tbody tr:not(.disabled).sel td input.text {color: #000;}');
         Craft::$app->view->registerJs("$('.buttons.hidden').removeClass('hidden');");
 
         $template = '_elements/'.$viewState['mode'].'view/'.($includeContainer ? 'container' : 'elements');

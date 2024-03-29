@@ -22,7 +22,7 @@
         /**
          * The constructor.
          */
-        init: function()
+        init: function(currentSiteId)
         {
             var that = this;
             this.addListener($('.save-elements-button'), 'activate', 'processAjaxCall');
@@ -63,20 +63,8 @@
             // Figure out the initial site to Translate
             var siteIdToTranslate = Craft.getLocalStorage('BaseElementIndex.siteId');
 
-            if (typeof $menuBtn != "undefined") {
-                var $option = $siteMenu.$options.filter('.sel:first');
-                if (!$option.length) {
-                    $option = $siteMenu.$options.first();
-                }
-
-                if ($option.length) {
-                    siteIdToTranslate = $option.data('site-id');
-                }
-
-                $siteMenu.on('optionselect', function(ev) {
-                    $siteIdInput.val($(ev.selectedOption).data('siteId'));
-                    $importSiteId.val($(ev.selectedOption).data('siteId'));
-                });
+            if (currentSiteId) {
+                siteIdToTranslate = currentSiteId;
 
                 $siteIdInput.val(siteIdToTranslate);
                 $importSiteId.val(siteIdToTranslate);
