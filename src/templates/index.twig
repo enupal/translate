@@ -11,13 +11,19 @@
 
 {% extends "_layouts/elementindex" %}
 
-{% set title = "Translate to"|t('enupal-translate') %}
+
+{% set siteHandle = craft.app.request.getParam('site') %}
+{% set currentSiteId = craft.app.getSites().getSiteByHandle(siteHandle).id ?? null %}
+{% set translateTo = craft.app.getSites().getSiteByHandle(siteHandle).language ?? craft.app.getSites().getPrimarySite().language %}
+
+{% set title = "Translate to: "~translateTo %}
 {% set elementType = 'enupal\\translate\\elements\\Translate' %}
 {% import "_includes/forms" as forms %}
 
 {% do view.registerAssetBundle("enupal\\translate\\web\\TranslateAsset") %}
 {% set continueEditingUrl = 'enupal-translate' %}
 {% set saveShortcutRedirect = continueEditingUrl %}
+
 
 {% block actionButton %}
     <div class="btngroup">
@@ -83,10 +89,11 @@
 {% block footer %}
     <div id="count-spinner" class="spinner hidden"></div>
     <div id="count-container" class="light flex-grow">&nbsp;</div>
+    <div id="actions-container" class="flex"></div>
 {% endblock %}
 
 {% js %}
     $(document).ready(function() {
-        new EnupalTranslate();
+        new EnupalTranslate({{currentSiteId}});
     });
 {% endjs %}
