@@ -1,5 +1,12 @@
 # Enupal Translate Changelog
 
+## 4.0.2 - 2024.06.22
+
+### Fixed
+- Fixed issue when having one site ([#68])
+
+[#68]: https://github.com/enupal/translate/issues/68
+
 ## 4.0.1 - 2024.03.31
 
 ### Updated

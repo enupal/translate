@@ -1,7 +1,7 @@
 {
   "name": "enupal/translate",
   "description": "Translate your website templates and plugins into multiple languages. Bulk translation with Google Translate or Yandex.",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "type": "craft-plugin",
   "autoload": {
     "psr-4": {

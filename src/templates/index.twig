@@ -13,8 +13,8 @@
 
 
 {% set siteHandle = craft.app.request.getParam('site') %}
-{% set currentSiteId = craft.app.getSites().getSiteByHandle(siteHandle).id ?? null %}
-{% set translateTo = craft.app.getSites().getSiteByHandle(siteHandle).language ?? craft.app.getSites().getPrimarySite().language %}
+{% set currentSiteId = siteHandle ? craft.app.getSites().getSiteByHandle(siteHandle).id ?? null : null %}
+{% set translateTo = siteHandle ? craft.app.getSites().getSiteByHandle(siteHandle).language : craft.app.getSites().getPrimarySite().language %}
 
 {% set title = "Translate to: "~translateTo %}
 {% set elementType = 'enupal\\translate\\elements\\Translate' %}
