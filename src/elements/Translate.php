@@ -329,6 +329,7 @@ class Translate extends Element
             'attributes' => Craft::$app->getElementSources()->getTableAttributes(static::class, $sourceKey),
             'elements' => $elements,
             'showCheckboxes' => $showCheckboxes,
+            'showHeaderColumn' => true,
             'selectable' => true,
             'sortable' => false,
             'inlineEditing' => false
