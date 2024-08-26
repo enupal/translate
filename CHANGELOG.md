@@ -1,5 +1,12 @@
 # Enupal Translate Changelog
 
+## 4.0.3 - 2024.08.26
+
+### Fixed
+- Fixed the issue where the source column was not shown on the index page ([#71])
+
+- [#71]: https://github.com/enupal/translate/issues/71
+
 ## 4.0.2 - 2024.06.22
 
 ### Fixed
