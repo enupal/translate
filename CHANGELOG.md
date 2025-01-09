@@ -1,5 +1,12 @@
 # Enupal Translate Changelog
 
+## 4.1.1 - 2025.01.09
+
+### Fixed
+- Fixed error when only one site introduced on Craft CMS v5.5.4 ([#74])
+
+[#74]: https://github.com/enupal/translate/issues/74
+
 ## 4.1.0 - 2025.01.07
 
 ### Fixed
