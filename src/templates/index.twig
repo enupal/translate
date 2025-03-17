@@ -18,6 +18,8 @@
 {% do view.registerAssetBundle("enupal\\translate\\web\\TranslateAsset") %}
 {% set continueEditingUrl = 'enupal-translate' %}
 {% set saveShortcutRedirect = continueEditingUrl %}
+{% set selectedSiteId = selectedSiteId ?? craft.app.sites.getPrimarySite().id %}
+
 
 {% block actionButton %}
     <div class="btngroup">
@@ -39,7 +41,7 @@
                     <a id="donwload-button" class="formsubmit translations-download-button"
                        data-process="download"
                        data-action="enupal-translate/translate/download"
-                       data-siteId="{{ elementInstance.siteId }}">
+                       data-siteId="{{ selectedSiteId }}">
                         {{ "Download"|t('enupal-translate') }}
                     </a>
                 </li>
@@ -55,7 +57,7 @@
             {{ csrfInput() }}
             <input type="hidden" name="action" value="enupal-translate/translate/upload">
             {{ redirectInput('enupal-translate') }}
-            <input type="hidden" id="importSiteId" name="importSiteId" value="{{ elementInstance.siteId }}">
+            <input type="hidden" id="importSiteId" name="importSiteId" value="{{ selectedSiteId }}">
             <input type="file" accept=".csv" name="translations-upload" style="display: none" />
         </form>
         <div class="btn submit translations-upload-button" data-icon="upload" style="position: relative; overflow: hidden;" role="button">{{ "Import file"|t('enupal-translate') }}</div>
@@ -74,7 +76,7 @@
     <form method="post" id="translate-ajax" accept-charset="utf-8">
         {{ csrfInput() }}
         <input type="hidden" name="action" value="enupal-translate/translate/save">
-        <input type="hidden" name="siteId" value="{{ elementInstance.siteId }}">
+        <input type="hidden" name="siteId" value="{{ selectedSiteId }}">
         
         {{ parent() }}
     </form>
