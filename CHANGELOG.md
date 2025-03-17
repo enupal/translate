@@ -1,5 +1,12 @@
 # Enupal Translate Changelog
 
+## 3.2.0 - 2025.03.17
+
+### Fixed
+- Fixed `elementInstance` does not exist ([#74])
+
+[#74]: https://github.com/enupal/translate/issues/74
+
 ## 3.1.0 - 2023.08.30
 
 ### Added
