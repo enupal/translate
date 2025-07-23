@@ -106,6 +106,16 @@ class Translate extends Component
 
         // Get current translation
         if ($current = @include($file)) {
+            // Filter out empty translations from current file
+            $current = array_filter($current, function($value) {
+                return !empty(trim($value));
+            });
+            
+            // Filter out empty translations from new translations
+            $translations = array_filter($translations, function($value) {
+                return !empty(trim($value));
+            });
+            
             $translations = array_merge($current, $translations);
         }
 
@@ -229,6 +239,11 @@ class Translate extends Component
             if (preg_match_all($regex, $contents, $matches)) {
                 $matchPosition = $fileOptions['matchPosition'];
                 foreach ($matches[$matchPosition] as $original) {
+                    // Skip empty or whitespace-only translations
+                    if (empty(trim($original))) {
+                        continue;
+                    }
+                    
                     // Apply the Craft Translate
                     $site = Craft::$app->getSites()->getSiteById($query->siteId);
                     $translation = Craft::t($category, $original, [], $site->language);
