@@ -116,6 +116,16 @@ class SyncTranslationsWithDb extends BaseJob
             // Get current translation
             $current = @include($file);
             if (is_array($current)) {
+                // Filter out empty translations from current file
+                $current = array_filter($current, function($value) {
+                    return !empty(trim($value));
+                });
+                
+                // Filter out empty translations from database translations
+                $finalTranslationsByLanguage = array_filter($finalTranslationsByLanguage, function($value) {
+                    return !empty(trim($value));
+                });
+                
                 $finalTranslationsByLanguage = array_merge($finalTranslationsByLanguage, $current);
             }
             TranslatePlugin::$app->translate->writeToFile($finalTranslationsByLanguage, $file);

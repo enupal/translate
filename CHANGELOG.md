@@ -1,5 +1,12 @@
 # Enupal Translate Changelog
 
+## 2.3.3 - 2025.07.23
+
+### Fixed
+- Fixed issue generating empty translations when saving ([#62])
+
+[#62]: https://github.com/enupal/translate/issues/62
+
 ## 2.3.2 - 2022.07.12
 
 ### Fixed
