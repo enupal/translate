@@ -6,10 +6,15 @@
  * author discovers that the plugin can translate what they're looking at, so
  * it explains itself even when it can't do anything yet.
  *
+ * Uses Craft's own `.meta > .field` markup so the rows line up with Slug,
+ * Author and Post Date above rather than inventing a second layout.
+ *
  * @link      https://enupal.com
  * @copyright Copyright (c) 2018 Enupal
  */
 #}
+{% import "_includes/forms" as forms %}
+
 {% if currentUser.can('enupal-translate:translateContent') %}
 
     {% set ready = craft.enupaltranslate.isContentTranslationReady() %}
@@ -26,167 +31,127 @@
     {% set isRealDraft = element.getIsDraft() and not element.isProvisionalDraft %}
     {% set showDraftNote = isRealDraft or element.getIsRevision() %}
 
-    <fieldset class="enupal-translate-sidebar">
+    <fieldset>
         <legend class="h6">{{ "Enupal Translate"|t('enupal-translate') }}</legend>
 
-        <div class="meta">
+        {% if not ready %}
+            <div class="meta">
+                <div class="field">
+                    <div class="input">
+                        <p class="light" style="margin: 0;">
+                            {{ "Machine-translate this entry into your other sites."|t('enupal-translate') }}
+                            {% if currentUser.admin %}
+                                <a class="go" href="{{ url('enupal-translate/settings/providers') }}">
+                                    {{ "Enable a provider"|t('enupal-translate') }}
+                                </a>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
 
-            {% if not ready %}
-                <p class="light enupal-translate-note">
-                    {{ "Machine-translate this entry into your other sites."|t('enupal-translate') }}
-                </p>
-                {% if currentUser.admin %}
-                    <p class="enupal-translate-note">
-                        <a class="go" href="{{ url('enupal-translate/settings/providers') }}">
-                            {{ "Enable a provider"|t('enupal-translate') }}
-                        </a>
-                    </p>
-                {% else %}
-                    <p class="light enupal-translate-note">
-                        {{ "No provider is enabled yet — ask an admin to set one up."|t('enupal-translate') }}
-                    </p>
-                {% endif %}
+        {% elseif targets is empty %}
+            <div class="meta">
+                <div class="field">
+                    <div class="input">
+                        <p class="light" style="margin: 0;">
+                            {{ "No other sites available to translate into."|t('enupal-translate') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
 
-            {% elseif targets is empty %}
-                <p class="light enupal-translate-note">
-                    {{ "No other sites available to translate into."|t('enupal-translate') }}
-                </p>
+        {% else %}
 
-            {% else %}
+            {# Build the target options once, marking sites that already have a version. #}
+            {% set targetOptions = [] %}
+            {% for target in targets %}
+                {% set label = target.site.name ~ ' (' ~ target.site.language ~ ')' %}
+                {% set targetOptions = targetOptions|merge([{
+                    label: target.exists ? label ~ ' — ' ~ 'exists'|t('enupal-translate') : label,
+                    value: target.site.id
+                }]) %}
+            {% endfor %}
+            {% if targets|length > 1 %}
+                {% set targetOptions = targetOptions|merge([{
+                    label: "All sites"|t('enupal-translate') ~ ' (' ~ targets|length ~ ')',
+                    value: '*'
+                }]) %}
+            {% endif %}
 
-                <form method="post" accept-charset="UTF-8" class="enupal-translate-form">
-                    {{ csrfInput() }}
-                    {{ actionInput('enupal-translate/content/translate') }}
-                    {{ hiddenInput('elementId', element.canonicalId) }}
-                    {{ hiddenInput('elementType', className(element)) }}
-                    {{ hiddenInput('sourceSiteId', element.siteId) }}
-                    {{ redirectInput(element.cpEditUrl) }}
+            <form method="post" accept-charset="UTF-8">
+                {{ csrfInput() }}
+                {{ actionInput('enupal-translate/content/translate') }}
+                {{ hiddenInput('elementId', element.canonicalId) }}
+                {{ hiddenInput('elementType', className(element)) }}
+                {{ hiddenInput('sourceSiteId', element.siteId) }}
+                {{ redirectInput(element.cpEditUrl) }}
 
-                    <div class="enupal-translate-row">
-                        <span class="enupal-translate-label">{{ "From"|t('enupal-translate') }}</span>
-                        <span class="enupal-translate-value">
-                            {{ element.site.name }} <span class="light">({{ element.site.language }})</span>
+                <div class="meta">
+                    <div class="field">
+                        <div class="heading">
+                            <label>{{ "From"|t('enupal-translate') }}</label>
+                        </div>
+                        <div class="input">
+                            <span>{{ element.site.name }} ({{ element.site.language }})</span>
                             {% if showDraftNote %}
                                 <span class="info">
                                     {{ "This is a draft. Translating uses the saved version of this entry, not the changes shown here."|t('enupal-translate') }}
                                 </span>
                             {% endif %}
-                        </span>
+                        </div>
                     </div>
 
                     {% if providers|length > 1 %}
-                        <div class="enupal-translate-row">
-                            <span class="enupal-translate-label">{{ "With"|t('enupal-translate') }}</span>
-                            <span class="enupal-translate-value">
-                                <div class="select small">
-                                    <select name="providerHandle">
-                                        {% for handle, label in providers %}
-                                            <option value="{{ handle }}" {{ handle == defaultProvider ? 'selected' : '' }}>{{ label }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </span>
-                        </div>
+                        {{ forms.selectField({
+                            label: "With"|t('enupal-translate'),
+                            name: 'providerHandle',
+                            options: providers,
+                            value: defaultProvider
+                        }) }}
                     {% else %}
                         {{ hiddenInput('providerHandle', defaultProvider) }}
                     {% endif %}
 
-                    <div class="enupal-translate-row enupal-translate-row--stacked">
-                        <span class="enupal-translate-label">{{ "To"|t('enupal-translate') }}</span>
-                        <ul class="enupal-translate-targets">
-                            {% for target in targets %}
-                                <li>
-                                    <button type="submit" class="btn small" name="targetSiteId" value="{{ target.site.id }}">
-                                        {{ target.site.name }} <span class="light">({{ target.site.language }})</span>
-                                    </button>
-                                    {% if target.exists %}
-                                        <span class="enupal-translate-exists"
-                                              title="{{ 'A version already exists in this site and will be updated'|t('enupal-translate') }}">
-                                            {{ "exists"|t('enupal-translate') }}
-                                        </span>
-                                    {% endif %}
-                                </li>
-                            {% endfor %}
+                    {{ forms.selectField({
+                        label: "To"|t('enupal-translate'),
+                        name: 'targetSiteId',
+                        options: targetOptions,
+                        value: targetOptions|first.value
+                    }) }}
 
-                            {% if targets|length > 1 %}
-                                <li>
-                                    <button type="submit"
-                                            class="btn small"
-                                            name="targetSiteId"
-                                            value="*"
-                                            onclick="return confirm('{{ 'Translate into all {count} sites? This runs in the queue.'|t('enupal-translate', {count: targets|length})|e('js') }}')">
-                                        <strong>{{ "All sites"|t('enupal-translate') }}</strong>
-                                    </button>
-                                </li>
-                            {% endif %}
-                        </ul>
+                    <div class="field">
+                        <div class="input enupal-translate-actions">
+                            <button type="submit" class="btn">
+                                {{ "Translate"|t('enupal-translate') }}
+                            </button>
+                            <span class="light enupal-translate-meta">
+                                {% if providers|length > 1 %}
+                                    <a href="{{ url('enupal-translate/settings/content') }}">{{ "Settings"|t('enupal-translate') }}</a>
+                                {% else %}
+                                    {{ providerName }}
+                                {% endif %}
+                                &middot;
+                                <a href="{{ url('enupal-translate/dashboard') }}">{{ "Usage"|t('enupal-translate') }}</a>
+                            </span>
+                        </div>
                     </div>
-                </form>
+                </div>
+            </form>
 
-                <p class="enupal-translate-footer light">
-                    {% if providers|length > 1 %}
-                        <a href="{{ url('enupal-translate/settings/content') }}">{{ "Settings"|t('enupal-translate') }}</a>
-                    {% else %}
-                        {{ providerName }}
-                    {% endif %}
-                    <span aria-hidden="true">·</span>
-                    <a href="{{ url('enupal-translate/dashboard') }}">{{ "Usage"|t('enupal-translate') }}</a>
-                </p>
+        {% endif %}
 
-            {% endif %}
-
-        </div>
     </fieldset>
 
     {% css %}
-        .enupal-translate-sidebar .enupal-translate-note {
-            margin: 0 0 6px;
-        }
-        .enupal-translate-sidebar .enupal-translate-row {
-            display: flex;
-            align-items: baseline;
+        .enupal-translate-actions {
+            flex: 1 1 auto;
+            justify-content: space-between;
             gap: 8px;
-            margin-bottom: 8px;
         }
-        .enupal-translate-sidebar .enupal-translate-row--stacked {
-            align-items: flex-start;
-        }
-        .enupal-translate-sidebar .enupal-translate-label {
-            flex: 0 0 34px;
+        .enupal-translate-meta {
             font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            color: var(--light-text-color, #8e9297);
-        }
-        .enupal-translate-sidebar .enupal-translate-value {
-            flex: 1 1 auto;
-            min-width: 0;
-        }
-        .enupal-translate-sidebar .enupal-translate-targets {
-            flex: 1 1 auto;
-            margin: 0;
-            padding: 0;
-            list-style: none;
-            min-width: 0;
-        }
-        .enupal-translate-sidebar .enupal-translate-targets li {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-bottom: 4px;
-        }
-        .enupal-translate-sidebar .enupal-translate-exists {
-            font-size: 11px;
-            color: var(--light-text-color, #8e9297);
-        }
-        .enupal-translate-sidebar .enupal-translate-footer {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin: 10px 0 0;
-            padding-top: 8px;
-            border-top: 1px solid var(--hairline-color, rgba(51, 64, 77, 0.1));
-            font-size: 12px;
+            white-space: nowrap;
         }
     {% endcss %}
 
