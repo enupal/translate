@@ -1,0 +1,37 @@
+{#
+/**
+ * Target site picker for the bulk content translate action.
+ *
+ * The data-param/data-value pairs are posted back and land on the element
+ * action's public properties.
+ */
+#}
+{% set currentSiteHandle = craft.app.request.getParam('site') ?? craft.app.sites.currentSite.handle %}
+
+<button type="button" class="btn menubtn" aria-label="{{ 'Translate'|t('enupal-translate') }}">
+    {{ 'Translate to'|t('enupal-translate') }}
+</button>
+<div class="menu">
+    <ul>
+        <li>
+            <a class="formsubmit"
+               data-param="targetSiteHandle"
+               data-value="*"
+               data-params='{{ { sourceSiteHandle: currentSiteHandle }|json_encode }}'>
+                <strong>{{ 'All sites'|t('enupal-translate') }}</strong>
+            </a>
+        </li>
+        {% for site in craft.app.sites.allSites %}
+            {% if site.handle != currentSiteHandle and currentUser.can('editSite:' ~ site.uid) %}
+                <li>
+                    <a class="formsubmit"
+                       data-param="targetSiteHandle"
+                       data-value="{{ site.handle }}"
+                       data-params='{{ { sourceSiteHandle: currentSiteHandle }|json_encode }}'>
+                        {{ site.name }} ({{ site.language }})
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</div>

@@ -14,8 +14,10 @@ use Craft;
 use craft\base\Element;
 use craft\elements\db\ElementQueryInterface;
 use craft\web\ErrorHandler;
+use enupal\translate\elements\actions\ClaudeTranslate;
 use enupal\translate\elements\actions\GoogleCloudTranslate;
 use enupal\translate\elements\actions\GoogleTranslate;
+use enupal\translate\elements\actions\OpenAiTranslate;
 use enupal\translate\elements\actions\Yandex;
 use enupal\translate\Translate as TranslatePlugin;
 use enupal\translate\elements\db\TranslateQuery;
@@ -181,7 +183,7 @@ class Translate extends Element
     /**
      * @inheritdoc
      */
-    protected static function defineSources(string $context = null): array
+    protected static function defineSources(?string $context = null): array
     {
         $sources = [];
 
@@ -308,8 +310,16 @@ class Translate extends Element
     /**
      * @inheritdoc
      */
-    public static function indexHtml(ElementQueryInterface $elementQuery, ?array $disabledElementIds = null, array $viewState, ?string $sourceKey = null, ?string $context = null, bool $includeContainer, bool $showCheckboxes, bool $sortable = false): string
-    {
+    public static function indexHtml(
+        ElementQueryInterface $elementQuery,
+        ?array $disabledElementIds,
+        array $viewState,
+        ?string $sourceKey,
+        ?string $context,
+        bool $includeContainer,
+        bool $selectable,
+        bool $sortable,
+    ): string {
         // just 1 locale enabled
         if (empty($elementQuery->siteId)) {
             $primarySite = Craft::$app->getSites()->getPrimarySite();
@@ -328,7 +338,7 @@ class Translate extends Element
             'disabledElementIds' => $disabledElementIds,
             'attributes' => Craft::$app->getElementSources()->getTableAttributes(static::class, $sourceKey),
             'elements' => $elements,
-            'showCheckboxes' => $showCheckboxes,
+            'showCheckboxes' => $selectable,
             'showHeaderColumn' => true,
             'selectable' => true,
             'sortable' => false,
@@ -349,30 +359,26 @@ class Translate extends Element
     /**
      * @inheritdoc
      */
-    protected static function defineActions(string $source = null): array
+    protected static function defineActions(?string $source = null): array
     {
+        // One bulk action per provider the user has actually configured.
+        $actionsByProvider = [
+            'yandex' => Yandex::class,
+            'googleFree' => GoogleTranslate::class,
+            'googleCloud' => GoogleCloudTranslate::class,
+            'openai' => OpenAiTranslate::class,
+            'claude' => ClaudeTranslate::class,
+        ];
+
         $actions = [];
 
-        $settings = TranslatePlugin::$app->translate->getPluginSettings();
+        foreach (TranslatePlugin::$app->providers->getEnabledProviders() as $handle => $provider) {
+            if (!isset($actionsByProvider[$handle])) {
+                continue;
+            }
 
-        if ($settings->enableYandex && $settings->yandexApi){
-            // Yandex
             $actions[] = Craft::$app->getElements()->createAction([
-                'type' => Yandex::class,
-            ]);
-        }
-
-        if ($settings->enableGoogleApi && $settings->googleApi){
-            // Google Cloud Translate
-            $actions[] = Craft::$app->getElements()->createAction([
-                'type' => GoogleCloudTranslate::class,
-            ]);
-        }
-
-        if ($settings->enableFreeGoogleApi) {
-            // Google Translate Free
-            $actions[] = Craft::$app->getElements()->createAction([
-                'type' => GoogleTranslate::class,
+                'type' => $actionsByProvider[$handle],
             ]);
         }
 

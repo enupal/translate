@@ -55,5 +55,42 @@ class TranslateVariable
     {
         return Translate::$app->settings->getTwigSearchMethods();
     }
-}
 
+    /**
+     * Model options for a provider's settings dropdown.
+     *
+     * @return array value => label
+     */
+    public function getProviderModels(string $handle): array
+    {
+        $provider = Translate::$app->providers->getProviderByHandle($handle);
+
+        if ($provider === null || !method_exists($provider, 'getAvailableModels')) {
+            return [];
+        }
+
+        return $provider::getAvailableModels();
+    }
+
+    /**
+     * Enabled providers, for the content translation dropdown.
+     *
+     * @return array handle => label
+     */
+    public function getContentProviderOptions(): array
+    {
+        $options = ['' => Craft::t('enupal-translate', 'Automatic (first enabled)')];
+
+        return $options + Translate::$app->providers->getEnabledProviderOptions();
+    }
+
+    /**
+     * Every registered provider, so templates can show connection state.
+     *
+     * @return \enupal\translate\base\TranslationProvider[]
+     */
+    public function getProviders(): array
+    {
+        return Translate::$app->providers->getAllProviders();
+    }
+}

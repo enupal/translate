@@ -68,7 +68,49 @@ class Install extends Migration
 
         $this->addForeignKey(null, $message, ['id'], $sourceMessage, ['id'], 'CASCADE', 'RESTRICT');
 
+        $this->createMetricsTable();
+
         return true;
+    }
+
+    /**
+     * Usage metrics behind the translation dashboard.
+     */
+    private function createMetricsTable(): void
+    {
+        $metrics = '{{%enupaltranslate_metrics}}';
+
+        if ($this->db->tableExists($metrics)) {
+            return;
+        }
+
+        $this->createTable($metrics, [
+            'id' => $this->primaryKey(),
+            'provider' => $this->string(64)->notNull(),
+            'model' => $this->string(128),
+            'type' => $this->string(32)->notNull()->defaultValue('static'),
+            'sourceLanguage' => $this->string(32),
+            'targetLanguage' => $this->string(32)->notNull(),
+            'siteId' => $this->integer(),
+            'elementId' => $this->integer(),
+            'elementType' => $this->string(255),
+            'stringCount' => $this->integer()->notNull()->defaultValue(0),
+            'characterCount' => $this->integer()->notNull()->defaultValue(0),
+            'inputTokens' => $this->integer()->notNull()->defaultValue(0),
+            'outputTokens' => $this->integer()->notNull()->defaultValue(0),
+            'apiCalls' => $this->integer()->notNull()->defaultValue(0),
+            'durationMs' => $this->integer()->notNull()->defaultValue(0),
+            'success' => $this->boolean()->notNull()->defaultValue(true),
+            'errorMessage' => $this->text(),
+            'dateCreated' => $this->dateTime()->notNull(),
+            'dateUpdated' => $this->dateTime()->notNull(),
+            'uid' => $this->uid(),
+        ]);
+
+        $this->createIndex(null, $metrics, ['dateCreated']);
+        $this->createIndex(null, $metrics, ['provider']);
+        $this->createIndex(null, $metrics, ['type']);
+        $this->createIndex(null, $metrics, ['targetLanguage']);
     }
 
     /**
@@ -76,6 +118,7 @@ class Install extends Migration
      */
     public function safeDown()
     {
+        $this->dropTableIfExists('{{%enupaltranslate_metrics}}');
         $this->dropTableIfExists('{{%enupaltranslate_message}}');
         $this->dropTableIfExists('{{%enupaltranslate_sourcemessage}}');
 

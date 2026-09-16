@@ -1,0 +1,124 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Translate plugin for Craft CMS 5.x
+ *
+ * Content (element) translation settings.
+ *
+ * @link      https://enupal.com
+ * @copyright Copyright (c) 2018 Enupal
+ */
+#}
+{% extends "enupal-translate/_layouts/settings" %}
+{% import "_includes/forms" as forms %}
+
+{% set settings = craft.enupaltranslate.getSettings() %}
+{% set providerOptions = craft.enupaltranslate.getContentProviderOptions() %}
+{% set fullPageForm = true %}
+{% set saveShortcutRedirect = 'enupal-translate/settings/content' %}
+
+{% set saveButton %}
+    <div class="buttons">
+        <input class="btn submit" type="submit" value="{{ 'Save'|t('app') }}">
+    </div>
+{% endset %}
+
+{% set content %}
+
+    <input type="hidden" name="action" value="enupal-translate/settings/save-settings">
+
+    <div id="settings-cp">
+
+        {% namespace 'settings' %}
+
+        {% if providerOptions|length <= 1 %}
+            <p class="warning" data-icon="alert">
+                {{ "No translation provider is enabled yet. Turn one on under Providers before translating content."|t('enupal-translate') }}
+            </p>
+        {% endif %}
+
+        {{ forms.lightswitchField({
+            label: "Enable content translation"|t('enupal-translate'),
+            id: 'enableContentTranslation',
+            name: 'enableContentTranslation',
+            instructions: "Adds a “Translate to” action to your entry, asset and product indexes."|t('enupal-translate'),
+            on: settings.enableContentTranslation
+        }) }}
+
+        {{ forms.selectField({
+            label: "Provider"|t('enupal-translate'),
+            id: 'contentProvider',
+            name: 'contentProvider',
+            instructions: "Which provider to use for element content. AI providers generally do better here because they translate a whole entry in context."|t('enupal-translate'),
+            options: providerOptions,
+            value: settings.contentProvider
+        }) }}
+
+        <hr>
+
+        <h2>{{ "How translations are saved"|t('enupal-translate') }}</h2>
+
+        {{ forms.lightswitchField({
+            label: "Save as draft"|t('enupal-translate'),
+            id: 'saveAsDraft',
+            name: 'saveAsDraft',
+            instructions: "Recommended. Creates a draft in the target site so someone can review the translation before it goes live, instead of overwriting the published entry."|t('enupal-translate'),
+            on: settings.saveAsDraft
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: "Translate the title"|t('enupal-translate'),
+            id: 'translateTitle',
+            name: 'translateTitle',
+            on: settings.translateTitle
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: "Reset the slug"|t('enupal-translate'),
+            id: 'resetSlug',
+            name: 'resetSlug',
+            instructions: "Clear the target slug so Craft regenerates it from the translated title. Leave off if your URLs must stay stable."|t('enupal-translate'),
+            on: settings.resetSlug
+        }) }}
+
+        <hr>
+
+        <h2>{{ "What gets translated"|t('enupal-translate') }}</h2>
+
+        {{ forms.lightswitchField({
+            label: "Include disabled blocks"|t('enupal-translate'),
+            id: 'translateDisabledMatrixElements',
+            name: 'translateDisabledMatrixElements',
+            instructions: "Also translate disabled Matrix, Neo and Super Table blocks."|t('enupal-translate'),
+            on: settings.translateDisabledMatrixElements
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: "Update internal links"|t('enupal-translate'),
+            id: 'updateInternalLinks',
+            name: 'updateInternalLinks',
+            instructions: "Re-point Craft reference tags at the target site, so an internal link resolves to the translated entry."|t('enupal-translate'),
+            on: settings.updateInternalLinks
+        }) }}
+
+        {{ forms.lightswitchField({
+            label: "Detect the source language"|t('enupal-translate'),
+            id: 'detectSourceLanguage',
+            name: 'detectSourceLanguage',
+            instructions: "Let the provider work out the source language instead of declaring it. Useful when your source site holds mixed-language content."|t('enupal-translate'),
+            on: settings.detectSourceLanguage
+        }) }}
+
+        {{ forms.textareaField({
+            label: "Excluded fields"|t('enupal-translate'),
+            id: 'excludedFieldHandles',
+            name: 'excludedFieldHandles',
+            instructions: "Field handles to never translate, one per line. Use `title` to skip titles everywhere."|t('enupal-translate'),
+            rows: 4,
+            value: settings.excludedFieldHandles
+        }) }}
+
+        {% endnamespace %}
+    </div>
+
+{% endset %}

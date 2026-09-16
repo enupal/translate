@@ -1,0 +1,87 @@
+{#
+/**
+ * Claude provider settings. Rendered inside the 'settings' namespace.
+ */
+#}
+{% import "_includes/forms" as forms %}
+
+{{ forms.autosuggestField({
+    label: 'API key'|t('enupal-translate'),
+    id: 'claudeApiKey',
+    name: 'claudeApiKey',
+    instructions: 'Your Anthropic API key. <a href="https://console.anthropic.com/" rel="noopener" target="_blank">Get one here</a>.'|t('enupal-translate'),
+    suggestEnvVars: true,
+    value: settings.claudeApiKey
+}) }}
+
+{{ forms.autosuggestField({
+    label: 'API base URL'|t('enupal-translate'),
+    id: 'claudeBaseUrl',
+    name: 'claudeBaseUrl',
+    instructions: 'Leave empty for the official Anthropic API. Set this if you route through a gateway or proxy.'|t('enupal-translate'),
+    suggestEnvVars: true,
+    placeholder: 'https://api.anthropic.com/v1',
+    value: settings.claudeBaseUrl
+}) }}
+
+{{ forms.selectField({
+    label: "Model"|t('enupal-translate'),
+    id: 'claudeModel',
+    name: 'claudeModel',
+    options: craft.enupaltranslate.getProviderModels('claude'),
+    value: settings.claudeModel,
+    toggle: true,
+    targetPrefix: 'claude-model-'
+}) }}
+
+<div id="claude-model-custom" class="{% if settings.claudeModel != 'custom' %}hidden{% endif %}">
+    {{ forms.autosuggestField({
+        label: 'Custom model name'|t('enupal-translate'),
+        id: 'claudeCustomModel',
+        name: 'claudeCustomModel',
+        suggestEnvVars: true,
+        value: settings.claudeCustomModel
+    }) }}
+</div>
+
+{{ forms.selectField({
+    label: "Effort"|t('enupal-translate'),
+    id: 'claudeEffort',
+    name: 'claudeEffort',
+    instructions: "How much reasoning the model spends per batch. Translation is shallow work, so “Low” is both cheaper and faster with no real quality cost. Only applies to models that support it."|t('enupal-translate'),
+    options: {
+        low: "Low — recommended for translation"|t('enupal-translate'),
+        medium: "Medium"|t('enupal-translate'),
+        high: "High"|t('enupal-translate'),
+        xhigh: "Extra high"|t('enupal-translate'),
+        max: "Max"|t('enupal-translate')
+    },
+    value: settings.claudeEffort
+}) }}
+
+{{ forms.textField({
+    label: 'Max tokens'|t('enupal-translate'),
+    id: 'claudeMaxTokens',
+    name: 'claudeMaxTokens',
+    instructions: 'Ceiling on the response size for one batch. Raise it if you see “hit the max token limit” errors.'|t('enupal-translate'),
+    type: 'number', min: 1024, step: 1024,
+    value: settings.claudeMaxTokens
+}) }}
+
+{{ forms.textField({
+    label: 'Temperature'|t('enupal-translate'),
+    id: 'claudeTemperature',
+    name: 'claudeTemperature',
+    instructions: 'Only sent to older models. Current Claude models reject the parameter, so it is omitted automatically for them.'|t('enupal-translate'),
+    type: 'number', min: 0, max: 2, step: 0.1,
+    value: settings.claudeTemperature
+}) }}
+
+{{ forms.textareaField({
+    label: 'Custom prompt'|t('enupal-translate'),
+    id: 'claudePrompt',
+    name: 'claudePrompt',
+    instructions: 'Optional. Supports {source}, {target} and {count}. The JSON response rules are always appended automatically, so you cannot break the batch format.'|t('enupal-translate'),
+    rows: 3,
+    value: settings.claudePrompt
+}) }}

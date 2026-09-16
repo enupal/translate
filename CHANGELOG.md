@@ -1,5 +1,28 @@
 # Enupal Translate Changelog
 
+## 5.0.0 - 2026.09.16
+
+### Added
+- Content translation: entries, assets, categories and Commerce products can now be translated into other sites from the element index, including nested Matrix, Neo, Super Table and Content Block fields.
+- Added OpenAI and Claude (Anthropic) as translation providers, for both static and content translation.
+- Added a provider architecture: every provider now shares one interface, with a common base for LLM providers so OpenAI and Claude only implement their transport. Third-party providers can register through `Providers::EVENT_REGISTER_PROVIDERS`.
+- Added field serializers for Plain Text, Table, Link, Content Block and rich text (CKEditor, Redactor, TinyMCE, Vizy), plus Linkit and Hyper. Third-party fields can register through `Content::EVENT_REGISTER_SERIALIZERS`.
+- Added a dashboard reporting translation counts, token usage, API calls and failures, with filters by date, provider, type and target language, and a button to purge metrics.
+- Added queue jobs for content translation and for large static translation batches.
+- Added shared AI settings for protected terms and tone of voice.
+- Added an `enupal-translate:translateContent` permission.
+- Added `enupal-translate/translate/providers` and `enupal-translate/translate/test` console commands for checking provider configuration.
+
+### Changed
+- Settings are now split across General, Providers and Content pages.
+- Bulk static translation actions are now generated from whichever providers are enabled, rather than being hard-coded.
+- Batches are de-duplicated before being sent, so a string that repeats is only translated (and billed) once.
+- Failed provider requests are now retried with exponential backoff on rate limits and server errors.
+
+### Fixed
+- Fixed Google Translate (Free) mis-aligning results: strings were joined with ` || ` and split apart again, which silently attributed translations to the wrong source string whenever the separator did not survive translation. Yandex and Google Cloud now use their native batch APIs, and each free-Google string is sent on its own request.
+- Fixed deprecation notices on PHP 8.4 from implicitly nullable parameters.
+
 ## 4.1.2 - 2025.07.23
 
 ### Fixed
