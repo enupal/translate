@@ -33,7 +33,8 @@
 
         {% if providerOptions|length <= 1 %}
             <p class="warning" data-icon="alert">
-                {{ "No translation provider is enabled yet. Turn one on under Providers before translating content."|t('enupal-translate') }}
+                {{ "No translation provider is enabled yet."|t('enupal-translate') }}
+                <a class="go" href="{{ url('enupal-translate/settings/providers') }}">{{ "Set one up"|t('enupal-translate') }}</a>
             </p>
         {% endif %}
 
@@ -43,15 +44,6 @@
             name: 'enableContentTranslation',
             instructions: "Adds a “Translate to” action to your entry, asset and product indexes."|t('enupal-translate'),
             on: settings.enableContentTranslation
-        }) }}
-
-        {{ forms.selectField({
-            label: "Provider"|t('enupal-translate'),
-            id: 'contentProvider',
-            name: 'contentProvider',
-            instructions: "Which provider to use for element content. AI providers generally do better here because they translate a whole entry in context."|t('enupal-translate'),
-            options: providerOptions,
-            value: settings.contentProvider
         }) }}
 
         <hr>

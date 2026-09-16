@@ -13,6 +13,7 @@
 {% import "_includes/forms" as forms %}
 
 {% set settings = craft.enupaltranslate.getSettings() %}
+{% set providerOptions = craft.enupaltranslate.getContentProviderOptions() %}
 {% set fullPageForm = true %}
 {% set saveShortcutRedirect = 'enupal-translate/settings/providers' %}
 
@@ -138,6 +139,25 @@
             instructions: "Extra style guidance appended to every AI prompt, e.g. “Use the informal second person.”"|t('enupal-translate'),
             rows: 3,
             value: settings.llmToneInstructions
+        }) }}
+
+        <hr>
+
+        <h2>{{ "Default provider"|t('enupal-translate') }}</h2>
+
+        {% if providerOptions|length <= 1 %}
+            <p class="warning" data-icon="alert">
+                {{ "Enable at least one provider above before choosing a default."|t('enupal-translate') }}
+            </p>
+        {% endif %}
+
+        {{ forms.selectField({
+            label: "Use by default"|t('enupal-translate'),
+            id: 'contentProvider',
+            name: 'contentProvider',
+            instructions: "Which provider to use when translating element content. It is pre-selected on every entry, and can be swapped there for a one-off translation without changing this setting. Bulk template translation is unaffected — that has its own action per provider."|t('enupal-translate'),
+            options: providerOptions,
+            value: settings.contentProvider
         }) }}
 
         {% endnamespace %}
