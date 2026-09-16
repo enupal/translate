@@ -40,6 +40,7 @@ class ContentController extends BaseController
         $elementType = (string)$request->getRequiredBodyParam('elementType');
         $sourceSiteId = (int)$request->getRequiredBodyParam('sourceSiteId');
         $targetSiteId = $request->getBodyParam('targetSiteId');
+        $providerHandle = $request->getBodyParam('providerHandle') ?: null;
 
         if (!class_exists($elementType) || !is_subclass_of($elementType, ElementInterface::class)) {
             throw new BadRequestHttpException('Invalid element type.');
@@ -86,6 +87,7 @@ class ContentController extends BaseController
                 'elementType' => $elementType,
                 'sourceSiteId' => $sourceSite->id,
                 'targetSiteIds' => array_map(static fn(Site $site) => $site->id, $targetSites),
+                'providerHandle' => $providerHandle,
             ]));
 
             $this->setSuccessFlash(Craft::t('enupal-translate', 'Translating into {count} sites. Added to the queue.', [
@@ -98,7 +100,14 @@ class ContentController extends BaseController
         $targetSite = reset($targetSites);
 
         try {
-            $translated = TranslatePlugin::$app->content->translateElement($element, $sourceSite, $targetSite);
+            $translated = TranslatePlugin::$app->content->translateElement(
+                $element,
+                $sourceSite,
+                $targetSite,
+                null,
+                true,
+                $providerHandle
+            );
         } catch (Throwable $e) {
             Craft::error($e->getMessage(), __METHOD__);
             $this->setFailFlash($e->getMessage());

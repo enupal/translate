@@ -149,6 +149,24 @@ class TranslateVariable
     }
 
     /**
+     * Enabled providers as handle => label, for the sidebar picker.
+     */
+    public function getEnabledProviders(): array
+    {
+        return Translate::$app->providers->getEnabledProviderOptions();
+    }
+
+    /**
+     * Handle of the provider content translation will use by default.
+     */
+    public function getContentProviderHandle(): ?string
+    {
+        $provider = Translate::$app->providers->getContentProvider();
+
+        return $provider ? $provider::handle() : null;
+    }
+
+    /**
      * Label of the provider that content translation will use.
      */
     public function getContentProviderName(): ?string

@@ -39,6 +39,13 @@ class TranslateContentJob extends BaseJob
      */
     public ?array $fieldHandles = null;
 
+    /**
+     * Provider handle to translate with, or null for the configured default.
+     *
+     * @var string|null
+     */
+    public ?string $providerHandle = null;
+
     protected function defaultDescription(): ?string
     {
         return Craft::t('enupal-translate', 'Translating {count} elements', [
@@ -91,7 +98,9 @@ class TranslateContentJob extends BaseJob
                         $element,
                         $sourceSite,
                         $targetSite,
-                        $this->fieldHandles
+                        $this->fieldHandles,
+                        true,
+                        $this->providerHandle
                     );
                 } catch (Throwable $e) {
                     // Keep going: one bad element shouldn't abandon the rest

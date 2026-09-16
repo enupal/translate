@@ -76,14 +76,11 @@ class Content extends Component
         Site $sourceSite,
         Site $targetSite,
         ?array $fieldHandles = null,
-        bool $isRoot = true
+        bool $isRoot = true,
+        ?string $providerHandle = null
     ): ?ElementInterface {
         $settings = TranslatePlugin::$app->settings->getSettings();
-        $provider = TranslatePlugin::$app->providers->getContentProvider();
-
-        if ($provider === null) {
-            throw new \RuntimeException(Craft::t('enupal-translate', 'No translation provider is enabled. Check the plugin settings.'));
-        }
+        $provider = $this->resolveProvider($providerHandle);
 
         $serialized = $this->serializeElement($source, $sourceSite, $targetSite);
 
@@ -124,6 +121,37 @@ class Content extends Component
         $this->saveTarget($source, $target, $sourceSite, $targetSite, $isRoot, $translated);
 
         return $target;
+    }
+
+    /**
+     * The provider to translate with: an explicit choice when one was made,
+     * otherwise whatever the settings resolve to.
+     *
+     * @throws \RuntimeException if nothing usable is configured
+     */
+    public function resolveProvider(?string $handle = null): \enupal\translate\base\TranslationProvider
+    {
+        $providers = TranslatePlugin::$app->providers;
+
+        if (!empty($handle)) {
+            $provider = $providers->getProviderByHandle($handle);
+
+            if ($provider === null || !$provider->isConfigured()) {
+                throw new \RuntimeException(Craft::t('enupal-translate', 'The “{provider}” provider is not enabled.', [
+                    'provider' => $handle,
+                ]));
+            }
+
+            return $provider;
+        }
+
+        $provider = $providers->getContentProvider();
+
+        if ($provider === null) {
+            throw new \RuntimeException(Craft::t('enupal-translate', 'No translation provider is enabled. Check the plugin settings.'));
+        }
+
+        return $provider;
     }
 
     /**
