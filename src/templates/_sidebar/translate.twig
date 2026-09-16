@@ -22,6 +22,7 @@
     {% set providers = ready ? craft.enupaltranslate.getEnabledProviders() : {} %}
     {% set defaultProvider = craft.enupaltranslate.getContentProviderHandle() %}
     {% set targets = ready ? craft.enupaltranslate.getTranslationTargets(element) : [] %}
+    {% set canSetDefault = craft.enupaltranslate.canChangeSettings() %}
 
     {#
         Translation always reads the saved entry, never the editor's current
@@ -114,6 +115,18 @@
                             options: providers,
                             value: defaultProvider
                         }) }}
+
+                        {# Changing the default writes to project config, so only
+                           offer it to someone who is actually allowed to. #}
+                        {% if canSetDefault %}
+                            {{ forms.lightswitchField({
+                                label: "Set as default"|t('enupal-translate'),
+                                instructions: null,
+                                name: 'setAsDefault',
+                                on: false,
+                                fieldClass: 'lightswitch-field'
+                            }) }}
+                        {% endif %}
                     {% else %}
                         {{ hiddenInput('providerHandle', defaultProvider) }}
                     {% endif %}

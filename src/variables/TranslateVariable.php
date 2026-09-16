@@ -167,6 +167,18 @@ class TranslateVariable
     }
 
     /**
+     * Whether the current user may change the plugin's settings.
+     *
+     * Settings live in project config, which is read-only when admin changes
+     * are disabled — typically on production.
+     */
+    public function canChangeSettings(): bool
+    {
+        return Craft::$app->getConfig()->getGeneral()->allowAdminChanges
+            && (Craft::$app->getUser()->getIdentity()?->admin ?? false);
+    }
+
+    /**
      * Label of the provider that content translation will use.
      */
     public function getContentProviderName(): ?string

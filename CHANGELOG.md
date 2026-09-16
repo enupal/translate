@@ -8,7 +8,7 @@
 - Added a provider architecture: every provider now shares one interface, with a common base for LLM providers so OpenAI and Claude only implement their transport. Third-party providers can register through `Providers::EVENT_REGISTER_PROVIDERS`.
 - Added field serializers for Plain Text, Table, Link, Content Block and rich text (CKEditor, Redactor, TinyMCE, Vizy), plus Linkit and Hyper. Third-party fields can register through `Content::EVENT_REGISTER_SERIALIZERS`.
 - Added a dashboard reporting translation counts, token usage, API calls and failures, with filters by date, provider, type and target language, and a button to purge metrics.
-- The sidebar panel lets you choose which provider to translate with, when more than one is enabled.
+- The sidebar panel lets you choose which provider to translate with, when more than one is enabled, with a "Set as default" switch to make that choice stick.
 - Added an Enupal Translate panel to the sidebar of entry, asset, category and product edit screens, for translating the element you're looking at into one site or all of them. It also explains itself when no provider is configured yet, so the feature is discoverable.
 - Added queue jobs for content translation and for large static translation batches.
 - Added shared AI settings for protected terms and tone of voice.

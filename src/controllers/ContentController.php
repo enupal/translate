@@ -42,6 +42,10 @@ class ContentController extends BaseController
         $targetSiteId = $request->getBodyParam('targetSiteId');
         $providerHandle = $request->getBodyParam('providerHandle') ?: null;
 
+        if ($providerHandle && $request->getBodyParam('setAsDefault')) {
+            $this->setDefaultProvider($providerHandle);
+        }
+
         if (!class_exists($elementType) || !is_subclass_of($elementType, ElementInterface::class)) {
             throw new BadRequestHttpException('Invalid element type.');
         }
@@ -133,6 +137,34 @@ class ContentController extends BaseController
 
         // Drop the author straight into what was just produced.
         return $this->redirect($translated->getCpEditUrl() ?? $element->getCpEditUrl());
+    }
+
+    /**
+     * Remember this provider as the default for content translation.
+     *
+     * Best-effort: it must never stop the translation the author actually
+     * asked for, so a refusal is reported and then stepped over.
+     */
+    private function setDefaultProvider(string $handle): void
+    {
+        if (!Craft::$app->getConfig()->getGeneral()->allowAdminChanges
+            || !(Craft::$app->getUser()->getIdentity()?->admin ?? false)) {
+            Craft::$app->getSession()->setNotice(Craft::t('enupal-translate', 'The default provider could not be changed, because admin changes are disabled.'));
+
+            return;
+        }
+
+        $provider = TranslatePlugin::$app->providers->getProviderByHandle($handle);
+
+        if ($provider === null || !$provider->isConfigured()) {
+            return;
+        }
+
+        try {
+            TranslatePlugin::$app->settings->saveSettings(['contentProvider' => $handle]);
+        } catch (Throwable $e) {
+            Craft::error('Could not save the default translation provider: ' . $e->getMessage(), __METHOD__);
+        }
     }
 
     /**
