@@ -25,6 +25,9 @@
 - Fixed a `TypeError` on the entry, asset and category indexes: the bulk action was registered against `RegisterComponentTypesEvent` instead of `RegisterElementActionsEvent`.
 - Provider errors now report the API's own message instead of Guzzle's full HTTP dump.
 - A 429 caused by an exhausted quota is no longer retried, since waiting cannot resolve it.
+- Google Translate (Free) requests are now paced, and a rate limit is no longer retried — retrying a throttled scrape only deepens the block. Whatever was translated before the block is kept rather than discarded, and the error explains that the free endpoint is scraped rather than an official API.
+- Partial results from any provider are now kept when a batch fails partway, instead of being thrown away and paid for again.
+- The sidebar warns when the entry has unsaved changes, since translation reads the saved version.
 - Fixed Google Translate (Free) mis-aligning results: strings were joined with ` || ` and split apart again, which silently attributed translations to the wrong source string whenever the separator did not survive translation. Yandex and Google Cloud now use their native batch APIs, and each free-Google string is sent on its own request.
 - Fixed deprecation notices on PHP 8.4 from implicitly nullable parameters.
 

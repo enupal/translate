@@ -11,7 +11,9 @@ namespace enupal\translate\providers;
 use Craft;
 use enupal\translate\base\TranslationProvider;
 use enupal\translate\models\TranslationResult;
+use RuntimeException;
 use Stichoza\GoogleTranslate\GoogleTranslate as FreeGoogleClient;
+use Throwable;
 
 /**
  * The free Google Translate endpoint, via web scraping.
@@ -47,6 +49,29 @@ class GoogleFreeProvider extends TranslationProvider
         return 25;
     }
 
+    /**
+     * This endpoint is scraped, not an API, and Google throttles bursts hard.
+     * Pacing the requests is what keeps a batch from being cut off partway.
+     */
+    protected function getRequestDelayMs(): int
+    {
+        return 500;
+    }
+
+    /**
+     * Retrying a throttled scrape immediately just deepens the block, and
+     * Google's answer is an HTML page rather than a machine-readable error,
+     * so treat any 429 here as terminal for this run.
+     */
+    protected function isRetryable(Throwable $e): bool
+    {
+        if ($this->getStatusCode($e) === 429) {
+            return false;
+        }
+
+        return parent::isRetryable($e);
+    }
+
     protected function getMaxChunkCharacters(): int
     {
         return PHP_INT_MAX;
@@ -61,9 +86,35 @@ class GoogleFreeProvider extends TranslationProvider
 
         $translations = [];
         $calls = 0;
+        $delay = $this->getRequestDelayMs() * 1000;
 
         foreach ($texts as $key => $text) {
-            $translations[$key] = $client->translate($text);
+            if ($calls > 0 && $delay > 0) {
+                usleep($delay);
+            }
+
+            try {
+                $translations[$key] = $client->translate($text);
+            } catch (Throwable $e) {
+                if ($this->getStatusCode($e) !== 429) {
+                    throw $e;
+                }
+
+                // Hand back what was translated before the block, so a long
+                // run isn't lost entirely.
+                return new TranslationResult([
+                    'provider' => static::handle(),
+                    'translations' => $translations,
+                    'apiCalls' => $calls + 1,
+                    'success' => false,
+                    'errorMessage' => \Craft::t('enupal-translate',
+                        'Google rate-limited this server after {done} of {total} strings. The free endpoint is scraped rather than an official API, so Google throttles it without warning — wait a while and retry a smaller batch, or use Google Cloud Translate or an AI provider for bulk work.', [
+                            'done' => $calls,
+                            'total' => count($texts),
+                        ]),
+                ]);
+            }
+
             $calls++;
         }
 

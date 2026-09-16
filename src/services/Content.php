@@ -373,8 +373,12 @@ class Content extends Component
     {
         $class = get_class($source);
 
+        // Key off the canonical id: if the source is a draft, its own id points
+        // at the draft row rather than the entry the target site shares.
+        $canonicalId = $source->getCanonicalId() ?? $source->id;
+
         $existing = $class::find()
-            ->id($source->id)
+            ->id($canonicalId)
             ->siteId($targetSite->id)
             ->status(null)
             ->drafts(null)

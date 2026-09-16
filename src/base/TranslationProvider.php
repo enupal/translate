@@ -103,6 +103,15 @@ abstract class TranslationProvider extends Component
     }
 
     /**
+     * Milliseconds to wait between consecutive requests to this provider.
+     * Zero for APIs that are happy to be called back to back.
+     */
+    protected function getRequestDelayMs(): int
+    {
+        return 0;
+    }
+
+    /**
      * Translate a keyed set of strings.
      *
      * Identical strings are only sent to the provider once and the result is
@@ -159,9 +168,11 @@ abstract class TranslationProvider extends Component
             if (!$chunkResult->success) {
                 $result->success = false;
                 $result->errorMessage = trim($result->errorMessage . "\n" . $chunkResult->errorMessage);
-                continue;
             }
 
+            // Keep whatever did come back. A provider that fails halfway still
+            // did the work for the strings it got through, and throwing those
+            // away means paying for them again on the retry.
             $translatedByHash += $chunkResult->translations;
         }
 

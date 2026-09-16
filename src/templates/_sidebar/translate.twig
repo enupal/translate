@@ -24,12 +24,19 @@
     {% set targets = ready ? craft.enupaltranslate.getTranslationTargets(element) : [] %}
 
     {#
-        Craft auto-creates a provisional draft on every edit screen, so only
-        flag a draft the author deliberately made. Translation always reads the
-        canonical entry, which is what the controller works from.
+        Translation always reads the saved entry, never the editor's current
+        state, so say so whenever the two can differ. A provisional draft only
+        exists once the author has changed something, which makes it a reliable
+        signal that there are unsaved edits.
     #}
+    {% set hasUnsavedChanges = element.isProvisionalDraft %}
     {% set isRealDraft = element.getIsDraft() and not element.isProvisionalDraft %}
-    {% set showDraftNote = isRealDraft or element.getIsRevision() %}
+    {% set sourceNote = null %}
+    {% if hasUnsavedChanges %}
+        {% set sourceNote = "You have unsaved changes. Translating uses the last saved version of this entry — save first if you want your changes included."|t('enupal-translate') %}
+    {% elseif isRealDraft or element.getIsRevision() %}
+        {% set sourceNote = "Translating uses the saved version of this entry, not this draft."|t('enupal-translate') %}
+    {% endif %}
 
     <fieldset>
         <legend class="h6">{{ "Enupal Translate"|t('enupal-translate') }}</legend>
@@ -94,10 +101,8 @@
                         </div>
                         <div class="input">
                             <span>{{ element.site.name }} ({{ element.site.language }})</span>
-                            {% if showDraftNote %}
-                                <span class="info">
-                                    {{ "This is a draft. Translating uses the saved version of this entry, not the changes shown here."|t('enupal-translate') }}
-                                </span>
+                            {% if sourceNote %}
+                                <span class="info">{{ sourceNote }}</span>
                             {% endif %}
                         </div>
                     </div>
