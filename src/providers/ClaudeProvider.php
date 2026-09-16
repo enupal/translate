@@ -126,15 +126,7 @@ class ClaudeProvider extends LlmTranslationProvider
             ];
         }
 
-        $response = $this->getClient()->post($this->getBaseUrl() . '/messages', [
-            'json' => $body,
-        ]);
-
-        $data = json_decode((string)$response->getBody(), true);
-
-        if (!is_array($data)) {
-            throw new RuntimeException('Claude returned a malformed response.');
-        }
+        $data = $this->postJson($this->getBaseUrl() . '/messages', $body);
 
         // A refusal comes back as HTTP 200 with no usable content, so it has
         // to be checked before reading the content blocks.

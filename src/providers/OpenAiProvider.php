@@ -133,15 +133,7 @@ class OpenAiProvider extends LlmTranslationProvider
             $body['temperature'] = (float)$settings->openAiTemperature;
         }
 
-        $response = $this->getClient()->post($this->getBaseUrl() . '/chat/completions', [
-            'json' => $body,
-        ]);
-
-        $data = json_decode((string)$response->getBody(), true);
-
-        if (!is_array($data)) {
-            throw new RuntimeException('OpenAI returned a malformed response.');
-        }
+        $data = $this->postJson($this->getBaseUrl() . '/chat/completions', $body);
 
         $choice = $data['choices'][0] ?? null;
 

@@ -16,7 +16,7 @@ use craft\base\Element;
 use craft\base\Plugin;
 use craft\elements\Asset;
 use craft\elements\Entry;
-use craft\events\RegisterComponentTypesEvent;
+use craft\events\RegisterElementActionsEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\events\RegisterUserPermissionsEvent;
 use craft\services\UserPermissions;
@@ -163,13 +163,13 @@ class Translate extends Plugin
             Event::on(
                 $elementType,
                 Element::EVENT_REGISTER_ACTIONS,
-                static function (RegisterComponentTypesEvent $event) {
+                static function (RegisterElementActionsEvent $event) {
                     // Pointless with a single site, and noisy in the UI.
                     if (count(Craft::$app->getSites()->getAllSites()) < 2) {
                         return;
                     }
 
-                    $event->types[] = TranslateContent::class;
+                    $event->actions[] = TranslateContent::class;
                 }
             );
         }

@@ -20,6 +20,9 @@
 - Failed provider requests are now retried with exponential backoff on rate limits and server errors.
 
 ### Fixed
+- Fixed a `TypeError` on the entry, asset and category indexes: the bulk action was registered against `RegisterComponentTypesEvent` instead of `RegisterElementActionsEvent`.
+- Provider errors now report the API's own message instead of Guzzle's full HTTP dump.
+- A 429 caused by an exhausted quota is no longer retried, since waiting cannot resolve it.
 - Fixed Google Translate (Free) mis-aligning results: strings were joined with ` || ` and split apart again, which silently attributed translations to the wrong source string whenever the separator did not survive translation. Yandex and Google Cloud now use their native batch APIs, and each free-Google string is sent on its own request.
 - Fixed deprecation notices on PHP 8.4 from implicitly nullable parameters.
 

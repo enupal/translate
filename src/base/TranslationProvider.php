@@ -269,28 +269,82 @@ abstract class TranslationProvider extends Component
 
     /**
      * Whether it is worth trying the request again. Rate limits and server
-     * errors are; a bad API key is not.
+     * errors are; a bad API key or an exhausted quota is not.
      */
     protected function isRetryable(Throwable $e): bool
     {
-        $code = (int)$e->getCode();
+        $status = $this->getStatusCode($e);
 
-        if ($code === 429 || $code >= 500) {
-            return true;
+        if ($status === 429) {
+            // A 429 usually means "slow down", but providers also use it for
+            // billing problems, which will never resolve by waiting.
+            return !$this->isQuotaError($e);
         }
 
-        // Guzzle puts the status on the response rather than the exception
-        // code for some error classes.
-        if (method_exists($e, 'getResponse')) {
-            $response = $e->getResponse();
-            if ($response) {
-                $status = $response->getStatusCode();
-                return $status === 429 || $status >= 500;
+        if ($status !== null) {
+            return $status >= 500;
+        }
+
+        // No status at all: a connection-level failure, worth another go.
+        return true;
+    }
+
+    /**
+     * Whether the error is about credit or quota rather than request rate.
+     */
+    protected function isQuotaError(Throwable $e): bool
+    {
+        $body = strtolower($this->getResponseBody($e) ?? $e->getMessage());
+
+        foreach ([
+            'insufficient_quota',
+            'no credits',
+            'billing',
+            'exceeded your current quota',
+            'credit balance is too low',
+        ] as $needle) {
+            if (str_contains($body, $needle)) {
+                return true;
             }
         }
 
-        // Connection-level failures have no status at all.
-        return $code === 0;
+        return false;
+    }
+
+    /**
+     * HTTP status behind an exception, or null if it isn't an HTTP error.
+     */
+    protected function getStatusCode(Throwable $e): ?int
+    {
+        if (method_exists($e, 'getResponse')) {
+            $response = $e->getResponse();
+
+            if ($response) {
+                return $response->getStatusCode();
+            }
+        }
+
+        $code = (int)$e->getCode();
+
+        return $code >= 100 && $code < 600 ? $code : null;
+    }
+
+    protected function getResponseBody(Throwable $e): ?string
+    {
+        if (!method_exists($e, 'getResponse')) {
+            return null;
+        }
+
+        $response = $e->getResponse();
+
+        if (!$response) {
+            return null;
+        }
+
+        $body = $response->getBody();
+        $body->rewind();
+
+        return $body->getContents();
     }
 
     /**

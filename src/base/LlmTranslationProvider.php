@@ -12,7 +12,9 @@ use Craft;
 use craft\helpers\App;
 use enupal\translate\models\LlmResponse;
 use enupal\translate\models\TranslationResult;
+use enupal\translate\errors\ApiException;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 use RuntimeException;
 
 /**
@@ -195,6 +197,63 @@ abstract class LlmTranslationProvider extends TranslationProvider
         }
 
         return $this->client;
+    }
+
+
+    /**
+     * POST a JSON body and return the decoded response.
+     *
+     * Guzzle's own exception message embeds the whole HTTP response, which is
+     * unreadable in a queue job or a flash message, so the provider's error
+     * text is pulled out and re-thrown on its own. The status code is kept so
+     * the retry logic can still see it.
+     */
+    protected function postJson(string $url, array $body): array
+    {
+        try {
+            $response = $this->getClient()->post($url, ['json' => $body]);
+        } catch (RequestException $e) {
+            $message = $this->extractApiError($e);
+
+            if ($message === null) {
+                throw $e;
+            }
+
+            throw new ApiException($message, $e->getResponse()?->getStatusCode() ?? 0, $e);
+        }
+
+        $data = json_decode((string)$response->getBody(), true);
+
+        if (!is_array($data)) {
+            throw new RuntimeException(static::displayName() . ' returned a malformed response.');
+        }
+
+        return $data;
+    }
+
+    /**
+     * Pull the human-readable error out of a provider error response.
+     * Both OpenAI and Anthropic nest it under an "error" object.
+     */
+    protected function extractApiError(RequestException $e): ?string
+    {
+        $response = $e->getResponse();
+
+        if (!$response) {
+            return null;
+        }
+
+        $stream = $response->getBody();
+        $stream->rewind();
+        $decoded = json_decode($stream->getContents(), true);
+
+        $message = $decoded['error']['message'] ?? $decoded['message'] ?? null;
+
+        if (!is_string($message) || $message === '') {
+            return null;
+        }
+
+        return sprintf('%s API error (HTTP %d): %s', static::displayName(), $response->getStatusCode(), $message);
     }
 
     abstract protected function getRequestHeaders(): array;
