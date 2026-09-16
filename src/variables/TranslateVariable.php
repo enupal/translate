@@ -93,4 +93,68 @@ class TranslateVariable
     {
         return Translate::$app->providers->getAllProviders();
     }
+
+    /**
+     * The sites an element can be translated into, with whether a translation
+     * already exists there.
+     *
+     * @return array[] each: ['site' => Site, 'exists' => bool]
+     */
+    public function getTranslationTargets(\craft\base\ElementInterface $element): array
+    {
+        $user = Craft::$app->getUser()->getIdentity();
+        $content = Translate::$app->content;
+        $sourceSiteId = $element->siteId;
+        $elementType = get_class($element);
+        $canonicalId = $element->getCanonicalId();
+
+        $targets = [];
+
+        foreach (Craft::$app->getSites()->getAllSites() as $site) {
+            if ($site->id === $sourceSiteId) {
+                continue;
+            }
+
+            if (!$user?->can('editSite:' . $site->uid)) {
+                continue;
+            }
+
+            if (!$content->supportsSite($element, $site)) {
+                continue;
+            }
+
+            $targets[] = [
+                'site' => $site,
+                'exists' => $elementType::find()
+                    ->id($canonicalId)
+                    ->siteId($site->id)
+                    ->status(null)
+                    ->exists(),
+            ];
+        }
+
+        return $targets;
+    }
+
+    /**
+     * Whether content translation is ready to use: switched on, with a
+     * provider configured.
+     */
+    public function isContentTranslationReady(): bool
+    {
+        $settings = Translate::$app->settings->getSettings();
+
+        return (bool)$settings->enableContentTranslation
+            && Translate::$app->providers->getContentProvider() !== null;
+    }
+
+    /**
+     * Label of the provider that content translation will use.
+     */
+    public function getContentProviderName(): ?string
+    {
+        $provider = Translate::$app->providers->getContentProvider();
+
+        return $provider ? $provider::displayName() : null;
+    }
 }

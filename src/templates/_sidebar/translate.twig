@@ -1,0 +1,141 @@
+{#
+/**
+ * Translate plugin for Craft CMS 5.x
+ *
+ * Panel shown in the sidebar of an element's edit screen. This is how an
+ * author discovers that the plugin can translate what they're looking at, so
+ * it explains itself even when it can't do anything yet.
+ *
+ * @link      https://enupal.com
+ * @copyright Copyright (c) 2018 Enupal
+ */
+#}
+{% if currentUser.can('enupal-translate:translateContent') %}
+
+    {% set ready = craft.enupaltranslate.isContentTranslationReady() %}
+    {% set providerName = craft.enupaltranslate.getContentProviderName() %}
+    {% set targets = ready ? craft.enupaltranslate.getTranslationTargets(element) : [] %}
+
+    <fieldset class="enupal-translate-sidebar">
+        <legend class="h6">{{ "Enupal Translate"|t('enupal-translate') }}</legend>
+
+        <div class="meta">
+
+            {% if not ready %}
+                <div class="field">
+                    <div class="heading">
+                        <p class="light">
+                            {{ "Machine-translate this entry into your other sites."|t('enupal-translate') }}
+                        </p>
+                        {% if currentUser.admin %}
+                            <p>
+                                <a class="go" href="{{ url('enupal-translate/settings/providers') }}">
+                                    {{ "Enable a translation provider"|t('enupal-translate') }}
+                                </a>
+                            </p>
+                        {% else %}
+                            <p class="light">
+                                {{ "No translation provider is enabled yet — ask an admin to set one up."|t('enupal-translate') }}
+                            </p>
+                        {% endif %}
+                    </div>
+                </div>
+
+            {% elseif targets is empty %}
+                <div class="field">
+                    <div class="heading">
+                        <p class="light">
+                            {{ "There are no other sites this entry can be translated into."|t('enupal-translate') }}
+                        </p>
+                    </div>
+                </div>
+
+            {% else %}
+
+            {#
+                Craft auto-creates a provisional draft on every edit screen, so
+                only warn about a draft the author deliberately made. The
+                translation always reads the canonical entry, not the draft.
+            #}
+            {% set isRealDraft = element.getIsDraft() and not element.isProvisionalDraft %}
+            {% if isRealDraft or element.getIsRevision() %}
+                <div class="field">
+                    <p class="warning">
+                        {{ "This is a draft. Translating will use the saved version of this entry, not what you see here."|t('enupal-translate') }}
+                    </p>
+                </div>
+            {% endif %}
+
+                <div class="field">
+                    <div class="heading">{{ "Translate from"|t('enupal-translate') }}</div>
+                    <div class="input">
+                        <span class="light">{{ element.site.name }} ({{ element.site.language }})</span>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="heading">{{ "Translate to"|t('enupal-translate') }}</div>
+                    <div class="input">
+                        <form method="post" accept-charset="UTF-8" class="enupal-translate-form">
+                            {{ csrfInput() }}
+                            {{ actionInput('enupal-translate/content/translate') }}
+                            {{ hiddenInput('elementId', element.canonicalId) }}
+                            {{ hiddenInput('elementType', className(element)) }}
+                            {{ hiddenInput('sourceSiteId', element.siteId) }}
+                            {{ redirectInput(element.cpEditUrl) }}
+
+                            <ul class="enupal-translate-targets">
+                                {% for target in targets %}
+                                    <li>
+                                        <button type="submit"
+                                                class="btn menubtn-item"
+                                                name="targetSiteId"
+                                                value="{{ target.site.id }}">
+                                            {{ target.site.name }} ({{ target.site.language }})
+                                        </button>
+                                        {% if target.exists %}
+                                            <span class="light" title="{{ 'A version already exists here and will be updated'|t('enupal-translate') }}">
+                                                {{ "exists"|t('enupal-translate') }}
+                                            </span>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+
+                                {% if targets|length > 1 %}
+                                    <li>
+                                        <button type="submit"
+                                                class="btn menubtn-item"
+                                                name="targetSiteId"
+                                                value="*"
+                                                onclick="return confirm('{{ 'Translate into all {count} sites? This runs in the queue.'|t('enupal-translate', {count: targets|length})|e('js') }}')">
+                                            <strong>{{ "All sites"|t('enupal-translate') }}</strong>
+                                        </button>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <p class="light enupal-translate-meta">
+                        {{ "Using {provider}."|t('enupal-translate', {provider: providerName}) }}
+                        <a href="{{ url('enupal-translate/dashboard') }}">{{ "Usage"|t('enupal-translate') }}</a>
+                    </p>
+                </div>
+
+            {% endif %}
+
+        </div>
+    </fieldset>
+
+    {% css %}
+        .enupal-translate-sidebar .enupal-translate-targets { margin: 0; padding: 0; list-style: none; }
+        .enupal-translate-sidebar .enupal-translate-targets li {
+            display: flex; align-items: center; gap: 6px; margin-bottom: 4px;
+        }
+        .enupal-translate-sidebar .enupal-translate-targets .btn { width: auto; text-align: left; }
+        .enupal-translate-sidebar .enupal-translate-meta { margin-top: 4px; font-size: 12px; }
+    {% endcss %}
+
+{% endif %}

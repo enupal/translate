@@ -16,6 +16,7 @@ use craft\base\Element;
 use craft\base\Plugin;
 use craft\elements\Asset;
 use craft\elements\Entry;
+use craft\events\DefineHtmlEvent;
 use craft\events\RegisterElementActionsEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\events\RegisterUserPermissionsEvent;
@@ -59,6 +60,7 @@ class Translate extends Plugin
         $this->registerCpRoutes();
         $this->registerPermissions();
         $this->registerContentTranslationActions();
+        $this->registerSidebarPanel();
     }
 
     protected function createSettingsModel(): ?\craft\base\Model
@@ -142,23 +144,28 @@ class Translate extends Plugin
      * Add the bulk "Translate to" action to the element indexes that can
      * usefully be translated.
      */
+    /**
+     * Element types that can usefully be translated.
+     *
+     * @return string[]
+     */
+    private function translatableElementTypes(): array
+    {
+        return array_values(array_filter([
+            Entry::class,
+            Asset::class,
+            'craft\elements\Category',
+            'craft\commerce\elements\Product',
+        ], 'class_exists'));
+    }
+
     private function registerContentTranslationActions(): void
     {
         if (!$this->getSettings()->enableContentTranslation) {
             return;
         }
 
-        $elementTypes = [
-            Entry::class,
-            Asset::class,
-            'craft\commerce\elements\Product',
-            'craft\elements\Category',
-        ];
-
-        foreach ($elementTypes as $elementType) {
-            if (!class_exists($elementType)) {
-                continue;
-            }
+        foreach ($this->translatableElementTypes() as $elementType) {
 
             Event::on(
                 $elementType,
@@ -170,6 +177,38 @@ class Translate extends Plugin
                     }
 
                     $event->actions[] = TranslateContent::class;
+                }
+            );
+        }
+    }
+
+    /**
+     * Put a panel in the sidebar of each element's edit screen, so authors can
+     * translate what they're looking at without going back to the index — and
+     * so they discover the plugin is there at all.
+     */
+    private function registerSidebarPanel(): void
+    {
+        if (!$this->getSettings()->enableContentTranslation) {
+            return;
+        }
+
+        if (!Craft::$app->getRequest()->getIsCpRequest() || Craft::$app->getRequest()->getIsConsoleRequest()) {
+            return;
+        }
+
+        foreach ($this->translatableElementTypes() as $elementType) {
+            Event::on(
+                $elementType,
+                Element::EVENT_DEFINE_SIDEBAR_HTML,
+                static function (DefineHtmlEvent $event) {
+                    if (count(Craft::$app->getSites()->getAllSites()) < 2) {
+                        return;
+                    }
+
+                    $event->html .= Craft::$app->getView()->renderTemplate('enupal-translate/_sidebar/translate', [
+                        'element' => $event->sender,
+                    ]);
                 }
             );
         }
