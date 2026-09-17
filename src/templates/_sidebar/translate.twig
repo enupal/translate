@@ -110,6 +110,13 @@
                         </div>
                     </div>
 
+                    {{ forms.selectField({
+                        label: "To"|t('enupal-translate'),
+                        name: 'targetSiteId',
+                        options: targetOptions,
+                        value: targetOptions|first.value
+                    }) }}
+
                     {% if providers|length > 1 %}
                         {{ forms.selectField({
                             label: "With"|t('enupal-translate'),
@@ -118,29 +125,32 @@
                             value: defaultProvider
                         }) }}
                     {% else %}
+                        {# Only one provider, so there is nothing to choose —
+                           but still name it, so the row set stays consistent
+                           and it is obvious what will do the work. #}
+                        <div class="field">
+                            <div class="heading">
+                                <label>{{ "With"|t('enupal-translate') }}</label>
+                            </div>
+                            <div class="input">
+                                <span>{{ providerName }}</span>
+                            </div>
+                        </div>
                         {{ hiddenInput('providerHandle', defaultProvider) }}
                     {% endif %}
-
-                    {{ forms.selectField({
-                        label: "To"|t('enupal-translate'),
-                        name: 'targetSiteId',
-                        options: targetOptions,
-                        value: targetOptions|first.value
-                    }) }}
 
                     <div class="field">
                         <div class="input enupal-translate-actions">
                             <button type="submit" class="btn">
                                 {{ "Translate"|t('enupal-translate') }}
                             </button>
-                            <span class="light enupal-translate-meta">
-                                {% if providers|length > 1 %}
-                                    <a href="{{ url('enupal-translate/settings/content') }}">{{ "Settings"|t('enupal-translate') }}</a>
-                                {% else %}
-                                    {{ providerName }}
-                                {% endif %}
-                                &middot;
-                                <a href="{{ url('enupal-translate/dashboard') }}">{{ "Usage"|t('enupal-translate') }}</a>
+                            <span class="enupal-translate-meta">
+                                <a href="{{ url('enupal-translate/settings/providers') }}" class="enupal-translate-link">
+                                    {{ iconSvg('gear') }}<span>{{ "Settings"|t('enupal-translate') }}</span>
+                                </a>
+                                <a href="{{ url('enupal-translate/dashboard') }}" class="enupal-translate-link">
+                                    {{ iconSvg('chart-simple') }}<span>{{ "Usage"|t('enupal-translate') }}</span>
+                                </a>
                             </span>
                         </div>
                     </div>
@@ -173,8 +183,21 @@
             gap: 8px;
         }
         .enupal-translate-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             font-size: 12px;
             white-space: nowrap;
+        }
+        .enupal-translate-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .enupal-translate-link svg {
+            width: 12px;
+            height: 12px;
+            flex: 0 0 auto;
         }
     {% endcss %}
 
