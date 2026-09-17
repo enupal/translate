@@ -39,7 +39,10 @@
     {% endif %}
 
     <fieldset>
-        <legend class="h6">{{ "Enupal Translate"|t('enupal-translate') }}</legend>
+        <legend class="h6 enupal-translate-legend">
+            {{ svg('@enupal/translate/icon-mask.svg', sanitize = true) }}
+            <span>{{ "Enupal Translate"|t('enupal-translate') }}</span>
+        </legend>
 
         {% if not ready %}
             <div class="meta">
@@ -149,6 +152,21 @@
     </fieldset>
 
     {% css %}
+        .enupal-translate-legend {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .enupal-translate-legend svg {
+            width: 14px;
+            height: 14px;
+            flex: 0 0 auto;
+        }
+        /* The icon ships with Craft's text colour baked into each shape, so
+           recolour only those and leave the transparent ones alone. */
+        .enupal-translate-legend svg [style*="3f4d5a"] {
+            fill: currentColor !important;
+        }
         .enupal-translate-actions {
             flex: 1 1 auto;
             justify-content: space-between;
