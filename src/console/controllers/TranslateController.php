@@ -138,4 +138,76 @@ class TranslateController extends Controller
 
         return ExitCode::OK;
     }
+
+    /**
+     * Report which fields in this install can be translated.
+     *
+     * Shows every custom field, the serializer that will handle it, and why
+     * anything is being skipped — so a site's coverage can be checked without
+     * running a translation.
+     *
+     * @return int
+     */
+    public function actionFields(): int
+    {
+        $content = Translate::$app->content;
+        $excluded = Translate::$app->settings->getSettings()->getExcludedFieldHandles();
+
+        $supported = [];
+        $unsupported = [];
+
+        foreach (Craft::$app->getFields()->getAllFields() as $field) {
+            $class = get_class($field);
+            $serializer = $content->getSerializer($field);
+            $short = fn(?string $c) => $c ? substr((string)strrchr($c, '\\'), 1) : '-';
+
+            $row = [
+                'handle' => $field->handle,
+                'name' => $field->name,
+                'class' => $class,
+                'serializer' => $serializer ? $short(get_class($serializer)) : null,
+            ];
+
+            if (!$serializer) {
+                $row['reason'] = 'no serializer for ' . $short($class);
+                $unsupported[] = $row;
+                continue;
+            }
+
+            if (in_array($field->handle, $excluded, true)) {
+                $row['reason'] = 'excluded in settings';
+                $unsupported[] = $row;
+                continue;
+            }
+
+            $isNested = in_array($class, \enupal\translate\services\Content::$nestedElementFields, true);
+            $method = $field->translationMethod ?? \craft\base\Field::TRANSLATION_METHOD_NONE;
+
+            if (!$isNested && $method === \craft\base\Field::TRANSLATION_METHOD_NONE) {
+                $row['reason'] = 'field is not translatable (Translation Method: None)';
+                $unsupported[] = $row;
+                continue;
+            }
+
+            $supported[] = $row;
+        }
+
+        $this->stdout(PHP_EOL . 'Translatable (' . count($supported) . ')' . PHP_EOL, Console::FG_GREEN);
+        foreach ($supported as $r) {
+            $this->stdout(sprintf("  %-28s %-22s %s\n", $r['handle'], $r['serializer'], $r['name']));
+        }
+
+        $this->stdout(PHP_EOL . 'Skipped (' . count($unsupported) . ')' . PHP_EOL, Console::FG_YELLOW);
+        foreach ($unsupported as $r) {
+            $this->stdout(sprintf("  %-28s %s\n", $r['handle'], $r['reason']));
+        }
+
+        $this->stdout(PHP_EOL . 'Field types this plugin knows how to translate:' . PHP_EOL);
+        foreach ($content->getSupportedFieldClasses() as $class => $serializer) {
+            $installed = class_exists($class) ? 'installed' : 'not installed';
+            $this->stdout(sprintf("  %-46s %-16s %s\n", $class, substr((string)strrchr($serializer, '\\'), 1), $installed));
+        }
+
+        return ExitCode::OK;
+    }
 }

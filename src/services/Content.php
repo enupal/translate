@@ -24,7 +24,12 @@ use enupal\translate\events\RegisterSerializersEvent;
 use enupal\translate\helpers\ArrayFlattener;
 use enupal\translate\records\Metric;
 use enupal\translate\serializers\ContentBlock as ContentBlockSerializer;
+use enupal\translate\serializers\EtherSeo as EtherSeoSerializer;
+use enupal\translate\serializers\Hyper as HyperSerializer;
 use enupal\translate\serializers\Link as LinkSerializer;
+use enupal\translate\serializers\Linkit as LinkitSerializer;
+use enupal\translate\serializers\Seomatic as SeomaticSerializer;
+use enupal\translate\serializers\Vizy as VizySerializer;
 use enupal\translate\serializers\Matrix as MatrixSerializer;
 use enupal\translate\serializers\RichText as RichTextSerializer;
 use enupal\translate\serializers\Table as TableSerializer;
@@ -361,6 +366,16 @@ class Content extends Component
             ->keyBy(fn(FieldInterface $field) => $field->handle);
     }
 
+    /**
+     * Every field class this plugin can translate, mapped to its serializer.
+     *
+     * @return array<string, string>
+     */
+    public function getSupportedFieldClasses(): array
+    {
+        return $this->serializers;
+    }
+
     public function getSerializer(FieldInterface $field): ?FieldSerializer
     {
         $class = $this->serializers[get_class($field)] ?? null;
@@ -475,11 +490,20 @@ class Content extends Component
         $this->serializers['craft\ckeditor\Field'] = RichTextSerializer::class;
         $this->serializers['craft\redactor\Field'] = RichTextSerializer::class;
         $this->serializers['abmat\tinymce\Field'] = RichTextSerializer::class;
-        $this->serializers['verbb\vizy\fields\VizyField'] = RichTextSerializer::class;
         $this->serializers['verbb\doxter\fields\Doxter'] = TextSerializer::class;
 
-        $this->serializers['presseddigital\linkit\fields\LinkitField'] = LinkSerializer::class;
-        $this->serializers['verbb\hyper\fields\HyperField'] = LinkSerializer::class;
+        // Vizy is a node tree with nested block elements, not a markup string,
+        // so it needs its own walk rather than the rich text serializer.
+        $this->serializers['verbb\vizy\fields\VizyField'] = VizySerializer::class;
+
+        $this->serializers['craft\fields\Link'] = LinkSerializer::class;
+        $this->serializers['presseddigital\linkit\fields\LinkitField'] = LinkitSerializer::class;
+        $this->serializers['verbb\hyper\fields\HyperField'] = HyperSerializer::class;
+
+        // SEO fields expose a handful of translatable strings among a lot of
+        // configuration, so each gets a serializer that knows which is which.
+        $this->serializers['nystudio107\seomatic\fields\SeoSettings'] = SeomaticSerializer::class;
+        $this->serializers['ether\seo\fields\SeoField'] = EtherSeoSerializer::class;
 
         $event = new RegisterSerializersEvent(['serializers' => $this->serializers]);
         $this->trigger(self::EVENT_REGISTER_SERIALIZERS, $event);
