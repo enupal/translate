@@ -118,9 +118,10 @@ class Content extends Component
         $target = $this->findOrCreateTargetElement($source, $targetSite);
         $this->setElementTranslation($source, $target, $translated);
 
-        $this->saveTarget($source, $target, $sourceSite, $targetSite, $isRoot, $translated);
-
-        return $target;
+        // saveTarget may swap the element for a freshly created draft, so the
+        // caller has to be handed back what was actually saved — otherwise it
+        // links the author to the untouched live entry.
+        return $this->saveTarget($source, $target, $sourceSite, $targetSite, $isRoot, $translated);
     }
 
     /**
@@ -156,6 +157,9 @@ class Content extends Component
 
     /**
      * Save the target, as a draft when configured to.
+     *
+     * @return ElementInterface the element that was saved, which is the draft
+     *                          rather than the canonical entry when one is made
      */
     private function saveTarget(
         ElementInterface $source,
@@ -164,7 +168,7 @@ class Content extends Component
         Site $targetSite,
         bool $isRoot,
         array $translated
-    ): void {
+    ): ElementInterface {
         $settings = TranslatePlugin::$app->settings->getSettings();
 
         $notes = Craft::t('enupal-translate', 'Translated by Enupal Translate from {source} to {target}.', [
@@ -199,6 +203,8 @@ class Content extends Component
                 'errors' => $target->getErrors(),
             ], __METHOD__);
         }
+
+        return $target;
     }
 
     // Serialization

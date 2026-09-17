@@ -22,6 +22,9 @@
 - Failed provider requests are now retried with exponential backoff on rate limits and server errors.
 
 ### Fixed
+- Fixed saving an entry triggering a translation. The sidebar panel rendered a `<form>` inside Craft's own entry form; nested forms are invalid HTML, so the browser hoisted its hidden inputs into the outer form and Save submitted the translate action instead of saving the entry. The panel now posts over AJAX and contains no form or named inputs.
+- Fixed the translated draft being reported as the live entry. `saveTarget()` swapped in the newly created draft locally, so callers were handed the untouched canonical element — the success message said "translated" rather than "saved as a draft", and the link went to the live entry showing the old content.
+- The success message now says whether the result was saved as a draft, at what time, and links straight to it.
 - Fixed a `TypeError` on the entry, asset and category indexes: the bulk action was registered against `RegisterComponentTypesEvent` instead of `RegisterElementActionsEvent`.
 - Provider errors now report the API's own message instead of Guzzle's full HTTP dump.
 - A 429 caused by an exhausted quota is no longer retried, since waiting cannot resolve it.

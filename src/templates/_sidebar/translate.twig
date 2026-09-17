@@ -89,13 +89,16 @@
                 }]) %}
             {% endif %}
 
-            <form method="post" accept-charset="UTF-8">
-                {{ csrfInput() }}
-                {{ actionInput('enupal-translate/content/translate') }}
-                {{ hiddenInput('elementId', element.canonicalId) }}
-                {{ hiddenInput('elementType', className(element)) }}
-                {{ hiddenInput('sourceSiteId', element.siteId) }}
-                {{ redirectInput(element.cpEditUrl) }}
+            {#
+                Deliberately not a <form>: this panel renders inside Craft's own
+                entry form, and a nested form is invalid HTML — the browser
+                hoists its inputs into the outer one, so saving the entry would
+                submit this action too. The button posts over AJAX instead.
+            #}
+            <div class="enupal-translate-panel"
+                 data-element-id="{{ element.canonicalId }}"
+                 data-element-type="{{ className(element) }}"
+                 data-source-site-id="{{ element.siteId }}">
 
                 <div class="meta">
                     <div class="field">
@@ -112,7 +115,7 @@
 
                     {{ forms.selectField({
                         label: "To"|t('enupal-translate'),
-                        name: 'targetSiteId',
+                        id: 'enupal-translate-target',
                         options: targetOptions,
                         value: targetOptions|first.value
                     }) }}
@@ -120,7 +123,7 @@
                     {% if providers|length > 1 %}
                         {{ forms.selectField({
                             label: "With"|t('enupal-translate'),
-                            name: 'providerHandle',
+                            id: 'enupal-translate-provider',
                             options: providers,
                             value: defaultProvider
                         }) }}
@@ -136,14 +139,15 @@
                                 <span>{{ providerName }}</span>
                             </div>
                         </div>
-                        {{ hiddenInput('providerHandle', defaultProvider) }}
+                        <input type="hidden" id="enupal-translate-provider" value="{{ defaultProvider }}">
                     {% endif %}
 
                     <div class="field">
                         <div class="input enupal-translate-actions">
-                            <button type="submit" class="btn">
+                            <button type="button" class="btn" id="enupal-translate-submit">
                                 {{ "Translate"|t('enupal-translate') }}
                             </button>
+                            <div class="spinner hidden" id="enupal-translate-spinner"></div>
                             <span class="enupal-translate-meta">
                                 <a href="{{ url('enupal-translate/settings/providers') }}" class="enupal-translate-link">
                                     {{ iconSvg('gear') }}<span>{{ "Settings"|t('enupal-translate') }}</span>
@@ -155,11 +159,89 @@
                         </div>
                     </div>
                 </div>
-            </form>
+
+                <div class="meta hidden" id="enupal-translate-result">
+                    <div class="field">
+                        <div class="input">
+                            <p id="enupal-translate-result-text" style="margin: 0;"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
         {% endif %}
 
     </fieldset>
+
+
+    {% js %}
+        (function () {
+            var panel = document.querySelector('.enupal-translate-panel');
+            if (!panel) {
+                return;
+            }
+
+            var button = document.getElementById('enupal-translate-submit');
+            var spinner = document.getElementById('enupal-translate-spinner');
+            var result = document.getElementById('enupal-translate-result');
+            var resultText = document.getElementById('enupal-translate-result-text');
+
+            function busy(isBusy) {
+                button.disabled = isBusy;
+                button.classList.toggle('disabled', isBusy);
+                spinner.classList.toggle('hidden', !isBusy);
+            }
+
+            function report(message, url, label, isError) {
+                resultText.className = isError ? 'error' : '';
+                resultText.textContent = message + ' ';
+
+                if (url) {
+                    var link = document.createElement('a');
+                    link.href = url;
+                    link.textContent = label;
+                    resultText.appendChild(link);
+                }
+
+                result.classList.remove('hidden');
+            }
+
+            button.addEventListener('click', function () {
+                var target = document.getElementById('enupal-translate-target');
+                var provider = document.getElementById('enupal-translate-provider');
+
+                busy(true);
+                result.classList.add('hidden');
+
+                Craft.sendActionRequest('POST', 'enupal-translate/content/translate', {
+                    data: {
+                        elementId: panel.dataset.elementId,
+                        elementType: panel.dataset.elementType,
+                        sourceSiteId: panel.dataset.sourceSiteId,
+                        targetSiteId: target.value,
+                        providerHandle: provider ? provider.value : ''
+                    }
+                }).then(function (response) {
+                    var data = (response && response.data) || {};
+
+                    if (data.success) {
+                        Craft.cp.displayNotice(data.message);
+                        report(data.message, data.targetUrl, data.targetLabel, false);
+                    } else {
+                        Craft.cp.displayError(data.message || {{ "Translation failed."|t('enupal-translate')|json_encode|raw }});
+                        report(data.message || '', null, null, true);
+                    }
+                }).catch(function (error) {
+                    var data = (error && error.response && error.response.data) || {};
+                    var message = data.message || data.error || {{ "Translation failed. Check the logs."|t('enupal-translate')|json_encode|raw }};
+                    Craft.cp.displayError(message);
+                    report(message, null, null, true);
+                }).finally(function () {
+                    busy(false);
+                });
+            });
+        })();
+    {% endjs %}
 
     {% css %}
         .enupal-translate-legend {
@@ -198,6 +280,12 @@
             width: 12px;
             height: 12px;
             flex: 0 0 auto;
+        }
+        #enupal-translate-result-text.error {
+            color: var(--error-color, #cf1124);
+        }
+        #enupal-translate-spinner {
+            margin-inline-start: 6px;
         }
     {% endcss %}
 

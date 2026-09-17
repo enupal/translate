@@ -66,17 +66,13 @@ class ContentController extends BaseController
         }
 
         if (TranslatePlugin::$app->providers->getContentProvider() === null) {
-            $this->setFailFlash(Craft::t('enupal-translate', 'No translation provider is enabled. Check the Enupal Translate settings.'));
-
-            return $this->redirectToPostedUrl($element);
+            return $this->failure($element, Craft::t('enupal-translate', 'No translation provider is enabled. Check the Enupal Translate settings.'));
         }
 
         $targetSites = $this->resolveTargetSites($element, $sourceSite, $targetSiteId);
 
         if (empty($targetSites)) {
-            $this->setFailFlash(Craft::t('enupal-translate', 'There are no other sites this entry can be translated into.'));
-
-            return $this->redirectToPostedUrl($element);
+            return $this->failure($element, Craft::t('enupal-translate', 'There are no other sites this entry can be translated into.'));
         }
 
         // More than one target is queued; the author shouldn't sit on a
@@ -90,11 +86,9 @@ class ContentController extends BaseController
                 'providerHandle' => $providerHandle,
             ]));
 
-            $this->setSuccessFlash(Craft::t('enupal-translate', 'Translating into {count} sites. Added to the queue.', [
+            return $this->success($element, Craft::t('enupal-translate', 'Translating into {count} sites. Added to the queue.', [
                 'count' => count($targetSites),
             ]));
-
-            return $this->redirectToPostedUrl($element);
         }
 
         $targetSite = reset($targetSites);
@@ -110,29 +104,64 @@ class ContentController extends BaseController
             );
         } catch (Throwable $e) {
             Craft::error($e->getMessage(), __METHOD__);
-            $this->setFailFlash($e->getMessage());
 
-            return $this->redirectToPostedUrl($element);
+            return $this->failure($element, $e->getMessage());
         }
 
         if ($translated === null) {
-            $this->setFailFlash(Craft::t('enupal-translate', 'There was nothing translatable on this entry.'));
-
-            return $this->redirectToPostedUrl($element);
+            return $this->failure($element, Craft::t('enupal-translate', 'There was nothing translatable on this entry.'));
         }
 
         if ($translated->hasErrors()) {
-            $this->setFailFlash(Craft::t('enupal-translate', 'Translated, but the entry could not be saved cleanly. Check the logs.'));
-
-            return $this->redirectToPostedUrl($element);
+            return $this->failure($element, Craft::t('enupal-translate', 'Translated, but the entry could not be saved cleanly. Check the logs.'));
         }
 
-        $this->setSuccessFlash(Craft::t('enupal-translate', 'Translated into {site}.', [
-            'site' => $targetSite->name,
-        ]));
+        $isDraft = $translated->getIsDraft();
+        $time = Craft::$app->getFormatter()->asTime(new \DateTime(), 'short');
 
-        // Drop the author straight into what was just produced.
-        return $this->redirect($translated->getCpEditUrl() ?? $element->getCpEditUrl());
+        $message = $isDraft
+            ? Craft::t('enupal-translate', 'Translated into {site} and saved as a draft at {time}.', [
+                'site' => $targetSite->name,
+                'time' => $time,
+            ])
+            : Craft::t('enupal-translate', 'Translated into {site} at {time}.', [
+                'site' => $targetSite->name,
+                'time' => $time,
+            ]);
+
+        return $this->success($element, $message, [
+            'targetUrl' => $translated->getCpEditUrl(),
+            'targetLabel' => $isDraft
+                ? Craft::t('enupal-translate', 'Review draft')
+                : Craft::t('enupal-translate', 'View translation'),
+            'isDraft' => $isDraft,
+        ]);
+    }
+
+    /**
+     * The sidebar posts over AJAX so that it never has to nest a form inside
+     * Craft's own; anything posting a plain form still gets a redirect.
+     */
+    private function success(ElementInterface $element, string $message, array $data = []): Response
+    {
+        if ($this->request->getAcceptsJson()) {
+            return $this->asJson(array_merge(['success' => true, 'message' => $message], $data));
+        }
+
+        $this->setSuccessFlash($message);
+
+        return $this->redirect($data['targetUrl'] ?? $element->getCpEditUrl());
+    }
+
+    private function failure(ElementInterface $element, string $message): Response
+    {
+        if ($this->request->getAcceptsJson()) {
+            return $this->asJson(['success' => false, 'message' => $message]);
+        }
+
+        $this->setFailFlash($message);
+
+        return $this->redirectToPostedUrl($element);
     }
 
     /**
