@@ -1,8 +1,8 @@
 # Enupal Translate Changelog
 
-## 5.0.0-beta.1 - 2026.09.18
+## 5.0.0 - 2026.09.18
 
-> {warning} This is a beta release. Content translation and the AI providers are new and are still being proven on real sites. Static template translation is unchanged and works as it always has. Please report anything you hit at https://github.com/enupal/translate/issues — include the provider, the field type, and the relevant row from the dashboard's recent activity table.
+> {warning} Content translation and the AI providers are new in this release and are still being proven on real sites. Static template translation is unchanged and works as it always has. Please report anything you hit at https://github.com/enupal/translate/issues — include the provider, the field type, and the relevant row from the dashboard's recent activity table.
 
 > {note} Requires Craft 5.5.4 or later and PHP 8.2 or later.
 
@@ -14,7 +14,7 @@ the bulk translation actions on the Translations page behave exactly as before.
 Content translation and the dashboard are switched on by default, so they are
 there when you want them.
 
-### Known gaps in this beta
+### Known gaps
 
 - The TinyMCE and Doxter serializers have not been exercised against a live
   install of those plugins. Every other supported field type has been, including
