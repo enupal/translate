@@ -8,8 +8,9 @@
 #}
 {% set currentSiteHandle = craft.app.request.getParam('site') ?? craft.app.sites.currentSite.handle %}
 
-<button type="button" class="btn menubtn" aria-label="{{ 'Translate'|t('enupal-translate') }}">
-    {{ 'Translate to'|t('enupal-translate') }}
+<button type="button" class="btn menubtn enupal-translate-trigger" aria-label="{{ 'Translate'|t('enupal-translate') }}">
+    {{ svg('@enupal/translate/icon-mask.svg', sanitize = true) }}
+    <span>{{ 'Translate to'|t('enupal-translate') }}</span>
 </button>
 <div class="menu">
     <ul>
@@ -35,3 +36,23 @@
         {% endfor %}
     </ul>
 </div>
+
+{% css %}
+    /* Craft's .btn is inline-flex, so the icon and label need an explicit gap
+       rather than relying on the whitespace between them. */
+    .btn.enupal-translate-trigger {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .btn.enupal-translate-trigger svg {
+        width: 13px;
+        height: 13px;
+        flex: 0 0 auto;
+    }
+    /* The icon ships with Craft's text colour baked into each shape; recolour
+       only those and leave the transparent ones alone. */
+    .btn.enupal-translate-trigger svg [style*="3f4d5a"] {
+        fill: currentColor !important;
+    }
+{% endcss %}
