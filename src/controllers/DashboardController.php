@@ -19,6 +19,11 @@ use yii\web\Response;
  */
 class DashboardController extends BaseController
 {
+    /**
+     * Rows per page in the recent activity table.
+     */
+    private const RECENT_PER_PAGE = 10;
+
     public function actionIndex(): Response
     {
         $this->requirePermission('accessPlugin-enupal-translate');
@@ -34,7 +39,11 @@ class DashboardController extends BaseController
             'byProvider' => $metrics->getBreakdown('provider', $filters),
             'byLanguage' => $metrics->getBreakdown('targetLanguage', $filters),
             'byModel' => $metrics->getBreakdown('model', $filters),
-            'recent' => $metrics->getRecent($filters),
+            'recent' => $metrics->getRecentPage(
+                $filters,
+                (int)Craft::$app->getRequest()->getParam('page', 1),
+                self::RECENT_PER_PAGE
+            ),
             'options' => $metrics->getFilterOptions(),
             'providers' => TranslatePlugin::$app->providers->getAllProviders(),
             'typeOptions' => [

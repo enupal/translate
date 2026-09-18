@@ -8,6 +8,7 @@
 - Added a provider architecture: every provider now shares one interface, with a common base for LLM providers so OpenAI and Claude only implement their transport. Third-party providers can register through `Providers::EVENT_REGISTER_PROVIDERS`.
 - Added field serializers for Plain Text, Table, Link, Content Block and rich text (CKEditor, Redactor, TinyMCE), plus dedicated handling for Vizy, Hyper, Linkit, SEOmatic and Ether SEO — 16 field types in total.
 - Added an `enupal-translate/translate/fields` console command reporting which fields in an install can be translated, and why any are skipped. Third-party fields can register through `Content::EVENT_REGISTER_SERIALIZERS`.
+- The dashboard's recent activity table shows 10 rows per page, with a pager that keeps the active filters.
 - Added a dashboard reporting translation counts, token usage, API calls and failures, with filters by date, provider, type and target language, and a button to purge metrics.
 - The default content translation provider is chosen under Settings → Providers. The sidebar pre-selects it on every entry, and its dropdown swaps provider for a one-off translation without changing the default.
 - Added an Enupal Translate panel to the sidebar of entry, asset, category and product edit screens, for translating the element you're looking at into one site or all of them. It also explains itself when no provider is configured yet, so the feature is discoverable.

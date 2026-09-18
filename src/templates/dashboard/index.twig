@@ -183,7 +183,12 @@
         {% endif %}
 
         <div class="enupal-panel">
-            <h2 class="enupal-panel__title">{{ "Recent activity"|t('enupal-translate') }}</h2>
+            <h2 class="enupal-panel__title">
+                {{ "Recent activity"|t('enupal-translate') }}
+                <span class="light enupal-panel__count">
+                    {{ "{total} batches"|t('enupal-translate', {total: recent.total|number_format}) }}
+                </span>
+            </h2>
             <table class="data fullwidth">
                 <thead>
                 <tr>
@@ -198,7 +203,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for row in recent %}
+                {% for row in recent.rows %}
                     <tr>
                         <td>{{ row.dateCreated|datetime('short') }}</td>
                         <td>{{ row.provider }}{% if row.model %} <span class="light">({{ row.model }})</span>{% endif %}</td>
@@ -219,6 +224,40 @@
                 {% endfor %}
                 </tbody>
             </table>
+
+            {% if recent.totalPages > 1 %}
+                {# Carry the active filters through, so paging doesn't reset them. #}
+                {% set pageParams = craft.app.request.queryParams|filter((v, k) => k not in ['page', 'p']) %}
+
+                <nav class="enupal-pager" aria-label="{{ 'Recent activity pages'|t('enupal-translate') }}">
+                    {% if recent.page > 1 %}
+                        <a class="btn small"
+                           href="{{ url('enupal-translate/dashboard', pageParams|merge({page: recent.page - 1})) }}"
+                           rel="prev">
+                            {{ "Previous"|t('enupal-translate') }}
+                        </a>
+                    {% else %}
+                        <span class="btn small disabled">{{ "Previous"|t('enupal-translate') }}</span>
+                    {% endif %}
+
+                    <span class="light enupal-pager__status">
+                        {{ "Page {page} of {total}"|t('enupal-translate', {
+                            page: recent.page,
+                            total: recent.totalPages
+                        }) }}
+                    </span>
+
+                    {% if recent.page < recent.totalPages %}
+                        <a class="btn small"
+                           href="{{ url('enupal-translate/dashboard', pageParams|merge({page: recent.page + 1})) }}"
+                           rel="next">
+                            {{ "Next"|t('enupal-translate') }}
+                        </a>
+                    {% else %}
+                        <span class="btn small disabled">{{ "Next"|t('enupal-translate') }}</span>
+                    {% endif %}
+                </nav>
+            {% endif %}
         </div>
 
     {% endif %}

@@ -190,6 +190,37 @@ class Metrics extends Component
     }
 
     /**
+     * One page of recent batches, plus what the pager needs to draw itself.
+     *
+     * @return array{rows: array, total: int, page: int, perPage: int, totalPages: int}
+     */
+    public function getRecentPage(array $filters = [], int $page = 1, int $perPage = 10): array
+    {
+        $perPage = max(1, $perPage);
+        $total = (int)$this->createQuery($filters)->count();
+        $totalPages = max(1, (int)ceil($total / $perPage));
+
+        // Clamp rather than 404: a filter change can leave the page number
+        // past the end of a now-shorter result set.
+        $page = max(1, min($page, $totalPages));
+
+        $rows = $this->createQuery($filters)
+            ->select(['*'])
+            ->orderBy(['dateCreated' => SORT_DESC, 'id' => SORT_DESC])
+            ->offset(($page - 1) * $perPage)
+            ->limit($perPage)
+            ->all();
+
+        return [
+            'rows' => $rows,
+            'total' => $total,
+            'page' => $page,
+            'perPage' => $perPage,
+            'totalPages' => $totalPages,
+        ];
+    }
+
+    /**
      * Delete metrics. With no filters this empties the table.
      *
      * @return int rows deleted

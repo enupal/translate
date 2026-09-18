@@ -80,3 +80,20 @@
     text-align: center;
     color: var(--light-text-color, #8e9297);
 }
+
+.enupal-panel__count {
+    margin-inline-start: 8px;
+    font-size: 12px;
+    font-weight: 400;
+}
+
+.enupal-pager {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.enupal-pager__status {
+    font-size: 12px;
+}
