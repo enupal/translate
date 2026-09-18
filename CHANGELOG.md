@@ -20,9 +20,8 @@ there when you want them.
 
 ### Known gaps in this beta
 
-- The Vizy, Hyper, Linkit, Ether SEO, Super Table, Redactor and TinyMCE
-  serializers are written against each field's documented value shape but have
-  not yet been exercised against a live install of those plugins.
+- The Neo, TinyMCE and Doxter serializers have not been exercised against a live
+  install of those plugins. Every other supported field type has been.
 - Placeholders (`{{ twig }}`, `{param}`, `%s`) and HTML are preserved by
   instructing the model, not by masking them before the request. This holds up
   well in testing, but a custom prompt or a smaller model makes it less certain.
