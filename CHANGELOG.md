@@ -2,11 +2,11 @@
 
 ## 5.0.0-beta.1 - 2026.09.18
 
-> {warning} This is a beta release. Content translation and the AI providers are new and are still being proven on real sites. Static template translation is unchanged and works as it did in 4.x. Please report anything you hit at https://github.com/enupal/translate/issues — include the provider, the field type, and the relevant row from the dashboard's recent activity table.
+> {warning} This is a beta release. Content translation and the AI providers are new and are still being proven on real sites. Static template translation is unchanged and works as it always has. Please report anything you hit at https://github.com/enupal/translate/issues — include the provider, the field type, and the relevant row from the dashboard's recent activity table.
 
-> {note} Requires Craft 5.5.4 or later and PHP 8.2 or later. There is no Craft 4 build.
+> {note} Requires Craft 5.5.4 or later and PHP 8.2 or later.
 
-### Upgrading from 4.x
+### Upgrading from Enupal Translate 4.x
 
 Nothing to do. Your Yandex and Google credentials carry over untouched — they
 have simply moved from the General settings page to the new Providers page, and
