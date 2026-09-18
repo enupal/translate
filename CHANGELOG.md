@@ -1,6 +1,31 @@
 # Enupal Translate Changelog
 
-## 5.0.0 - 2026.09.16
+## 5.0.0-beta.1 - 2026.09.18
+
+> **Beta.** Content translation and the AI providers are new in this release and
+> are still being proven on real sites. Static template translation is unchanged
+> and continues to work as it did in 4.x. Please report anything you hit at
+> https://github.com/enupal/translate/issues — include the provider, the field
+> type, and the relevant row from the dashboard's recent activity table.
+>
+> Requires Craft 5.5.4 or later and PHP 8.2 or later. There is no Craft 4 build.
+
+### Upgrading from 4.x
+
+Nothing to do. Your Yandex and Google credentials carry over untouched — they
+have simply moved from the General settings page to the new Providers page, and
+the bulk translation actions on the Translations page behave exactly as before.
+Content translation and the dashboard are switched on by default, so they are
+there when you want them.
+
+### Known gaps in this beta
+
+- The Vizy, Hyper, Linkit, Ether SEO, Super Table, Redactor and TinyMCE
+  serializers are written against each field's documented value shape but have
+  not yet been exercised against a live install of those plugins.
+- Placeholders (`{{ twig }}`, `{param}`, `%s`) and HTML are preserved by
+  instructing the model, not by masking them before the request. This holds up
+  well in testing, but a custom prompt or a smaller model makes it less certain.
 
 ### Added
 - Content translation: entries, assets, categories and Commerce products can now be translated into other sites from the element index, including nested Matrix, Neo, Super Table and Content Block fields.
