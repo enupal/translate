@@ -11,6 +11,7 @@ namespace enupal\translate\services;
 use Craft;
 use craft\base\Component;
 use craft\db\Query;
+use craft\helpers\DateTimeHelper;
 use craft\helpers\Db;
 use DateTime;
 use DateTimeZone;
@@ -25,6 +26,11 @@ use Throwable;
 class Metrics extends Component
 {
     public const TABLE = '{{%enupaltranslate_metrics}}';
+
+    /**
+     * Days covered when the dashboard is opened without a date range.
+     */
+    public const DEFAULT_RANGE_DAYS = 30;
 
     /**
      * Store the outcome of one batch.
@@ -295,13 +301,17 @@ class Metrics extends Component
             $conditions[] = ['model' => $filters['model']];
         }
 
-        if (!empty($filters['start'])) {
-            $conditions[] = ['>=', 'dateCreated', Db::prepareDateForDb($this->toDateTime($filters['start']))];
+        $start = $this->toDateTime($filters['start'] ?? null);
+
+        if ($start !== null) {
+            $start->setTime(0, 0);
+            $conditions[] = ['>=', 'dateCreated', Db::prepareDateForDb($start)];
         }
 
-        if (!empty($filters['end'])) {
+        $end = $this->toDateTime($filters['end'] ?? null);
+
+        if ($end !== null) {
             // The end date is inclusive, so cover the whole day.
-            $end = $this->toDateTime($filters['end']);
             $end->setTime(23, 59, 59);
             $conditions[] = ['<=', 'dateCreated', Db::prepareDateForDb($end)];
         }
@@ -316,13 +326,8 @@ class Metrics extends Component
      */
     private function resolveRange(array $filters): array
     {
-        $end = !empty($filters['end']) ? $this->toDateTime($filters['end']) : new DateTime('now');
-
-        if (!empty($filters['start'])) {
-            $start = $this->toDateTime($filters['start']);
-        } else {
-            $start = (clone $end)->modify('-29 days');
-        }
+        $end = $this->toDateTime($filters['end'] ?? null) ?? new DateTime('now');
+        $start = $this->toDateTime($filters['start'] ?? null) ?? (clone $end)->modify('-' . (self::DEFAULT_RANGE_DAYS - 1) . ' days');
 
         if ($start > $end) {
             [$start, $end] = [$end, $start];
@@ -331,13 +336,34 @@ class Metrics extends Component
         return [$start, $end];
     }
 
-    private function toDateTime($value): DateTime
+    /**
+     * Normalize whatever the request produced into a date.
+     *
+     * Craft's date fields post an array of date/locale/timezone parts rather
+     * than a string, so this goes through DateTimeHelper instead of
+     * constructing a DateTime directly. Anything unparseable, including an
+     * empty field, is treated as "no bound".
+     */
+    public function toDateTime($value): ?DateTime
     {
+        if ($value === null || $value === '' || $value === []) {
+            return null;
+        }
+
         if ($value instanceof DateTime) {
             return clone $value;
         }
 
-        return new DateTime((string)$value);
+        if (is_array($value) && trim((string)($value['date'] ?? '')) === '') {
+            return null;
+        }
+
+        // assumeSystemTimeZone: a date typed into the CP means that day in the
+        // site's timezone. Left at its default, Craft reads it as UTC and a
+        // negative-offset site sees every date shift back by one.
+        $date = DateTimeHelper::toDateTime($value, true);
+
+        return $date instanceof DateTime ? $date : null;
     }
 
     /**

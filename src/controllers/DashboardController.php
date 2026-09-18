@@ -10,6 +10,8 @@ namespace enupal\translate\controllers;
 
 use Craft;
 use craft\web\Controller as BaseController;
+use DateTime;
+use enupal\translate\services\Metrics;
 use enupal\translate\records\Metric;
 use enupal\translate\Translate as TranslatePlugin;
 use yii\web\Response;
@@ -75,16 +77,41 @@ class DashboardController extends BaseController
         return $this->redirectToPostedUrl();
     }
 
+    /**
+     * The active filters, with the date range always resolved.
+     *
+     * Craft's date fields post an array of parts rather than a string, so the
+     * bounds go through the metrics service to be normalized. An empty range
+     * falls back to the last month, which keeps the chart and the totals
+     * showing something useful on a first visit.
+     */
     private function resolveFilters(): array
     {
         $request = Craft::$app->getRequest();
+        $metrics = TranslatePlugin::$app->metrics;
 
-        return array_filter([
-            'start' => $request->getParam('start'),
-            'end' => $request->getParam('end'),
-            'provider' => $request->getParam('provider'),
-            'type' => $request->getParam('type'),
-            'targetLanguage' => $request->getParam('targetLanguage'),
-        ], static fn($value) => $value !== null && $value !== '');
+        $end = $metrics->toDateTime($request->getParam('end')) ?? new DateTime('now');
+        $start = $metrics->toDateTime($request->getParam('start'))
+            ?? (clone $end)->modify('-' . (Metrics::DEFAULT_RANGE_DAYS - 1) . ' days');
+
+        // Tolerate a range entered back to front rather than returning nothing.
+        if ($start > $end) {
+            [$start, $end] = [$end, $start];
+        }
+
+        $filters = [
+            'start' => $start->setTime(0, 0),
+            'end' => $end->setTime(23, 59, 59),
+        ];
+
+        foreach (['provider', 'type', 'targetLanguage'] as $key) {
+            $value = $request->getParam($key);
+
+            if (is_string($value) && $value !== '') {
+                $filters[$key] = $value;
+            }
+        }
+
+        return $filters;
     }
 }

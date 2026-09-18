@@ -24,13 +24,13 @@
         {{ forms.dateField({
             label: "From"|t('enupal-translate'),
             name: 'start',
-            value: filters.start is defined ? filters.start|date('Y-m-d') : null
+            value: filters.start ?? null
         }) }}
 
         {{ forms.dateField({
             label: "To"|t('enupal-translate'),
             name: 'end',
-            value: filters.end is defined ? filters.end|date('Y-m-d') : null
+            value: filters.end ?? null
         }) }}
 
         {% set providerOptions = {'': "All providers"|t('enupal-translate')} %}
@@ -228,6 +228,10 @@
             {% if recent.totalPages > 1 %}
                 {# Carry the active filters through, so paging doesn't reset them. #}
                 {% set pageParams = craft.app.request.queryParams|filter((v, k) => k not in ['page', 'p']) %}
+                {% set pageParams = pageParams|merge({
+                    'start[date]': filters.start|date('Y-m-d'),
+                    'end[date]': filters.end|date('Y-m-d')
+                }) %}
 
                 <nav class="enupal-pager" aria-label="{{ 'Recent activity pages'|t('enupal-translate') }}">
                     {% if recent.page > 1 %}

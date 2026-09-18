@@ -8,6 +8,7 @@
 - Added a provider architecture: every provider now shares one interface, with a common base for LLM providers so OpenAI and Claude only implement their transport. Third-party providers can register through `Providers::EVENT_REGISTER_PROVIDERS`.
 - Added field serializers for Plain Text, Table, Link, Content Block and rich text (CKEditor, Redactor, TinyMCE), plus dedicated handling for Vizy, Hyper, Linkit, SEOmatic and Ether SEO — 16 field types in total.
 - Added an `enupal-translate/translate/fields` console command reporting which fields in an install can be translated, and why any are skipped. Third-party fields can register through `Content::EVENT_REGISTER_SERIALIZERS`.
+- The dashboard opens on the last 30 days rather than an empty range, and the date inputs show it.
 - The dashboard's recent activity table shows 10 rows per page, with a pager that keeps the active filters.
 - Added a dashboard reporting translation counts, token usage, API calls and failures, with filters by date, provider, type and target language, and a button to purge metrics.
 - The default content translation provider is chosen under Settings → Providers. The sidebar pre-selects it on every entry, and its dropdown swaps provider for a one-off translation without changing the default.
@@ -24,6 +25,8 @@
 - Failed provider requests are now retried with exponential backoff on rate limits and server errors.
 
 ### Fixed
+- Fixed a 500 error when applying the dashboard filters. Craft's date fields post an array of date/locale/timezone parts rather than a string, which was being passed straight into a `DateTime` constructor.
+- Fixed dashboard dates shifting back a day. A date typed into the control panel means that day in the site's timezone, but Craft reads a bare date as UTC unless told otherwise, so any site at a negative offset saw the range move.
 - Fixed saving an entry triggering a translation. The sidebar panel rendered a `<form>` inside Craft's own entry form; nested forms are invalid HTML, so the browser hoisted its hidden inputs into the outer form and Save submitted the translate action instead of saving the entry. The panel now posts over AJAX and contains no form or named inputs.
 - Fixed the translated draft being reported as the live entry. `saveTarget()` swapped in the newly created draft locally, so callers were handed the untouched canonical element — the success message said "translated" rather than "saved as a draft", and the link went to the live entry showing the old content.
 - The success message now says whether the result was saved as a draft, at what time, and links straight to it.
