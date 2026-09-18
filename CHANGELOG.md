@@ -20,8 +20,17 @@ there when you want them.
 
 ### Known gaps in this beta
 
-- The Neo, TinyMCE and Doxter serializers have not been exercised against a live
-  install of those plugins. Every other supported field type has been.
+- The TinyMCE and Doxter serializers have not been exercised against a live
+  install of those plugins. Every other supported field type has been, including
+  Neo, Vizy, Hyper, Linkit, Super Table, CKEditor, Redactor, SEOmatic and
+  Ether SEO.
+- **Neo and the queue:** Neo reads a web-only request property while saving, so
+  translating a Neo field fails when the queue is run from the console
+  (`craft queue/listen`, or a cron worker) with `Getting unknown property:
+  craft\console\Request::actionSegments`. Translating from the entry sidebar
+  works, as does Craft's default web-based queue runner. This is a Neo
+  limitation rather than something this plugin can work around; the job reports
+  which element failed and why.
 - Placeholders (`{{ twig }}`, `{param}`, `%s`) and HTML are preserved by
   instructing the model, not by masking them before the request. This holds up
   well in testing, but a custom prompt or a smaller model makes it less certain.
