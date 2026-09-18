@@ -8,10 +8,10 @@
 
 namespace enupal\translate\elements\actions;
 
-class GoogleCloudTranslate extends BaseProviderTranslate
+class OpenAiTranslate extends BaseProviderTranslate
 {
     public static function providerHandle(): string
     {
-        return 'googleCloud';
+        return 'openai';
     }
 }

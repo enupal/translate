@@ -1,0 +1,292 @@
+{#
+/**
+ * Translate plugin for Craft CMS 5.x
+ *
+ * Panel shown in the sidebar of an element's edit screen. This is how an
+ * author discovers that the plugin can translate what they're looking at, so
+ * it explains itself even when it can't do anything yet.
+ *
+ * Uses Craft's own `.meta > .field` markup so the rows line up with Slug,
+ * Author and Post Date above rather than inventing a second layout.
+ *
+ * @link      https://enupal.com
+ * @copyright Copyright (c) 2018 Enupal
+ */
+#}
+{% import "_includes/forms" as forms %}
+
+{% if currentUser.can('enupal-translate:translateContent') %}
+
+    {% set ready = craft.enupaltranslate.isContentTranslationReady() %}
+    {% set providerName = craft.enupaltranslate.getContentProviderName() %}
+    {% set providers = ready ? craft.enupaltranslate.getEnabledProviders() : {} %}
+    {% set defaultProvider = craft.enupaltranslate.getContentProviderHandle() %}
+    {% set targets = ready ? craft.enupaltranslate.getTranslationTargets(element) : [] %}
+
+    {#
+        Translation always reads the saved entry, never the editor's current
+        state, so say so whenever the two can differ. A provisional draft only
+        exists once the author has changed something, which makes it a reliable
+        signal that there are unsaved edits.
+    #}
+    {% set hasUnsavedChanges = element.isProvisionalDraft %}
+    {% set isRealDraft = element.getIsDraft() and not element.isProvisionalDraft %}
+    {% set sourceNote = null %}
+    {% if hasUnsavedChanges %}
+        {% set sourceNote = "You have unsaved changes. Translating uses the last saved version of this entry — save first if you want your changes included."|t('enupal-translate') %}
+    {% elseif isRealDraft or element.getIsRevision() %}
+        {% set sourceNote = "Translating uses the saved version of this entry, not this draft."|t('enupal-translate') %}
+    {% endif %}
+
+    <fieldset>
+        <legend class="h6 enupal-translate-legend">
+            {{ svg('@enupal/translate/icon-mask.svg', sanitize = true) }}
+            <span>{{ "Enupal Translate"|t('enupal-translate') }}</span>
+        </legend>
+
+        {% if not ready %}
+            <div class="meta">
+                <div class="field">
+                    <div class="input">
+                        <p class="light" style="margin: 0;">
+                            {{ "Machine-translate this entry into your other sites."|t('enupal-translate') }}
+                            {% if currentUser.admin %}
+                                <a class="go" href="{{ url('enupal-translate/settings/providers') }}">
+                                    {{ "Enable a provider"|t('enupal-translate') }}
+                                </a>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        {% elseif targets is empty %}
+            <div class="meta">
+                <div class="field">
+                    <div class="input">
+                        <p class="light" style="margin: 0;">
+                            {{ "No other sites available to translate into."|t('enupal-translate') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        {% else %}
+
+            {# Build the target options once, marking sites that already have a version. #}
+            {% set targetOptions = [] %}
+            {% for target in targets %}
+                {% set label = target.site.name ~ ' (' ~ target.site.language ~ ')' %}
+                {% set targetOptions = targetOptions|merge([{
+                    label: target.exists ? label ~ ' — ' ~ 'exists'|t('enupal-translate') : label,
+                    value: target.site.id
+                }]) %}
+            {% endfor %}
+            {% if targets|length > 1 %}
+                {% set targetOptions = targetOptions|merge([{
+                    label: "All sites"|t('enupal-translate') ~ ' (' ~ targets|length ~ ')',
+                    value: '*'
+                }]) %}
+            {% endif %}
+
+            {#
+                Deliberately not a <form>: this panel renders inside Craft's own
+                entry form, and a nested form is invalid HTML — the browser
+                hoists its inputs into the outer one, so saving the entry would
+                submit this action too. The button posts over AJAX instead.
+            #}
+            <div class="enupal-translate-panel"
+                 data-element-id="{{ element.canonicalId }}"
+                 data-element-type="{{ className(element) }}"
+                 data-source-site-id="{{ element.siteId }}">
+
+                <div class="meta">
+                    <div class="field">
+                        <div class="heading">
+                            <label>{{ "From"|t('enupal-translate') }}</label>
+                        </div>
+                        <div class="input">
+                            <span>{{ element.site.name }} ({{ element.site.language }})</span>
+                            {% if sourceNote %}
+                                <span class="info">{{ sourceNote }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {{ forms.selectField({
+                        label: "To"|t('enupal-translate'),
+                        id: 'enupal-translate-target',
+                        options: targetOptions,
+                        value: targetOptions|first.value
+                    }) }}
+
+                    {% if providers|length > 1 %}
+                        {{ forms.selectField({
+                            label: "With"|t('enupal-translate'),
+                            id: 'enupal-translate-provider',
+                            options: providers,
+                            value: defaultProvider
+                        }) }}
+                    {% else %}
+                        {# Only one provider, so there is nothing to choose —
+                           but still name it, so the row set stays consistent
+                           and it is obvious what will do the work. #}
+                        <div class="field">
+                            <div class="heading">
+                                <label>{{ "With"|t('enupal-translate') }}</label>
+                            </div>
+                            <div class="input">
+                                <span>{{ providerName }}</span>
+                            </div>
+                        </div>
+                        <input type="hidden" id="enupal-translate-provider" value="{{ defaultProvider }}">
+                    {% endif %}
+
+                    <div class="field">
+                        <div class="input enupal-translate-actions">
+                            <button type="button" class="btn" id="enupal-translate-submit">
+                                {{ "Translate"|t('enupal-translate') }}
+                            </button>
+                            <div class="spinner hidden" id="enupal-translate-spinner"></div>
+                            <span class="enupal-translate-meta">
+                                <a href="{{ url('enupal-translate/settings/providers') }}" class="enupal-translate-link">
+                                    {{ iconSvg('gear') }}<span>{{ "Settings"|t('enupal-translate') }}</span>
+                                </a>
+                                <a href="{{ url('enupal-translate/dashboard') }}" class="enupal-translate-link">
+                                    {{ iconSvg('chart-simple') }}<span>{{ "Usage"|t('enupal-translate') }}</span>
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="meta hidden" id="enupal-translate-result">
+                    <div class="field">
+                        <div class="input">
+                            <p id="enupal-translate-result-text" style="margin: 0;"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        {% endif %}
+
+    </fieldset>
+
+
+    {% js %}
+        (function () {
+            var panel = document.querySelector('.enupal-translate-panel');
+            if (!panel) {
+                return;
+            }
+
+            var button = document.getElementById('enupal-translate-submit');
+            var spinner = document.getElementById('enupal-translate-spinner');
+            var result = document.getElementById('enupal-translate-result');
+            var resultText = document.getElementById('enupal-translate-result-text');
+
+            function busy(isBusy) {
+                button.disabled = isBusy;
+                button.classList.toggle('disabled', isBusy);
+                spinner.classList.toggle('hidden', !isBusy);
+            }
+
+            function report(message, url, label, isError) {
+                resultText.className = isError ? 'error' : '';
+                resultText.textContent = message + ' ';
+
+                if (url) {
+                    var link = document.createElement('a');
+                    link.href = url;
+                    link.textContent = label;
+                    resultText.appendChild(link);
+                }
+
+                result.classList.remove('hidden');
+            }
+
+            button.addEventListener('click', function () {
+                var target = document.getElementById('enupal-translate-target');
+                var provider = document.getElementById('enupal-translate-provider');
+
+                busy(true);
+                result.classList.add('hidden');
+
+                Craft.sendActionRequest('POST', 'enupal-translate/content/translate', {
+                    data: {
+                        elementId: panel.dataset.elementId,
+                        elementType: panel.dataset.elementType,
+                        sourceSiteId: panel.dataset.sourceSiteId,
+                        targetSiteId: target.value,
+                        providerHandle: provider ? provider.value : ''
+                    }
+                }).then(function (response) {
+                    var data = (response && response.data) || {};
+
+                    if (data.success) {
+                        Craft.cp.displayNotice(data.message);
+                        report(data.message, data.targetUrl, data.targetLabel, false);
+                    } else {
+                        Craft.cp.displayError(data.message || {{ "Translation failed."|t('enupal-translate')|json_encode|raw }});
+                        report(data.message || '', null, null, true);
+                    }
+                }).catch(function (error) {
+                    var data = (error && error.response && error.response.data) || {};
+                    var message = data.message || data.error || {{ "Translation failed. Check the logs."|t('enupal-translate')|json_encode|raw }};
+                    Craft.cp.displayError(message);
+                    report(message, null, null, true);
+                }).finally(function () {
+                    busy(false);
+                });
+            });
+        })();
+    {% endjs %}
+
+    {% css %}
+        .enupal-translate-legend {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .enupal-translate-legend svg {
+            width: 14px;
+            height: 14px;
+            flex: 0 0 auto;
+        }
+        /* The icon ships with Craft's text colour baked into each shape, so
+           recolour only those and leave the transparent ones alone. */
+        .enupal-translate-legend svg [style*="3f4d5a"] {
+            fill: currentColor !important;
+        }
+        .enupal-translate-actions {
+            flex: 1 1 auto;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .enupal-translate-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        .enupal-translate-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .enupal-translate-link svg {
+            width: 12px;
+            height: 12px;
+            flex: 0 0 auto;
+        }
+        #enupal-translate-result-text.error {
+            color: var(--error-color, #cf1124);
+        }
+        #enupal-translate-spinner {
+            margin-inline-start: 6px;
+        }
+    {% endcss %}
+
+{% endif %}

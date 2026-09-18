@@ -1,9 +1,7 @@
 {# @var craft \craft\web\twig\variables\CraftVariable #}
 {#
 /**
- * Translate plugin for Craft CMS 3.x
- *
- * Translation management plugin for Craft CMS
+ * Translate plugin for Craft CMS 5.x
  *
  * @link      https://enupal.com
  * @copyright Copyright (c) 2018 Enupal
@@ -30,10 +28,7 @@
     <div id="settings-cp">
 
         {% namespace 'settings' %}
-        {{ forms.field({
-            label: "General settings"|t('enupal-translate')|upper
-        }, null) }}
-        <hr>
+
         {{ forms.textField({
             label: "Plugin Name"|t,
             id: 'pluginNameOverride',
@@ -42,8 +37,7 @@
             value: settings.pluginNameOverride,
             placeholder: "Enupal Translate"|t('enupal-translate'),
             autofocus: true,
-            first: true,
-            errors: ''
+            first: true
         }) }}
 
         {{ forms.selectField({
@@ -56,61 +50,23 @@
         }) }}
 
         <hr>
-        {{ forms.lightswitchField({
-            label: "Enable Yandex Translate"|t('enupal-translate'),
-            id: 'enableYandex',
-            name: 'enableYandex',
-            instructions: 'The API provides access to the Yandex online machine translation service. It supports more than 90 languages and can translate separate words or complete texts. <a href="https://yandex.com/dev/translate/"> Get your Api for free here</a>'|t('enupal-translate'),
-            on: settings.enableYandex,
-            toggle: 'settings-enableYandex',
-            onLabel: "On"|t('enupal-translate'),
-            offLabel: "Off"|t('enupal-translate')
-        }) }}
-        <div id="settings-enableYandex" class="{% if not settings.enableYandex %}hidden{% endif %}">
-            {{ forms.textField({
-                label: 'Yandex Translate',
-                instructions: 'Api Key'|t('enupal-translate'),
-                id: 'yandexApi',
-                name: 'yandexApi',
-                required: false,
-                type: "password",
-                errors: settings.getErrors('yandexApi'),
-                value: settings['yandexApi']})
-            }}
-        </div>
-        <hr>
-        {{ forms.lightswitchField({
-            label: "Enable Google Translate"|t('enupal-translate'),
-            id: 'enableGoogleApi',
-            instructions: 'Dynamically translate between thousands of available language pairs. <a href="https://cloud.google.com/translate/">Get your Api here</a>'|t('enupal-translate'),
-            name: 'enableGoogleApi',
-            on: settings.enableGoogleApi,
-            toggle: 'settings-enableGoogleApi',
-            onLabel: "On"|t('enupal-translate'),
-            offLabel: "Off"|t('enupal-translate')
+
+        {{ forms.textField({
+            label: "Queue threshold"|t('enupal-translate'),
+            id: 'staticQueueThreshold',
+            name: 'staticQueueThreshold',
+            type: 'number',
+            min: 0,
+            instructions: "Bulk static translations larger than this run in the queue instead of the browser request. Set to 0 to always run inline."|t('enupal-translate'),
+            value: settings.staticQueueThreshold
         }) }}
 
-        <div id="settings-enableGoogleApi" class="{% if not settings.enableGoogleApi %}hidden{% endif %}">
-            {{ forms.textField({
-                label: 'Google Translate',
-                instructions: 'Google Cloud Translation API version 2.0'|t('enupal-translate'),
-                id: 'googleApi',
-                name: 'googleApi',
-                required: false,
-                type: "password",
-                errors: settings.getErrors('googleApi'),
-                value: settings['googleApi']})
-            }}
-        </div>
-        <hr>
         {{ forms.lightswitchField({
-            label: "Google Translate (Free)"|t('enupal-translate'),
-            instructions: 'Do not depend on this setting as it may break anytime as it is based on crawling the Google Translate website. Consider buying Official Google Translate API for other types of usage. Also, Google might ban your server IP or require to solve CAPTCHA if you send unusual traffic (large amount of data/requests)',
-            id: 'enableFreeGoogleApi',
-            name: 'enableFreeGoogleApi',
-            on: settings.enableFreeGoogleApi,
-            onLabel: "On"|t('enupal-translate'),
-            offLabel: "Off"|t('enupal-translate')
+            label: "Track usage metrics"|t('enupal-translate'),
+            id: 'enableMetrics',
+            name: 'enableMetrics',
+            instructions: "Record translation counts and token usage so they show up on the dashboard."|t('enupal-translate'),
+            on: settings.enableMetrics
         }) }}
 
         {% endnamespace %}

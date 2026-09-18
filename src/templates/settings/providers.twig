@@ -1,0 +1,166 @@
+{# @var craft \craft\web\twig\variables\CraftVariable #}
+{#
+/**
+ * Translate plugin for Craft CMS 5.x
+ *
+ * Translation provider credentials and model settings.
+ *
+ * @link      https://enupal.com
+ * @copyright Copyright (c) 2018 Enupal
+ */
+#}
+{% extends "enupal-translate/_layouts/settings" %}
+{% import "_includes/forms" as forms %}
+
+{% set settings = craft.enupaltranslate.getSettings() %}
+{% set providerOptions = craft.enupaltranslate.getContentProviderOptions() %}
+{% set fullPageForm = true %}
+{% set saveShortcutRedirect = 'enupal-translate/settings/providers' %}
+
+{% set saveButton %}
+    <div class="buttons">
+        <input class="btn submit" type="submit" value="{{ 'Save'|t('app') }}">
+    </div>
+{% endset %}
+
+{% set content %}
+
+    <input type="hidden" name="action" value="enupal-translate/settings/save-settings">
+
+    <div id="settings-cp">
+
+        {% namespace 'settings' %}
+
+        <h2>{{ "Machine translation"|t('enupal-translate') }}</h2>
+
+        {{ forms.lightswitchField({
+            label: "Enable Yandex Translate"|t('enupal-translate'),
+            id: 'enableYandex',
+            name: 'enableYandex',
+            instructions: 'The API provides access to the Yandex online machine translation service. It supports more than 90 languages. <a href="https://yandex.com/dev/translate/" rel="noopener" target="_blank">Create an API key</a>.'|t('enupal-translate'),
+            on: settings.enableYandex,
+            toggle: 'settings-enableYandex'
+        }) }}
+
+        <div id="settings-enableYandex" class="{% if not settings.enableYandex %}hidden{% endif %}">
+            {{ forms.autosuggestField({
+                label: 'API key'|t('enupal-translate'),
+                id: 'yandexApi',
+                name: 'yandexApi',
+                suggestEnvVars: true,
+                errors: settings.getErrors('yandexApi'),
+                value: settings.yandexApi
+            }) }}
+        </div>
+
+        <hr>
+
+        {{ forms.lightswitchField({
+            label: "Enable Google Cloud Translate"|t('enupal-translate'),
+            id: 'enableGoogleApi',
+            name: 'enableGoogleApi',
+            instructions: 'Dynamically translate between thousands of available language pairs. <a href="https://console.cloud.google.com/apis/credentials" rel="noopener" target="_blank">Create an API key</a>.'|t('enupal-translate'),
+            on: settings.enableGoogleApi,
+            toggle: 'settings-enableGoogleApi'
+        }) }}
+
+        <div id="settings-enableGoogleApi" class="{% if not settings.enableGoogleApi %}hidden{% endif %}">
+            {{ forms.autosuggestField({
+                label: 'API key'|t('enupal-translate'),
+                instructions: 'Google Cloud Translation API version 2.0'|t('enupal-translate'),
+                id: 'googleApi',
+                name: 'googleApi',
+                suggestEnvVars: true,
+                errors: settings.getErrors('googleApi'),
+                value: settings.googleApi
+            }) }}
+        </div>
+
+        <hr>
+
+        {{ forms.lightswitchField({
+            label: "Google Translate (Free)"|t('enupal-translate'),
+            id: 'enableFreeGoogleApi',
+            name: 'enableFreeGoogleApi',
+            instructions: 'Do not depend on this setting as it may break at any time — it is based on crawling the Google Translate website. Google may also ban your server IP or require a CAPTCHA if you send unusual traffic.'|t('enupal-translate'),
+            on: settings.enableFreeGoogleApi
+        }) }}
+
+        <hr>
+
+        <h2>{{ "AI translation"|t('enupal-translate') }}</h2>
+        <p class="light">
+            {{ "AI providers usually produce more natural translations because they see every string in a batch at once, and they can be steered with your own prompt, protected terms and tone of voice. They are billed per token — the dashboard tracks your usage."|t('enupal-translate') }}
+        </p>
+
+        {{ forms.lightswitchField({
+            label: "Enable OpenAI"|t('enupal-translate'),
+            id: 'enableOpenAi',
+            name: 'enableOpenAi',
+            on: settings.enableOpenAi,
+            toggle: 'settings-enableOpenAi'
+        }) }}
+
+        <div id="settings-enableOpenAi" class="{% if not settings.enableOpenAi %}hidden{% endif %}">
+            {% include 'enupal-translate/settings/_providers/openai' with { settings: settings } only %}
+        </div>
+
+        <hr>
+
+        {{ forms.lightswitchField({
+            label: "Enable Claude"|t('enupal-translate'),
+            id: 'enableClaude',
+            name: 'enableClaude',
+            on: settings.enableClaude,
+            toggle: 'settings-enableClaude'
+        }) }}
+
+        <div id="settings-enableClaude" class="{% if not settings.enableClaude %}hidden{% endif %}">
+            {% include 'enupal-translate/settings/_providers/claude' with { settings: settings } only %}
+        </div>
+
+        <hr>
+
+        <h2>{{ "Shared AI instructions"|t('enupal-translate') }}</h2>
+
+        {{ forms.textareaField({
+            label: "Protected terms"|t('enupal-translate'),
+            id: 'llmProtectedTerms',
+            name: 'llmProtectedTerms',
+            instructions: "Terms to leave untranslated — brand names, product names, and so on. One per line. Applies to every AI provider."|t('enupal-translate'),
+            rows: 4,
+            value: settings.llmProtectedTerms
+        }) }}
+
+        {{ forms.textareaField({
+            label: "Tone of voice"|t('enupal-translate'),
+            id: 'llmToneInstructions',
+            name: 'llmToneInstructions',
+            instructions: "Extra style guidance appended to every AI prompt, e.g. “Use the informal second person.”"|t('enupal-translate'),
+            rows: 3,
+            value: settings.llmToneInstructions
+        }) }}
+
+        <hr>
+
+        <h2>{{ "Default provider"|t('enupal-translate') }}</h2>
+
+        {% if providerOptions|length <= 1 %}
+            <p class="warning" data-icon="alert">
+                {{ "Enable at least one provider above before choosing a default."|t('enupal-translate') }}
+            </p>
+        {% endif %}
+
+        {{ forms.selectField({
+            label: "Use by default"|t('enupal-translate'),
+            id: 'contentProvider',
+            name: 'contentProvider',
+            instructions: "Which provider to use when translating element content. It is pre-selected on every entry, and can be swapped there for a one-off translation without changing this setting. Bulk template translation is unaffected — that has its own action per provider."|t('enupal-translate'),
+            options: providerOptions,
+            value: settings.contentProvider
+        }) }}
+
+        {% endnamespace %}
+    </div>
+
+{% endset %}

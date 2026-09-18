@@ -1,6 +1,6 @@
 <?php
 /**
- * Translate plugin for Craft CMS 3.x
+ * Translate plugin for Craft CMS 5.x
  *
  * Translation management plugin for Craft CMS
  *
@@ -24,9 +24,28 @@ class App extends Component
      */
     public $settings;
 
+    /**
+     * @var Providers
+     */
+    public $providers;
+
+    /**
+     * @var Content
+     */
+    public $content;
+
+    /**
+     * @var Metrics
+     */
+    public $metrics;
+
     public function init(): void
     {
-        $this->translate = new Translate();
+        // Settings first — everything else reads from it.
         $this->settings = new Settings();
+        $this->providers = new Providers();
+        $this->metrics = new Metrics();
+        $this->translate = new Translate();
+        $this->content = new Content();
     }
 }

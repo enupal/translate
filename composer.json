@@ -1,7 +1,7 @@
 {
   "name": "enupal/translate",
-  "description": "Translate your website templates and plugins into multiple languages. Bulk translation with Google Translate or Yandex.",
-  "version": "4.1.2",
+  "description": "Translate entry content, templates and even plugins. With Google or AI.",
+  "version": "5.0.0-beta.1",
   "type": "craft-plugin",
   "autoload": {
     "psr-4": {
@@ -9,6 +9,7 @@
     }
   },
   "require": {
+    "php": ">=8.2",
     "craftcms/cms": "^5.5.4",
     "enupal/yandex-translate": "1.0.0",
     "stichoza/google-translate-php": "4.1.5",
@@ -23,13 +24,18 @@
   "support": {
     "email": "info@enupal.com",
     "issues": "https://github.com/enupal/translate/issues",
-    "docs": "https://enupal.com/craft-plugins/enupal-translate/docs"
+    "docs": "https://enupal.com/craft-plugins/enupal-translate/docs",
+    "source": "https://github.com/enupal/translate",
+    "rss": "https://github.com/enupal/translate/releases.atom"
   },
   "extra": {
     "name": "Enupal Translate",
     "handle": "enupal-translate",
     "hasSettings": true,
     "developer": "Enupal",
+    "developerUrl": "https://enupal.com",
+    "documentationUrl": "https://enupal.com/craft-plugins/enupal-translate/docs",
+    "changelogUrl": "https://raw.githubusercontent.com/enupal/translate/master/CHANGELOG.md",
     "class": "enupal\\translate\\Translate",
     "components": {
       "app": "enupal\\translate\\services\\App"

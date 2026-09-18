@@ -22,6 +22,9 @@ use enupal\translate\integrations\LegacyTwigSearch;
 use enupal\translate\integrations\OptimizedTwigSearch;
 use enupal\translate\integrations\PhpSearch;
 use enupal\translate\jobs\SyncTranslationsWithDb;
+use enupal\translate\models\TranslationResult;
+use enupal\translate\records\Metric;
+use craft\models\Site;
 use enupal\translate\Translate as TranslatePlugin;
 use Craft;
 
@@ -433,5 +436,56 @@ class Translate extends Component
         $searchMethods[OptimizedTwigSearch::class] = new OptimizedTwigSearch();
 
         return $searchMethods;
+    }
+
+    /**
+     * Translate static strings with one of the configured providers and write
+     * the result to the site (or plugin) translation file.
+     *
+     * @param string[] $originals The source strings.
+     * @param string $providerHandle e.g. 'claude'
+     * @param Site $site The target site.
+     * @param string|null $translatePath Plugin translation file, if any.
+     * @throws \RuntimeException if the provider isn't available
+     */
+    public function translateStatic(array $originals, string $providerHandle, Site $site, ?string $translatePath = null): TranslationResult
+    {
+        $provider = TranslatePlugin::$app->providers->getProviderByHandle($providerHandle);
+
+        if ($provider === null || !$provider->isConfigured()) {
+            throw new \RuntimeException(Craft::t('enupal-translate', 'The "{provider}" provider is not enabled.', [
+                'provider' => $providerHandle,
+            ]));
+        }
+
+        $primarySite = Craft::$app->getSites()->getPrimarySite();
+        $settings = TranslatePlugin::$app->settings->getSettings();
+        $sourceLanguage = $settings->detectSourceLanguage ? null : $primarySite->language;
+
+        // Key by the source string: that is what the translation file is
+        // keyed by, and it de-duplicates repeated strings for free.
+        $texts = [];
+        foreach ($originals as $original) {
+            if (is_string($original) && trim($original) !== '') {
+                $texts[$original] = $original;
+            }
+        }
+
+        $startedAt = microtime(true);
+        $result = $provider->translate($texts, $site->language, $sourceLanguage);
+        $durationMs = (int)((microtime(true) - $startedAt) * 1000);
+
+        TranslatePlugin::$app->metrics->record($result, Metric::TYPE_STATIC, $site->language, [
+            'sourceLanguage' => $primarySite->language,
+            'siteId' => $site->id,
+            'durationMs' => $durationMs,
+        ]);
+
+        if (!empty($result->translations)) {
+            $this->set($site->language, $result->translations, $translatePath);
+            $this->runSync();
+        }
+
+        return $result;
     }
 }

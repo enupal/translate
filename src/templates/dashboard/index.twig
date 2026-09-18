@@ -1,0 +1,340 @@
+{#
+/**
+ * Translate plugin for Craft CMS 5.x
+ *
+ * Translation usage dashboard.
+ *
+ * @link      https://enupal.com
+ * @copyright Copyright (c) 2018 Enupal
+ */
+#}
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+{% set title = "Dashboard"|t('enupal-translate') %}
+{% set selectedSubnavItem = 'dashboard' %}
+
+{% do view.registerAssetBundle("enupal\\translate\\web\\DashboardAsset") %}
+
+{% set hasData = summary.totalBatches > 0 %}
+
+{% block content %}
+
+    <form method="get" class="enupal-filters">
+        {{ forms.dateField({
+            label: "From"|t('enupal-translate'),
+            name: 'start',
+            value: filters.start ?? null
+        }) }}
+
+        {{ forms.dateField({
+            label: "To"|t('enupal-translate'),
+            name: 'end',
+            value: filters.end ?? null
+        }) }}
+
+        {% set providerOptions = {'': "All providers"|t('enupal-translate')} %}
+        {% for handle, provider in providers %}
+            {% set providerOptions = providerOptions|merge({(handle): provider.displayName()}) %}
+        {% endfor %}
+
+        {{ forms.selectField({
+            label: "Provider"|t('enupal-translate'),
+            name: 'provider',
+            options: providerOptions,
+            value: filters.provider ?? ''
+        }) }}
+
+        {{ forms.selectField({
+            label: "Type"|t('enupal-translate'),
+            name: 'type',
+            options: typeOptions,
+            value: filters.type ?? ''
+        }) }}
+
+        {% set languageOptions = {'': "All languages"|t('enupal-translate')} %}
+        {% for language in options.languages %}
+            {% set languageOptions = languageOptions|merge({(language): language}) %}
+        {% endfor %}
+
+        {{ forms.selectField({
+            label: "Target language"|t('enupal-translate'),
+            name: 'targetLanguage',
+            options: languageOptions,
+            value: filters.targetLanguage ?? ''
+        }) }}
+
+        <div class="field">
+            <button type="submit" class="btn submit">{{ "Apply"|t('enupal-translate') }}</button>
+            <a href="{{ url('enupal-translate/dashboard') }}" class="btn">{{ "Reset"|t('enupal-translate') }}</a>
+        </div>
+    </form>
+
+    <div class="enupal-stats">
+        <div class="enupal-stat">
+            <div class="enupal-stat__value">{{ summary.totalStrings|number_format }}</div>
+            <div class="enupal-stat__label">{{ "Translations"|t('enupal-translate') }}</div>
+            <div class="enupal-stat__meta">{{ "{n} batches"|t('enupal-translate', {n: summary.totalBatches|number_format}) }}</div>
+        </div>
+
+        <div class="enupal-stat">
+            <div class="enupal-stat__value">{{ summary.static|number_format }}</div>
+            <div class="enupal-stat__label">{{ "Static strings"|t('enupal-translate') }}</div>
+            <div class="enupal-stat__meta">{{ "From templates & plugins"|t('enupal-translate') }}</div>
+        </div>
+
+        <div class="enupal-stat">
+            <div class="enupal-stat__value">{{ summary.content|number_format }}</div>
+            <div class="enupal-stat__label">{{ "Content strings"|t('enupal-translate') }}</div>
+            <div class="enupal-stat__meta">{{ "From element fields"|t('enupal-translate') }}</div>
+        </div>
+
+        <div class="enupal-stat">
+            <div class="enupal-stat__value">{{ summary.totalTokens|number_format }}</div>
+            <div class="enupal-stat__label">{{ "Tokens"|t('enupal-translate') }}</div>
+            <div class="enupal-stat__meta">
+                {{ "{in} in / {out} out"|t('enupal-translate', {
+                    in: summary.inputTokens|number_format,
+                    out: summary.outputTokens|number_format
+                }) }}
+            </div>
+        </div>
+
+        <div class="enupal-stat">
+            <div class="enupal-stat__value">{{ summary.apiCalls|number_format }}</div>
+            <div class="enupal-stat__label">{{ "API calls"|t('enupal-translate') }}</div>
+            <div class="enupal-stat__meta">{{ "{n} characters"|t('enupal-translate', {n: summary.totalCharacters|number_format}) }}</div>
+        </div>
+
+        <div class="enupal-stat{% if summary.failures %} enupal-stat--warning{% endif %}">
+            <div class="enupal-stat__value">{{ summary.failures|number_format }}</div>
+            <div class="enupal-stat__label">{{ "Failed batches"|t('enupal-translate') }}</div>
+            <div class="enupal-stat__meta">{{ summary.failures ? "Check the logs"|t('enupal-translate') : "All good"|t('enupal-translate') }}</div>
+        </div>
+    </div>
+
+    {% if not hasData %}
+        <div class="enupal-panel">
+            <div class="enupal-empty">
+                <p>{{ "No translation activity recorded for this period yet."|t('enupal-translate') }}</p>
+            </div>
+        </div>
+    {% else %}
+
+        <div class="enupal-panel">
+            <h2 class="enupal-panel__title">{{ "Activity over time"|t('enupal-translate') }}</h2>
+            <div id="enupal-chart-activity" class="enupal-chart"></div>
+        </div>
+
+        <div class="enupal-grid-2">
+            <div class="enupal-panel">
+                <h2 class="enupal-panel__title">{{ "By provider"|t('enupal-translate') }}</h2>
+                <div id="enupal-chart-provider" class="enupal-chart"></div>
+            </div>
+
+            <div class="enupal-panel">
+                <h2 class="enupal-panel__title">{{ "By target language"|t('enupal-translate') }}</h2>
+                <table class="data fullwidth">
+                    <thead>
+                    <tr>
+                        <th>{{ "Language"|t('enupal-translate') }}</th>
+                        <th>{{ "Translations"|t('enupal-translate') }}</th>
+                        <th>{{ "Tokens"|t('enupal-translate') }}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for row in byLanguage %}
+                        <tr>
+                            <td>{{ row.label }}</td>
+                            <td>{{ row.strings|number_format }}</td>
+                            <td>{{ row.tokens|number_format }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% set modelRows = byModel|filter(r => r.label is not empty) %}
+        {% if modelRows|length %}
+            <div class="enupal-panel">
+                <h2 class="enupal-panel__title">{{ "By model"|t('enupal-translate') }}</h2>
+                <table class="data fullwidth">
+                    <thead>
+                    <tr>
+                        <th>{{ "Model"|t('enupal-translate') }}</th>
+                        <th>{{ "Translations"|t('enupal-translate') }}</th>
+                        <th>{{ "Tokens"|t('enupal-translate') }}</th>
+                        <th>{{ "API calls"|t('enupal-translate') }}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for row in modelRows %}
+                        <tr>
+                            <td><code>{{ row.label }}</code></td>
+                            <td>{{ row.strings|number_format }}</td>
+                            <td>{{ row.tokens|number_format }}</td>
+                            <td>{{ row.calls|number_format }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+
+        <div class="enupal-panel">
+            <h2 class="enupal-panel__title">
+                {{ "Recent activity"|t('enupal-translate') }}
+                <span class="light enupal-panel__count">
+                    {{ "{total} batches"|t('enupal-translate', {total: recent.total|number_format}) }}
+                </span>
+            </h2>
+            <table class="data fullwidth">
+                <thead>
+                <tr>
+                    <th>{{ "Date"|t('enupal-translate') }}</th>
+                    <th>{{ "Provider"|t('enupal-translate') }}</th>
+                    <th>{{ "Type"|t('enupal-translate') }}</th>
+                    <th>{{ "Language"|t('enupal-translate') }}</th>
+                    <th>{{ "Strings"|t('enupal-translate') }}</th>
+                    <th>{{ "Tokens"|t('enupal-translate') }}</th>
+                    <th>{{ "Duration"|t('enupal-translate') }}</th>
+                    <th>{{ "Status"|t('enupal-translate') }}</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for row in recent.rows %}
+                    <tr>
+                        <td>{{ row.dateCreated|datetime('short') }}</td>
+                        <td>{{ row.provider }}{% if row.model %} <span class="light">({{ row.model }})</span>{% endif %}</td>
+                        <td>{{ row.type }}</td>
+                        <td>{{ row.sourceLanguage }} &rarr; {{ row.targetLanguage }}</td>
+                        <td>{{ row.stringCount|number_format }}</td>
+                        <td>{{ (row.inputTokens + row.outputTokens)|number_format }}</td>
+                        <td>{{ (row.durationMs / 1000)|number_format(2) }}s</td>
+                        <td>
+                            {% if row.success %}
+                                <span class="status green"></span>{{ "OK"|t('enupal-translate') }}
+                            {% else %}
+                                <span class="status red"></span>
+                                <span title="{{ row.errorMessage }}">{{ "Failed"|t('enupal-translate') }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            {% if recent.totalPages > 1 %}
+                {# Carry the active filters through, so paging doesn't reset them. #}
+                {% set pageParams = craft.app.request.queryParams|filter((v, k) => k not in ['page', 'p']) %}
+                {% set pageParams = pageParams|merge({
+                    'start[date]': filters.start|date('Y-m-d'),
+                    'end[date]': filters.end|date('Y-m-d')
+                }) %}
+
+                <nav class="enupal-pager" aria-label="{{ 'Recent activity pages'|t('enupal-translate') }}">
+                    {% if recent.page > 1 %}
+                        <a class="btn small"
+                           href="{{ url('enupal-translate/dashboard', pageParams|merge({page: recent.page - 1})) }}"
+                           rel="prev">
+                            {{ "Previous"|t('enupal-translate') }}
+                        </a>
+                    {% else %}
+                        <span class="btn small disabled">{{ "Previous"|t('enupal-translate') }}</span>
+                    {% endif %}
+
+                    <span class="light enupal-pager__status">
+                        {{ "Page {page} of {total}"|t('enupal-translate', {
+                            page: recent.page,
+                            total: recent.totalPages
+                        }) }}
+                    </span>
+
+                    {% if recent.page < recent.totalPages %}
+                        <a class="btn small"
+                           href="{{ url('enupal-translate/dashboard', pageParams|merge({page: recent.page + 1})) }}"
+                           rel="next">
+                            {{ "Next"|t('enupal-translate') }}
+                        </a>
+                    {% else %}
+                        <span class="btn small disabled">{{ "Next"|t('enupal-translate') }}</span>
+                    {% endif %}
+                </nav>
+            {% endif %}
+        </div>
+
+    {% endif %}
+
+    <div class="enupal-panel">
+        <form method="post" accept-charset="UTF-8">
+            {{ csrfInput() }}
+            {{ actionInput('enupal-translate/dashboard/purge') }}
+            {{ redirectInput('enupal-translate/dashboard') }}
+
+            <button type="submit"
+                    class="btn"
+                    data-icon="trash"
+                    title="{{ 'Deletes the metric records matching the current filters'|t('enupal-translate') }}">
+                {{ "Purge filtered metrics"|t('enupal-translate') }}
+            </button>
+
+            <button type="submit"
+                    class="btn"
+                    data-icon="trash"
+                    name="purgeAll"
+                    value="1"
+                    onclick="return confirm('{{ 'Delete every translation metric? This cannot be undone.'|t('enupal-translate')|e('js') }}')">
+                {{ "Purge all metrics"|t('enupal-translate') }}
+            </button>
+        </form>
+    </div>
+
+    {% if hasData %}
+        {% js %}
+            (function () {
+                var palette = ['#0B69A3', '#27AB83', '#F0B429', '#E12D39', '#7B61FF', '#00A3C4'];
+
+                new ApexCharts(document.querySelector('#enupal-chart-activity'), {
+                    colors: palette,
+                    chart: { type: 'area', height: 340, width: '100%', toolbar: { show: false } },
+                    dataLabels: { enabled: false },
+                    stroke: { curve: 'smooth', width: 2 },
+                    fill: { type: 'gradient', gradient: { opacityFrom: 0.4, opacityTo: 0.05 } },
+                    series: [
+                        { name: {{ "Translations"|t('enupal-translate')|json_encode|raw }}, data: {{ series.strings|json_encode|raw }} },
+                        { name: {{ "Tokens"|t('enupal-translate')|json_encode|raw }}, data: {{ series.tokens|json_encode|raw }} }
+                    ],
+                    xaxis: {
+                        categories: {{ series.labels|json_encode|raw }},
+                        labels: { style: { colors: '#888' } }
+                    },
+                    yaxis: [
+                        {
+                            seriesName: {{ "Translations"|t('enupal-translate')|json_encode|raw }},
+                            title: { text: {{ "Translations"|t('enupal-translate')|json_encode|raw }} },
+                            labels: { style: { colors: '#888' }, formatter: function (v) { return parseInt(v, 10); } }
+                        },
+                        {
+                            seriesName: {{ "Tokens"|t('enupal-translate')|json_encode|raw }},
+                            opposite: true,
+                            title: { text: {{ "Tokens"|t('enupal-translate')|json_encode|raw }} },
+                            labels: { style: { colors: '#888' }, formatter: function (v) { return parseInt(v, 10); } }
+                        }
+                    ],
+                    legend: { position: 'top' },
+                    grid: { borderColor: 'rgba(51,64,77,0.1)' }
+                }).render();
+
+                new ApexCharts(document.querySelector('#enupal-chart-provider'), {
+                    colors: palette,
+                    chart: { type: 'donut', height: 340 },
+                    series: {{ byProvider|map(r => r.strings)|values|json_encode|raw }},
+                    labels: {{ byProvider|map(r => r.label)|values|json_encode|raw }},
+                    legend: { position: 'bottom' }
+                }).render();
+            })();
+        {% endjs %}
+    {% endif %}
+
+{% endblock %}
