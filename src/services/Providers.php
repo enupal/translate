@@ -95,8 +95,25 @@ class Providers extends Component
     }
 
     /**
-     * The provider used for element content, falling back to the first enabled
-     * one when nothing has been chosen.
+     * Order used when no provider has been chosen explicitly, best first.
+     *
+     * Registration order would otherwise decide it, which is arbitrary: a site
+     * with both a paid Google key and the free scraper enabled would fall back
+     * to the scraper and get itself rate-limited.
+     */
+    private const FALLBACK_ORDER = [
+        'claude',
+        'openai',
+        'googleCloud',
+        'yandex',
+        'googleFree',
+    ];
+
+    /**
+     * The provider used for element content.
+     *
+     * Falls back to the most capable enabled provider when nothing has been
+     * chosen, rather than whichever happens to be registered first.
      */
     public function getContentProvider(): ?TranslationProvider
     {
@@ -110,6 +127,13 @@ class Providers extends Component
 
         $enabled = $this->getEnabledProviders();
 
+        foreach (self::FALLBACK_ORDER as $handle) {
+            if (isset($enabled[$handle])) {
+                return $enabled[$handle];
+            }
+        }
+
+        // Anything registered by a third party, which the order won't know about.
         return $enabled ? reset($enabled) : null;
     }
 

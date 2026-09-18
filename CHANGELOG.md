@@ -19,7 +19,8 @@
 - Added `enupal-translate/translate/providers` and `enupal-translate/translate/test` console commands for checking provider configuration.
 
 ### Changed
-- Settings are now split across General, Providers and Content pages.
+- Settings are now split across General, Providers and Content pages. Existing Yandex and Google credentials are carried over untouched; they have simply moved to the Providers page.
+- When no default content provider has been chosen, the most capable enabled provider is used rather than whichever was registered first — so a site with both a Google Cloud key and the free endpoint enabled no longer falls back to the scraper.
 - Bulk static translation actions are now generated from whichever providers are enabled, rather than being hard-coded.
 - Batches are de-duplicated before being sent, so a string that repeats is only translated (and billed) once.
 - Failed provider requests are now retried with exponential backoff on rate limits and server errors.
