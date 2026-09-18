@@ -6,47 +6,116 @@
 	<img width="212" height="212" src="https://enupal.com/assets/docs/translate-icon.svg" alt="Enupal Translate"></a>
 </p>
 
-# Enupal Translate Plugin for Craft CMS 3 and 4
+# Enupal Translate for Craft CMS 5
 
-Translate your website templates and plugins into multiple languages. Bulk translation with Google Translate or Yandex.
+Translate entry content, templates and even plugins. With Google or AI.
 
-## Features
+A multi-site build needs two kinds of translation: the static strings in your
+templates and plugins, and the content in your entries. Enupal Translate handles
+both.
 
-### Translate your templates and plugins easily with
+Pick a target site, hit Translate, review the draft. Bigger jobs run in the
+background as Craft queue jobs, so you can carry on working.
 
-*  [Yandex](https://translate.yandex.com/)
-*  [Google Translate](https://cloud.google.com/translate/?hl=es)
-*  Manually
+> [!NOTE]
+> Content translation and the AI providers are new in 5.0 and still being proven
+> on real sites. Static template translation is unchanged. If you hit something,
+> please [open an issue](https://github.com/enupal/translate/issues).
 
-Translating your static texts has never been so easy:
+## Translate your content
+
+Translate any entry, asset, category or product into another site from the
+sidebar, or select several on the index and do them in bulk.
+
+**Craft fields**
+
+* Matrix, including nested blocks
+* Plain Text
+* Table — text columns only, numbers and dates left alone
+* Link — the label, never the URL
+* Content Block
+* Asset alt text
+
+**Rich text**
+
+* CKEditor
+* Redactor
+* TinyMCE
+* Vizy
+
+**Plugin fields**
+
+* Neo
+* Super Table
+* Hyper
+* Linkit
+* SEOmatic — only the fields you have overridden, so inheritance stays intact
+* Ether SEO
+
+Your own field types can join in through `Content::EVENT_REGISTER_SERIALIZERS`.
+
+Everything else is left alone: images, dropdowns, numbers and relations are never
+touched. Internal links follow the translation, so a link to an English entry
+becomes a link to its Spanish counterpart.
+
+## Translate your templates and plugins
+
+Enupal Translate scans your templates for translatable strings and lets you
+translate them in bulk or by hand.
 
 ![Screenshot](resources/screenshots/enupal-translate-final-1.gif)
 
-### SYNC with database:
+### Sync with the database
 
-Sync your static translations into your database without no extra queries that may impact your page load time.
+Keeps a copy of your translations folder in the database, so you can deploy
+without committing translations to git, and without extra queries slowing your
+pages down.
 
-This feature simply keeps a copy of your translations folder in the Database to facilitate your deployments and syncing your database translations with your templates folders. This feature avoids adding your translations folder to your version control system (git).
+### Import and export CSV
 
-### Download translations:
+Export from the dropdown in the top right, send the file to a translator, import
+it back.
 
-Download your translations as CSV file from the top right dropdown menu.
-
-* For all templates
-* Specific templates
-* Plugins
-
-### Import translations:
-
-Import your translations from a CSV file
+* All templates
+* A specific template
+* A plugin's strings
 
 ![Screenshot](resources/screenshots/6-enupal-translate.png)
 
-### Plugin Developers!
+### Plugin developers
 
-Enupal translate will generate all the translation files in your Plugin Path. Internationalize your plugins to reach more users in different countries!
+Enupal Translate writes translation files straight into your plugin's path.
+Internationalise your own plugins and reach people who do not work in English.
 
 ![Screenshot](resources/screenshots/7-enupal-translate.png)
+
+## Choose your translator
+
+* [OpenAI](https://platform.openai.com/api-keys) or
+  [Claude](https://console.anthropic.com/settings/keys) for translations that
+  read naturally, with your own prompt, protected terms and tone of voice
+* [Google Cloud Translate](https://cloud.google.com/translate/) or
+  [Yandex](https://yandex.com/dev/translate/) for fast, cheap machine translation
+* Google Translate (Free) for trying things out
+* Or type them yourself
+
+AI providers see a whole entry at once rather than field by field, so the result
+reads like a page instead of disconnected sentences. Repeated strings are sent
+once, so you never pay twice for the same words.
+
+## Know what it costs
+
+A dashboard shows how many translations you have made, split between templates
+and content, with token usage, API calls and anything that failed. Filter by
+date, provider, type or language.
+
+## Requirements
+
+* Craft CMS 5.5.4 or later
+* PHP 8.2 or later
+
+API keys can live in your `.env` rather than in project config, and a
+`translateContent` permission controls who can translate.
 
 ## Documentation
 

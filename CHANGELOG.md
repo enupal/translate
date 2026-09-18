@@ -1,5 +1,69 @@
 # Enupal Translate Changelog
 
+## 5.0.0-beta.1 - 2026.09.18
+
+> {warning} This is a beta release. Content translation and the AI providers are new and are still being proven on real sites. Static template translation is unchanged and works as it always has. Please report anything you hit at https://github.com/enupal/translate/issues — include the provider, the field type, and the relevant row from the dashboard's recent activity table.
+
+> {note} Requires Craft 5.5.4 or later and PHP 8.2 or later.
+
+### Upgrading from Enupal Translate 4.x
+
+Nothing to do. Your Yandex and Google credentials carry over untouched — they
+have simply moved from the General settings page to the new Providers page, and
+the bulk translation actions on the Translations page behave exactly as before.
+Content translation and the dashboard are switched on by default, so they are
+there when you want them.
+
+### Known gaps in this beta
+
+- The TinyMCE and Doxter serializers have not been exercised against a live
+  install of those plugins. Every other supported field type has been, including
+  Neo, Vizy, Hyper, Linkit, Super Table, CKEditor, Redactor, SEOmatic and
+  Ether SEO.
+
+> {warning} Neo reads a web-only request property while saving, so translating a Neo field fails when the queue runs from the console (`craft queue/listen`, or a cron worker). Translating from the entry sidebar works, as does Craft's default web-based queue runner. This is a Neo limitation rather than something this plugin can work around; the job reports which element failed and why.
+- Placeholders (`{{ twig }}`, `{param}`, `%s`) and HTML are preserved by
+  instructing the model, not by masking them before the request. This holds up
+  well in testing, but a custom prompt or a smaller model makes it less certain.
+
+### Added
+- Content translation: entries, assets, categories and Commerce products can now be translated into other sites from the element index, including nested Matrix, Neo, Super Table and Content Block fields.
+- Added OpenAI and Claude (Anthropic) as translation providers, for both static and content translation.
+- Added a provider architecture: every provider now shares one interface, with a common base for LLM providers so OpenAI and Claude only implement their transport. Third-party providers can register through `Providers::EVENT_REGISTER_PROVIDERS`.
+- Added field serializers for Plain Text, Table, Link, Content Block and rich text (CKEditor, Redactor, TinyMCE), plus dedicated handling for Vizy, Hyper, Linkit, SEOmatic and Ether SEO — 16 field types in total.
+- Added an `enupal-translate/translate/fields` console command reporting which fields in an install can be translated, and why any are skipped. Third-party fields can register through `Content::EVENT_REGISTER_SERIALIZERS`.
+- The dashboard opens on the last 30 days rather than an empty range, and the date inputs show it.
+- The dashboard's recent activity table shows 10 rows per page, with a pager that keeps the active filters.
+- Added a dashboard reporting translation counts, token usage, API calls and failures, with filters by date, provider, type and target language, and a button to purge metrics.
+- The default content translation provider is chosen under Settings → Providers. The sidebar pre-selects it on every entry, and its dropdown swaps provider for a one-off translation without changing the default.
+- Added an Enupal Translate panel to the sidebar of entry, asset, category and product edit screens, for translating the element you're looking at into one site or all of them. It also explains itself when no provider is configured yet, so the feature is discoverable.
+- Added queue jobs for content translation and for large static translation batches.
+- Added shared AI settings for protected terms and tone of voice.
+- Added an `enupal-translate:translateContent` permission.
+- Added `enupal-translate/translate/providers` and `enupal-translate/translate/test` console commands for checking provider configuration.
+
+### Changed
+- Settings are now split across General, Providers and Content pages. Existing Yandex and Google credentials are carried over untouched; they have simply moved to the Providers page.
+- When no default content provider has been chosen, the most capable enabled provider is used rather than whichever was registered first — so a site with both a Google Cloud key and the free endpoint enabled no longer falls back to the scraper.
+- Bulk static translation actions are now generated from whichever providers are enabled, rather than being hard-coded.
+- Batches are de-duplicated before being sent, so a string that repeats is only translated (and billed) once.
+- Failed provider requests are now retried with exponential backoff on rate limits and server errors.
+
+### Fixed
+- Fixed a 500 error when applying the dashboard filters. Craft's date fields post an array of date/locale/timezone parts rather than a string, which was being passed straight into a `DateTime` constructor.
+- Fixed dashboard dates shifting back a day. A date typed into the control panel means that day in the site's timezone, but Craft reads a bare date as UTC unless told otherwise, so any site at a negative offset saw the range move.
+- Fixed saving an entry triggering a translation. The sidebar panel rendered a `<form>` inside Craft's own entry form; nested forms are invalid HTML, so the browser hoisted its hidden inputs into the outer form and Save submitted the translate action instead of saving the entry. The panel now posts over AJAX and contains no form or named inputs.
+- Fixed the translated draft being reported as the live entry. `saveTarget()` swapped in the newly created draft locally, so callers were handed the untouched canonical element — the success message said "translated" rather than "saved as a draft", and the link went to the live entry showing the old content.
+- The success message now says whether the result was saved as a draft, at what time, and links straight to it.
+- Fixed a `TypeError` on the entry, asset and category indexes: the bulk action was registered against `RegisterComponentTypesEvent` instead of `RegisterElementActionsEvent`.
+- Provider errors now report the API's own message instead of Guzzle's full HTTP dump.
+- A 429 caused by an exhausted quota is no longer retried, since waiting cannot resolve it.
+- Google Translate (Free) requests are now paced, and a rate limit is no longer retried — retrying a throttled scrape only deepens the block. Whatever was translated before the block is kept rather than discarded, and the error explains that the free endpoint is scraped rather than an official API.
+- Partial results from any provider are now kept when a batch fails partway, instead of being thrown away and paid for again.
+- The sidebar warns when the entry has unsaved changes, since translation reads the saved version.
+- Fixed Google Translate (Free) mis-aligning results: strings were joined with ` || ` and split apart again, which silently attributed translations to the wrong source string whenever the separator did not survive translation. Yandex and Google Cloud now use their native batch APIs, and each free-Google string is sent on its own request.
+- Fixed deprecation notices on PHP 8.4 from implicitly nullable parameters.
+
 ## 4.1.2 - 2025.07.23
 
 ### Fixed

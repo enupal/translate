@@ -26,9 +26,15 @@ class Settings extends Component
      *
      * @return bool
      */
-    public function saveSettings(array $postSettings, string $scenario = null): bool
+    public function saveSettings(array $postSettings, ?string $scenario = null): bool
     {
         $plugin = $this->getPlugin();
+
+        // Craft writes exactly the keys it is handed to the project config and
+        // replaces the whole settings node, so a partial save would wipe
+        // everything that wasn't posted. Each settings page only posts its own
+        // fields, so merge over the current values first.
+        $postSettings = array_merge($plugin->getSettings()->toArray(), $postSettings);
 
         $plugin->getSettings()->setAttributes($postSettings, false);
 

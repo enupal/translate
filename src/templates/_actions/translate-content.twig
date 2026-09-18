@@ -1,0 +1,58 @@
+{#
+/**
+ * Target site picker for the bulk content translate action.
+ *
+ * The data-param/data-value pairs are posted back and land on the element
+ * action's public properties.
+ */
+#}
+{% set currentSiteHandle = craft.app.request.getParam('site') ?? craft.app.sites.currentSite.handle %}
+
+<button type="button" class="btn menubtn enupal-translate-trigger" aria-label="{{ 'Translate'|t('enupal-translate') }}">
+    {{ svg('@enupal/translate/icon-mask.svg', sanitize = true) }}
+    <span>{{ 'Translate to'|t('enupal-translate') }}</span>
+</button>
+<div class="menu">
+    <ul>
+        <li>
+            <a class="formsubmit"
+               data-param="targetSiteHandle"
+               data-value="*"
+               data-params='{{ { sourceSiteHandle: currentSiteHandle }|json_encode }}'>
+                <strong>{{ 'All sites'|t('enupal-translate') }}</strong>
+            </a>
+        </li>
+        {% for site in craft.app.sites.allSites %}
+            {% if site.handle != currentSiteHandle and currentUser.can('editSite:' ~ site.uid) %}
+                <li>
+                    <a class="formsubmit"
+                       data-param="targetSiteHandle"
+                       data-value="{{ site.handle }}"
+                       data-params='{{ { sourceSiteHandle: currentSiteHandle }|json_encode }}'>
+                        {{ site.name }} ({{ site.language }})
+                    </a>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</div>
+
+{% css %}
+    /* Craft's .btn is inline-flex, so the icon and label need an explicit gap
+       rather than relying on the whitespace between them. */
+    .btn.enupal-translate-trigger {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .btn.enupal-translate-trigger svg {
+        width: 13px;
+        height: 13px;
+        flex: 0 0 auto;
+    }
+    /* The icon ships with Craft's text colour baked into each shape; recolour
+       only those and leave the transparent ones alone. */
+    .btn.enupal-translate-trigger svg [style*="3f4d5a"] {
+        fill: currentColor !important;
+    }
+{% endcss %}

@@ -1,0 +1,65 @@
+{#
+/**
+ * OpenAI provider settings. Rendered inside the 'settings' namespace.
+ */
+#}
+{% import "_includes/forms" as forms %}
+
+{{ forms.autosuggestField({
+    label: 'API key'|t('enupal-translate'),
+    id: 'openAiApiKey',
+    name: 'openAiApiKey',
+    instructions: 'Your OpenAI API key, or the bearer token for a compatible endpoint. <a href="https://platform.openai.com/api-keys" rel="noopener" target="_blank">Create an API key</a>.'|t('enupal-translate'),
+    suggestEnvVars: true,
+    value: settings.openAiApiKey
+}) }}
+
+{{ forms.autosuggestField({
+    label: 'API base URL'|t('enupal-translate'),
+    id: 'openAiBaseUrl',
+    name: 'openAiBaseUrl',
+    instructions: 'Leave empty for the official OpenAI API. Set this to use any OpenAI-compatible provider (Azure OpenAI, Groq, Mistral, Ollama…).'|t('enupal-translate'),
+    suggestEnvVars: true,
+    placeholder: 'https://api.openai.com/v1',
+    value: settings.openAiBaseUrl
+}) }}
+
+{{ forms.selectField({
+    label: "Model"|t('enupal-translate'),
+    id: 'openAiModel',
+    name: 'openAiModel',
+    instructions: "Choose “Custom” to enter a model name for a non-OpenAI provider."|t('enupal-translate'),
+    options: craft.enupaltranslate.getProviderModels('openai'),
+    value: settings.openAiModel,
+    toggle: true,
+    targetPrefix: 'openai-model-'
+}) }}
+
+<div id="openai-model-custom" class="{% if settings.openAiModel != 'custom' %}hidden{% endif %}">
+    {{ forms.autosuggestField({
+        label: 'Custom model name'|t('enupal-translate'),
+        id: 'openAiCustomModel',
+        name: 'openAiCustomModel',
+        instructions: 'The model identifier your provider expects, e.g. `mistral-large`, `llama3`.'|t('enupal-translate'),
+        suggestEnvVars: true,
+        value: settings.openAiCustomModel
+    }) }}
+</div>
+
+{{ forms.textField({
+    label: 'Temperature'|t('enupal-translate'),
+    id: 'openAiTemperature',
+    name: 'openAiTemperature',
+    instructions: 'Between 0 and 2. Lower is more literal and consistent, which is usually what you want for translation. Ignored by GPT-5 models, which only accept their default.'|t('enupal-translate'),
+    type: 'number', min: 0, max: 2, step: 0.1,
+    value: settings.openAiTemperature
+}) }}
+
+{{ forms.textareaField({
+    label: 'Custom prompt'|t('enupal-translate'),
+    id: 'openAiPrompt',
+    name: 'openAiPrompt',
+    instructions: 'Optional. Supports {source}, {target} and {count}. The JSON response rules are always appended automatically, so you cannot break the batch format.'|t('enupal-translate'),
+    rows: 3,
+    value: settings.openAiPrompt
+}) }}

@@ -1,8 +1,9 @@
 <?php
 /**
- * Translate plugin for Craft CMS 3.x
+ * Translate plugin for Craft CMS 5.x
  *
- * Translate your website templates and plugins into multiple languages. Bulk translation with Google Translate or Yandex.
+ * Translate your website templates, plugins and content into multiple
+ * languages. Bulk translation with Google, Yandex, OpenAI or Claude.
  *
  * @link      https://enupal.com
  * @copyright Copyright (c) 2018 Enupal
@@ -11,13 +12,22 @@
 namespace enupal\translate;
 
 use Craft;
+use craft\base\Element;
 use craft\base\Plugin;
+use craft\elements\Asset;
+use craft\elements\Entry;
+use craft\events\DefineHtmlEvent;
+use craft\events\RegisterElementActionsEvent;
+use craft\events\RegisterUrlRulesEvent;
+use craft\events\RegisterUserPermissionsEvent;
+use craft\services\UserPermissions;
 use craft\web\twig\variables\CraftVariable;
-use enupal\translate\services\App;
-use yii\base\Event;
-
-use enupal\translate\variables\TranslateVariable;
+use craft\web\UrlManager;
+use enupal\translate\elements\actions\TranslateContent;
 use enupal\translate\models\Settings;
+use enupal\translate\services\App;
+use enupal\translate\variables\TranslateVariable;
+use yii\base\Event;
 
 class Translate extends Plugin
 {
@@ -32,7 +42,7 @@ class Translate extends Plugin
 
     public bool $hasCpSettings = true;
 
-    public string $schemaVersion = '3.0.0';
+    public string $schemaVersion = '4.0.0';
 
     public function init()
     {
@@ -42,11 +52,54 @@ class Translate extends Plugin
 
         $settings = $this->getSettings();
 
-        if ($settings->pluginNameOverride){
+        if ($settings->pluginNameOverride) {
             $this->name = $settings->pluginNameOverride;
         }
 
-        // Register our variables
+        $this->registerVariables();
+        $this->registerCpRoutes();
+        $this->registerPermissions();
+        $this->registerContentTranslationActions();
+        $this->registerSidebarPanel();
+    }
+
+    protected function createSettingsModel(): ?\craft\base\Model
+    {
+        return new Settings();
+    }
+
+    public function getCpNavItem(): ?array
+    {
+        $parent = parent::getCpNavItem();
+
+        return array_merge($parent, [
+            'subnav' => [
+                'translates' => [
+                    'label' => Craft::t('enupal-translate', 'Translations'),
+                    'url' => 'enupal-translate/index',
+                ],
+                'dashboard' => [
+                    'label' => Craft::t('enupal-translate', 'Dashboard'),
+                    'url' => 'enupal-translate/dashboard',
+                ],
+                'settings' => [
+                    'label' => Craft::t('enupal-translate', 'Settings'),
+                    'url' => 'enupal-translate/settings',
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function settingsHtml(): ?string
+    {
+        return Craft::$app->view->renderTemplate('enupal-translate/settings/index');
+    }
+
+    private function registerVariables(): void
+    {
         Event::on(
             CraftVariable::class,
             CraftVariable::EVENT_INIT,
@@ -58,34 +111,106 @@ class Translate extends Plugin
         );
     }
 
-    protected function createSettingsModel(): ?\craft\base\Model
+    private function registerCpRoutes(): void
     {
-        return new Settings();
+        Event::on(
+            UrlManager::class,
+            UrlManager::EVENT_REGISTER_CP_URL_RULES,
+            static function (RegisterUrlRulesEvent $event) {
+                $event->rules['enupal-translate/dashboard'] = 'enupal-translate/dashboard/index';
+            }
+        );
     }
 
-    public function getCpNavItem(): ?array
+    private function registerPermissions(): void
     {
-        $parent = parent::getCpNavItem();
-        return array_merge($parent, [
-            'subnav' => [
-                'translates' => [
-                    "label" => Craft::t('enupal-translate',"Translations"),
-                    "url" => 'enupal-translate/index'
-                ],
-                'settings' => [
-                    "label" => Craft::t('enupal-translate',"Settings"),
-                    "url" => 'enupal-translate/settings'
-                ]
-            ]
-        ]);
+        Event::on(
+            UserPermissions::class,
+            UserPermissions::EVENT_REGISTER_PERMISSIONS,
+            static function (RegisterUserPermissionsEvent $event) {
+                $event->permissions[] = [
+                    'heading' => Craft::t('enupal-translate', 'Enupal Translate'),
+                    'permissions' => [
+                        'enupal-translate:translateContent' => [
+                            'label' => Craft::t('enupal-translate', 'Translate element content'),
+                        ],
+                    ],
+                ];
+            }
+        );
     }
 
     /**
-     * @inheritdoc
+     * Add the bulk "Translate to" action to the element indexes that can
+     * usefully be translated.
      */
-    protected function settingsHtml(): ?string
+    /**
+     * Element types that can usefully be translated.
+     *
+     * @return string[]
+     */
+    private function translatableElementTypes(): array
     {
-        return Craft::$app->view->renderTemplate('enupal-translate/settings/index');
+        return array_values(array_filter([
+            Entry::class,
+            Asset::class,
+            'craft\elements\Category',
+            'craft\commerce\elements\Product',
+        ], 'class_exists'));
+    }
+
+    private function registerContentTranslationActions(): void
+    {
+        if (!$this->getSettings()->enableContentTranslation) {
+            return;
+        }
+
+        foreach ($this->translatableElementTypes() as $elementType) {
+
+            Event::on(
+                $elementType,
+                Element::EVENT_REGISTER_ACTIONS,
+                static function (RegisterElementActionsEvent $event) {
+                    // Pointless with a single site, and noisy in the UI.
+                    if (count(Craft::$app->getSites()->getAllSites()) < 2) {
+                        return;
+                    }
+
+                    $event->actions[] = TranslateContent::class;
+                }
+            );
+        }
+    }
+
+    /**
+     * Put a panel in the sidebar of each element's edit screen, so authors can
+     * translate what they're looking at without going back to the index — and
+     * so they discover the plugin is there at all.
+     */
+    private function registerSidebarPanel(): void
+    {
+        if (!$this->getSettings()->enableContentTranslation) {
+            return;
+        }
+
+        if (!Craft::$app->getRequest()->getIsCpRequest() || Craft::$app->getRequest()->getIsConsoleRequest()) {
+            return;
+        }
+
+        foreach ($this->translatableElementTypes() as $elementType) {
+            Event::on(
+                $elementType,
+                Element::EVENT_DEFINE_SIDEBAR_HTML,
+                static function (DefineHtmlEvent $event) {
+                    if (count(Craft::$app->getSites()->getAllSites()) < 2) {
+                        return;
+                    }
+
+                    $event->html .= Craft::$app->getView()->renderTemplate('enupal-translate/_sidebar/translate', [
+                        'element' => $event->sender,
+                    ]);
+                }
+            );
+        }
     }
 }
-
