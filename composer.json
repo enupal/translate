@@ -1,6 +1,6 @@
 {
   "name": "enupal/translate",
-  "description": "Translate your website templates, plugins and content into multiple languages. Bulk translation with Google, Yandex, OpenAI or Claude.",
+  "description": "Translate entry content, templates and even plugins. With Google or AI.",
   "version": "5.0.0-beta.1",
   "type": "craft-plugin",
   "autoload": {

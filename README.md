@@ -6,9 +6,15 @@
 	<img width="212" height="212" src="https://enupal.com/assets/docs/translate-icon.svg" alt="Enupal Translate"></a>
 </p>
 
-# Enupal Translate Plugin for Craft CMS 3 and 4
+# Enupal Translate for Craft CMS 5
 
-Translate your website templates and plugins into multiple languages. Bulk translation with Google Translate or Yandex.
+Translate entry content, templates and even plugins. With Google or AI.
+
+One plugin for both halves of a multilingual Craft site: the static strings in your
+templates and plugins, and the content inside your entries — Matrix, Neo, Super Table,
+CKEditor, Redactor, Vizy, Hyper, Linkit, Table, Link, Content Block, SEOmatic and
+Ether SEO. Translate with Google, Yandex, OpenAI or Claude, review the results as
+drafts, and track every translation and token on a built-in dashboard.
 
 ## Features
 
