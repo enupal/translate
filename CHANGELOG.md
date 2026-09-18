@@ -2,13 +2,9 @@
 
 ## 5.0.0-beta.1 - 2026.09.18
 
-> **Beta.** Content translation and the AI providers are new in this release and
-> are still being proven on real sites. Static template translation is unchanged
-> and continues to work as it did in 4.x. Please report anything you hit at
-> https://github.com/enupal/translate/issues — include the provider, the field
-> type, and the relevant row from the dashboard's recent activity table.
->
-> Requires Craft 5.5.4 or later and PHP 8.2 or later. There is no Craft 4 build.
+> {warning} This is a beta release. Content translation and the AI providers are new and are still being proven on real sites. Static template translation is unchanged and works as it did in 4.x. Please report anything you hit at https://github.com/enupal/translate/issues — include the provider, the field type, and the relevant row from the dashboard's recent activity table.
+
+> {note} Requires Craft 5.5.4 or later and PHP 8.2 or later. There is no Craft 4 build.
 
 ### Upgrading from 4.x
 
@@ -24,13 +20,8 @@ there when you want them.
   install of those plugins. Every other supported field type has been, including
   Neo, Vizy, Hyper, Linkit, Super Table, CKEditor, Redactor, SEOmatic and
   Ether SEO.
-- **Neo and the queue:** Neo reads a web-only request property while saving, so
-  translating a Neo field fails when the queue is run from the console
-  (`craft queue/listen`, or a cron worker) with `Getting unknown property:
-  craft\console\Request::actionSegments`. Translating from the entry sidebar
-  works, as does Craft's default web-based queue runner. This is a Neo
-  limitation rather than something this plugin can work around; the job reports
-  which element failed and why.
+
+> {warning} Neo reads a web-only request property while saving, so translating a Neo field fails when the queue runs from the console (`craft queue/listen`, or a cron worker). Translating from the entry sidebar works, as does Craft's default web-based queue runner. This is a Neo limitation rather than something this plugin can work around; the job reports which element failed and why.
 - Placeholders (`{{ twig }}`, `{param}`, `%s`) and HTML are preserved by
   instructing the model, not by masking them before the request. This holds up
   well in testing, but a custom prompt or a smaller model makes it less certain.

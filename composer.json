@@ -33,6 +33,9 @@
     "handle": "enupal-translate",
     "hasSettings": true,
     "developer": "Enupal",
+    "developerUrl": "https://enupal.com",
+    "documentationUrl": "https://enupal.com/craft-plugins/enupal-translate/docs",
+    "changelogUrl": "https://raw.githubusercontent.com/enupal/translate/master/CHANGELOG.md",
     "class": "enupal\\translate\\Translate",
     "components": {
       "app": "enupal\\translate\\services\\App"
